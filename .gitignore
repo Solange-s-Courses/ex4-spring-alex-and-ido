@@ -1,3 +1,7 @@
+# Operating System
+.DS_Store
+.DS_Store?
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -31,6 +35,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Operating System ###
-.DS_Store
