@@ -24,6 +24,16 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;  // Interface that handles database operations for User entities
 
+    @GetMapping("/")
+    public String home(HttpSession session) {
+        // Check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login"; // Not logged in, go to login
+        }
+        return "redirect:/dashboard"; // Logged in, go to dashboard
+    }
+
     // Handles GET requests to /register URL
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -69,8 +79,13 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String loginForm() {
-        return "login"; // Returns login.html template
+    public String loginForm(HttpSession session) {
+        // Check if user is already logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser != null) {
+            return "redirect:/dashboard"; // Already logged in, go to dashboard
+        }
+        return "login"; // Not logged in, show login page
     }
 
     @PostMapping("/login")
