@@ -141,6 +141,19 @@ public class UserController {
         return "dashboard";
     }
 
+    @GetMapping("/user-info")
+    public String userInfo(HttpSession session, Model model) {
+        // Check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login"; // Not logged in, redirect to login
+        }
+
+        // User is logged in, show their info
+        model.addAttribute("user", loggedInUser);
+        return "user-info"; // Returns user-info.html template
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
