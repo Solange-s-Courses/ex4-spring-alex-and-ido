@@ -116,14 +116,6 @@
   <div class="content-card">
     <h1>Dashboard</h1>
 
-    <div class="user-info">
-      <h3>Your Account Information:</h3>
-      <p><strong>Name:</strong> <span th:text="${user.firstName + ' ' + user.lastName}"></span></p>
-      <p><strong>Email:</strong> <span th:text="${user.emailAddress}"></span></p>
-      <p><strong>Phone:</strong> <span th:text="${user.phoneNumber}"></span></p>
-      <p><strong>Member Since:</strong> <span th:text="${#temporals.format(user.dateOfIssue, 'MMM dd, yyyy')}"></span></p>
-    </div>
-
     <!-- Future content will go here -->
     <p>Welcome to the Event Management System dashboard!</p>
   </div>
