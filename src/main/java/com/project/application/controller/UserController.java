@@ -154,6 +154,95 @@ public class UserController {
         return "user-info"; // Returns user-info.html template
     }
 
+    @PostMapping("/change-name")
+    public String changeName(@RequestParam String firstName,
+                             @RequestParam String lastName,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
+            return "redirect:/login";
+        }
+
+        // Trim and convert names to lowercase
+        firstName = firstName.trim().toLowerCase();
+        lastName = lastName.trim().toLowerCase();
+
+        // Validate names (only letters, max 20 characters)
+        if (!firstName.matches("^[A-Za-z]{1,20}$")) {
+            redirectAttributes.addFlashAttribute("error", "First name must contain only letters and be 1-20 characters long.");
+            return "redirect:/user-info";
+        }
+
+        if (!lastName.matches("^[A-Za-z]{1,20}$")) {
+            redirectAttributes.addFlashAttribute("error", "Last name must contain only letters and be 1-20 characters long.");
+            return "redirect:/user-info";
+        }
+
+        try {
+            // Update user in database
+            loggedInUser.setFirstName(firstName);
+            loggedInUser.setLastName(lastName);
+            userRepository.save(loggedInUser);
+
+            // Update session with new data
+            session.setAttribute("loggedInUser", loggedInUser);
+
+            redirectAttributes.addFlashAttribute("success", "Name changed successfully!");
+            return "redirect:/user-info";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to change name. Please try again.");
+            return "redirect:/user-info";
+        }
+    }
+
+    @PostMapping("/change-phone")
+    public String changePhone(@RequestParam String phoneNumber,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
+            return "redirect:/login";
+        }
+
+        // Trim phone number
+        phoneNumber = phoneNumber.trim();
+
+        // Validate phone number (exactly 10 digits)
+        if (!phoneNumber.matches("^[0-9]{10}$")) {
+            redirectAttributes.addFlashAttribute("error", "Phone number must be exactly 10 digits.");
+            return "redirect:/user-info";
+        }
+
+        // Check if phone number already exists (excluding current user)
+        Optional<User> existingUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (existingUser.isPresent() && !existingUser.get().getUserId().equals(loggedInUser.getUserId())) {
+            redirectAttributes.addFlashAttribute("error", "Phone number already exists!");
+            return "redirect:/user-info";
+        }
+
+        try {
+            // Update user in database
+            loggedInUser.setPhoneNumber(phoneNumber);
+            userRepository.save(loggedInUser);
+
+            // Update session with new data
+            session.setAttribute("loggedInUser", loggedInUser);
+
+            redirectAttributes.addFlashAttribute("success", "Phone number changed successfully!");
+            return "redirect:/user-info";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to change phone number. Please try again.");
+            return "redirect:/user-info";
+        }
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

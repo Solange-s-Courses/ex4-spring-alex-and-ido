@@ -12,7 +12,7 @@
       background-color: #f8f9fa;
     }
 
-    /* Navbar Styles (same as dashboard) */
+    /* Navbar Styles */
     .navbar {
       background-color: #007bff;
       color: white;
@@ -94,6 +94,13 @@
       background-color: #f8f9fa;
       border-radius: 6px;
       border-left: 4px solid #007bff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-content {
+      flex: 1;
     }
 
     .info-label {
@@ -107,6 +114,21 @@
     .info-value {
       font-size: 18px;
       color: #333;
+    }
+
+    .change-btn {
+      background-color: #17a2b8;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s;
+    }
+
+    .change-btn:hover {
+      background-color: #138496;
     }
 
     .back-btn {
@@ -125,6 +147,120 @@
       background-color: #5a6268;
       text-decoration: none;
       color: white;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: black;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .submit-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+
+    .submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .cancel-btn {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .cancel-btn:hover {
+      background-color: #5a6268;
+    }
+
+    /* Alert Styles */
+    .alert {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
   </style>
 </head>
@@ -145,28 +281,125 @@
   <div class="info-card">
     <h1>My Account Information</h1>
 
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
     <div class="info-section">
-      <div class="info-label">Full Name</div>
-      <div class="info-value" th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></div>
+      <div class="info-content">
+        <div class="info-label">Full Name</div>
+        <div class="info-value" th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></div>
+      </div>
+      <button class="change-btn" onclick="openNameModal()">Change Name</button>
     </div>
 
     <div class="info-section">
-      <div class="info-label">Email Address</div>
-      <div class="info-value" th:text="${user.emailAddress}"></div>
+      <div class="info-content">
+        <div class="info-label">Email Address</div>
+        <div class="info-value" th:text="${user.emailAddress}"></div>
+      </div>
     </div>
 
     <div class="info-section">
-      <div class="info-label">Phone Number</div>
-      <div class="info-value" th:text="${user.phoneNumber}"></div>
+      <div class="info-content">
+        <div class="info-label">Phone Number</div>
+        <div class="info-value" th:text="${user.phoneNumber}"></div>
+      </div>
+      <button class="change-btn" onclick="openPhoneModal()">Change Number</button>
     </div>
 
     <div class="info-section">
-      <div class="info-label">Member Since</div>
-      <div class="info-value" th:text="${#temporals.format(user.dateOfIssue, 'MMMM dd, yyyy - HH:mm')}"></div>
+      <div class="info-content">
+        <div class="info-label">Member Since</div>
+        <div class="info-value" th:text="${#temporals.format(user.dateOfIssue, 'MMMM dd, yyyy - HH:mm')}"></div>
+      </div>
     </div>
 
     <a th:href="@{/dashboard}" class="back-btn">Back to Dashboard</a>
   </div>
 </div>
+
+<!-- Change Name Modal -->
+<div id="nameModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Change Name</h3>
+      <span class="close" onclick="closeNameModal()">&times;</span>
+    </div>
+    <form th:action="@{/change-name}" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name:</label>
+          <input type="text" id="firstName" name="firstName"
+                 th:value="${#strings.capitalize(user.firstName)}"
+                 maxlength="20" pattern="[A-Za-z]+" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name:</label>
+          <input type="text" id="lastName" name="lastName"
+                 th:value="${#strings.capitalize(user.lastName)}"
+                 maxlength="20" pattern="[A-Za-z]+" required>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <button type="submit" class="submit-btn">Save Changes</button>
+        <button type="button" class="cancel-btn" onclick="closeNameModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change Phone Modal -->
+<div id="phoneModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Change Phone Number</h3>
+      <span class="close" onclick="closePhoneModal()">&times;</span>
+    </div>
+    <form th:action="@{/change-phone}" method="post">
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber"
+               th:value="${user.phoneNumber}"
+               maxlength="10" pattern="[0-9]{10}" required>
+        <small style="color: #666;">Enter exactly 10 digits</small>
+      </div>
+      <div style="margin-top: 1rem;">
+        <button type="submit" class="submit-btn">Save Changes</button>
+        <button type="button" class="cancel-btn" onclick="closePhoneModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openNameModal() {
+    document.getElementById('nameModal').style.display = 'block';
+  }
+
+  function closeNameModal() {
+    document.getElementById('nameModal').style.display = 'none';
+  }
+
+  function openPhoneModal() {
+    document.getElementById('phoneModal').style.display = 'block';
+  }
+
+  function closePhoneModal() {
+    document.getElementById('phoneModal').style.display = 'none';
+  }
+
+  // Close modal when clicking outside of it
+  window.onclick = function(event) {
+    var nameModal = document.getElementById('nameModal');
+    var phoneModal = document.getElementById('phoneModal');
+    if (event.target == nameModal) {
+      nameModal.style.display = 'none';
+    }
+    if (event.target == phoneModal) {
+      phoneModal.style.display = 'none';
+    }
+  }
+</script>
 </body>
 </html>
