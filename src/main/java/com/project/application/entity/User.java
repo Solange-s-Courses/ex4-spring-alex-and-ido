@@ -44,6 +44,18 @@ public class User {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String phoneNumber;
 
+    @Column(name = "first_name", nullable = false, length = 20)
+    @NotBlank(message = "First name is required")
+    @Size(max = 20, message = "First name cannot exceed 20 characters")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "First name can only contain letters")
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 20)
+    @NotBlank(message = "Last name is required")
+    @Size(max = 20, message = "Last name cannot exceed 20 characters")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Last name can only contain letters")
+    private String lastName;
+
     @Column(name = "encrypted_password", nullable = false)
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 16, message = "Password must be between 8 and 16 characters")

@@ -16,49 +16,67 @@ import jakarta.validation.Valid;
 
 import java.util.Optional;
 
-// let spring know this is a web controller that handles HTTP requests
 @Controller
 public class UserController {
 
-    // Dependency Injection
     @Autowired
-    private UserRepository userRepository;  // Interface that handles database operations for User entities
+    private UserRepository userRepository;
 
     @GetMapping("/")
     public String home(HttpSession session) {
-        // Check if user is logged in
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
-            return "redirect:/login"; // Not logged in, go to login
+            return "redirect:/login";
         }
-        return "redirect:/dashboard"; // Logged in, go to dashboard
+        return "redirect:/dashboard";
     }
 
-    // Handles GET requests to /register URL
     @GetMapping("/register")
     public String showRegistrationForm(Model model, HttpSession session) {
-        // check if user is logged in
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser != null) {
-            return "redirect:/dashboard"; // Logged in, go to dashboard
+            return "redirect:/dashboard";
         }
-        // Creates empty User object and sends it to the template
         model.addAttribute("user", new User());
-        return "register";  // Returns the name of the Thymeleaf template (register.html)
+        return "register";
     }
 
-    // Handles POST requests to /register URL
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute User user,
                                BindingResult bindingResult,
                                Model model,
                                RedirectAttributes redirectAttributes) {
+
+        // Trim and convert names to lowercase
+        if (user.getFirstName() != null) {
+            user.setFirstName(user.getFirstName().trim().toLowerCase());
+        }
+        if (user.getLastName() != null) {
+            user.setLastName(user.getLastName().trim().toLowerCase());
+        }
+
+        // Trim other fields
+        if (user.getEmailAddress() != null) {
+            user.setEmailAddress(user.getEmailAddress().trim());
+        }
+        if (user.getPhoneNumber() != null) {
+            user.setPhoneNumber(user.getPhoneNumber().trim());
+        }
+
+        // Convert names to lowercase before validation and saving
+        if (user.getFirstName() != null) {
+            user.setFirstName(user.getFirstName().toLowerCase());
+        }
+        if (user.getLastName() != null) {
+            user.setLastName(user.getLastName().toLowerCase());
+        }
+
         // Encrypt password before saving
         user.setEncryptedPassword(user.getEncryptedPassword()); // encryption will be added...
 
         // Check for validation errors
         if (bindingResult.hasErrors()) {
-            return "register"; // Return to form with error messages
+            return "register";
         }
 
         // Check if email already exists
@@ -85,12 +103,11 @@ public class UserController {
 
     @GetMapping("/login")
     public String loginForm(HttpSession session) {
-        // Check if user is already logged in
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser != null) {
-            return "redirect:/dashboard"; // Already logged in, go to dashboard
+            return "redirect:/dashboard";
         }
-        return "login"; // Not logged in, show login page
+        return "login";
     }
 
     @PostMapping("/login")
@@ -99,40 +116,34 @@ public class UserController {
                         HttpSession session,
                         Model model) {
 
-        // Find user by email - returns Optional<User>
         Optional<User> userOptional = userRepository.findByEmailAddress(email);
 
-        // Check if user exists and password matches
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (password.equals(user.getEncryptedPassword())) {
-                // Store user in session
                 session.setAttribute("loggedInUser", user);
-                return "redirect:/dashboard"; // Redirect to landing page
+                return "redirect:/dashboard";
             }
         }
 
-        // Login failed (user not found OR wrong password)
         model.addAttribute("error", "Invalid email or password");
-        return "login"; // Back to login page with error message
+        return "login";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
-        // Check if user is logged in
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
-            return "redirect:/login"; // Not logged in, redirect to login
+            return "redirect:/login";
         }
 
-        // User is logged in, show dashboard
         model.addAttribute("user", loggedInUser);
-        return "dashboard"; // Returns dashboard.html template
+        return "dashboard";
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate(); // Clear entire session
+        session.invalidate();
         return "redirect:/login";
     }
 }

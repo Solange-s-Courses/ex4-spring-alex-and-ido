@@ -14,12 +14,19 @@
         .form-group {
             margin-bottom: 15px;
         }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input[type="email"], input[type="tel"], input[type="password"] {
+        input[type="email"], input[type="tel"], input[type="password"], input[type="text"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -110,6 +117,27 @@
                th:classappend="${#fields.hasErrors('phoneNumber')} ? 'error' : ''" required>
         <div th:if="${#fields.hasErrors('phoneNumber')}" class="field-error">
             <span th:errors="*{phoneNumber}"></span>
+        </div>
+    </div>
+
+    <!-- First Name and Last Name in one row -->
+    <div class="form-row">
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" th:field="*{firstName}"
+                   th:classappend="${#fields.hasErrors('firstName')} ? 'error' : ''" required>
+            <div th:if="${#fields.hasErrors('firstName')}" class="field-error">
+                <span th:errors="*{firstName}"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" th:field="*{lastName}"
+                   th:classappend="${#fields.hasErrors('lastName')} ? 'error' : ''" required>
+            <div th:if="${#fields.hasErrors('lastName')}" class="field-error">
+                <span th:errors="*{lastName}"></span>
+            </div>
         </div>
     </div>
 
