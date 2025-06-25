@@ -36,7 +36,12 @@ public class UserController {
 
     // Handles GET requests to /register URL
     @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
+    public String showRegistrationForm(Model model, HttpSession session) {
+        // check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser != null) {
+            return "redirect:/dashboard"; // Logged in, go to dashboard
+        }
         // Creates empty User object and sends it to the template
         model.addAttribute("user", new User());
         return "register";  // Returns the name of the Thymeleaf template (register.html)
@@ -100,7 +105,7 @@ public class UserController {
         // Check if user exists and password matches
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (password.equals(user.getEncryptedPassword())) { // CHANGED: use getEncryptedPassword()
+            if (password.equals(user.getEncryptedPassword())) {
                 // Store user in session
                 session.setAttribute("loggedInUser", user);
                 return "redirect:/dashboard"; // Redirect to landing page
