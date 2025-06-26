@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class UserController {
@@ -190,7 +192,7 @@ public class UserController {
 
     @GetMapping("/admin")
     public String adminPage(HttpSession session, Model model) {
-        // Check if user is logged in - use correct session attribute name
+        // Check if user is logged in
         User user = (User) session.getAttribute(LOGGED_IN_USER);
         if (user == null) {
             return "redirect:/login";
@@ -201,7 +203,11 @@ public class UserController {
             return "error/404"; // Redirect to 404 for non-admin users
         }
 
+        // Get all non-admin users for the user list
+        List<User> users = userService.getAllNonAdminUsers();
+
         model.addAttribute("user", user);
+        model.addAttribute("users", users);
         return "admin";
     }
 }

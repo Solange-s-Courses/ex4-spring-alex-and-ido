@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -160,6 +161,10 @@ public class UserService {
         } catch (Exception e) {
             return "Role update failed: " + e.getMessage();
         }
+    }
+
+    public List<User> getAllNonAdminUsers() {
+        return userRepository.findAllNonAdminUsers();
     }
 
     // Get user by ID
