@@ -187,4 +187,21 @@ public class UserController {
         session.invalidate();
         return "redirect:/login";
     }
+
+    @GetMapping("/admin")
+    public String adminPage(HttpSession session, Model model) {
+        // Check if user is logged in - use correct session attribute name
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Check if user has admin role
+        if (!"admin".equals(user.getRole().getName())) {
+            return "error/404"; // Redirect to 404 for non-admin users
+        }
+
+        model.addAttribute("user", user);
+        return "admin";
+    }
 }
