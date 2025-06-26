@@ -1,8 +1,9 @@
 package com.project.application.controller;
 
 import com.project.application.entity.User;
-import com.project.application.repository.UserRepository;
+import com.project.application.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,18 +15,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
-import java.util.Optional;
-
 @Controller
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService userService;
+
+    private static final String LOGGED_IN_USER = "loggedInUser";
+
+    // helper methods
+    private User getLoggedInUser(HttpSession session) {
+        return (User) session.getAttribute(LOGGED_IN_USER);
+    }
+    private boolean isUserLoggedIn(HttpSession session) {
+        return getLoggedInUser(session) != null;
+    }
 
     @GetMapping("/")
     public String home(HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
+        if (!isUserLoggedIn(session)) {
             return "redirect:/login";
         }
         return "redirect:/dashboard";
@@ -33,8 +41,7 @@ public class UserController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser != null) {
+        if (isUserLoggedIn(session)) {
             return "redirect:/dashboard";
         }
         model.addAttribute("user", new User());
@@ -47,64 +54,26 @@ public class UserController {
                                Model model,
                                RedirectAttributes redirectAttributes) {
 
-        // Trim and convert names to lowercase
-        if (user.getFirstName() != null) {
-            user.setFirstName(user.getFirstName().trim().toLowerCase());
-        }
-        if (user.getLastName() != null) {
-            user.setLastName(user.getLastName().trim().toLowerCase());
-        }
-
-        // Trim other fields
-        if (user.getEmailAddress() != null) {
-            user.setEmailAddress(user.getEmailAddress().trim());
-        }
-        if (user.getPhoneNumber() != null) {
-            user.setPhoneNumber(user.getPhoneNumber().trim());
-        }
-
-        // Convert names to lowercase before validation and saving
-        if (user.getFirstName() != null) {
-            user.setFirstName(user.getFirstName().toLowerCase());
-        }
-        if (user.getLastName() != null) {
-            user.setLastName(user.getLastName().toLowerCase());
-        }
-
-        // Encrypt password before saving
-        user.setEncryptedPassword(user.getEncryptedPassword()); // encryption will be added...
-
         // Check for validation errors
         if (bindingResult.hasErrors()) {
             return "register";
         }
 
-        // Check if email already exists
-        if (userRepository.findByEmailAddress(user.getEmailAddress()).isPresent()) {
-            model.addAttribute("error", "Email address already exists!");
-            return "register";
-        }
+        // Use service to register user (includes role assignment)
+        String result = userService.registerUser(user);
 
-        // Check if phone already exists
-        if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) {
-            model.addAttribute("error", "Phone number already exists!");
-            return "register";
-        }
-
-        try {
-            userRepository.save(user);
+        if ("success".equals(result)) {
             redirectAttributes.addFlashAttribute("success", "Registration successful!");
             return "redirect:/register";
-        } catch (Exception e) {
-            model.addAttribute("error", "Registration failed!");
+        } else {
+            model.addAttribute("error", result);
             return "register";
         }
     }
 
     @GetMapping("/login")
     public String loginForm(HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser != null) {
+        if (isUserLoggedIn(session)) {
             return "redirect:/dashboard";
         }
         return "login";
@@ -116,42 +85,49 @@ public class UserController {
                         HttpSession session,
                         Model model) {
 
-        Optional<User> userOptional = userRepository.findByEmailAddress(email);
+        User user = userService.loginUser(email, password);
 
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (password.equals(user.getEncryptedPassword())) {
-                session.setAttribute("loggedInUser", user);
-                return "redirect:/dashboard";
-            }
+        if (user != null) {
+            // Store user information in session (including role info)
+            session.setAttribute(LOGGED_IN_USER, user);
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("userEmail", user.getEmailAddress());
+            session.setAttribute("userFirstName", user.getFirstName());
+            session.setAttribute("userLastName", user.getLastName());
+            session.setAttribute("userPhone", user.getPhoneNumber());
+
+            // NEW: Store role information in session
+            session.setAttribute("userRole", user.getRole());
+            session.setAttribute("userRoleName", user.getRoleName());
+
+            return "redirect:/dashboard";
+        } else {
+            model.addAttribute("error", "Invalid email or password");
+            return "login";
         }
-
-        model.addAttribute("error", "Invalid email or password");
-        return "login";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        User loggedInUser = getLoggedInUser(session);
         if (loggedInUser == null) {
             return "redirect:/login";
         }
-
         model.addAttribute("user", loggedInUser);
+        model.addAttribute("userRole", session.getAttribute("userRoleName"));
         return "dashboard";
     }
 
     @GetMapping("/user-info")
     public String userInfo(HttpSession session, Model model) {
-        // Check if user is logged in
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        User loggedInUser = getLoggedInUser(session);
         if (loggedInUser == null) {
-            return "redirect:/login"; // Not logged in, redirect to login
+            return "redirect:/login";
         }
 
-        // User is logged in, show their info
         model.addAttribute("user", loggedInUser);
-        return "user-info"; // Returns user-info.html template
+        model.addAttribute("userRole", session.getAttribute("userRoleName"));
+        return "user-info";
     }
 
     @PostMapping("/change-name")
@@ -160,43 +136,25 @@ public class UserController {
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        User loggedInUser = getLoggedInUser(session);
         if (loggedInUser == null) {
             redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
             return "redirect:/login";
         }
 
-        // Trim and convert names to lowercase
-        firstName = firstName.trim().toLowerCase();
-        lastName = lastName.trim().toLowerCase();
+        String result = userService.updateUserName(loggedInUser, firstName, lastName);
 
-        // Validate names (only letters, max 20 characters)
-        if (!firstName.matches("^[A-Za-z]{1,20}$")) {
-            redirectAttributes.addFlashAttribute("error", "First name must contain only letters and be 1-20 characters long.");
-            return "redirect:/user-info";
-        }
-
-        if (!lastName.matches("^[A-Za-z]{1,20}$")) {
-            redirectAttributes.addFlashAttribute("error", "Last name must contain only letters and be 1-20 characters long.");
-            return "redirect:/user-info";
-        }
-
-        try {
-            // Update user in database
-            loggedInUser.setFirstName(firstName);
-            loggedInUser.setLastName(lastName);
-            userRepository.save(loggedInUser);
-
-            // Update session with new data
-            session.setAttribute("loggedInUser", loggedInUser);
+        if ("success".equals(result)) {
+            session.setAttribute(LOGGED_IN_USER, loggedInUser);
+            session.setAttribute("userFirstName", loggedInUser.getFirstName());
+            session.setAttribute("userLastName", loggedInUser.getLastName());
 
             redirectAttributes.addFlashAttribute("success", "Name changed successfully!");
-            return "redirect:/user-info";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to change name. Please try again.");
-            return "redirect:/user-info";
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
         }
+
+        return "redirect:/user-info";
     }
 
     @PostMapping("/change-phone")
@@ -204,43 +162,24 @@ public class UserController {
                               HttpSession session,
                               RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        User loggedInUser = getLoggedInUser(session);
         if (loggedInUser == null) {
             redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
             return "redirect:/login";
         }
 
-        // Trim phone number
-        phoneNumber = phoneNumber.trim();
+        String result = userService.updateUserPhone(loggedInUser, phoneNumber);
 
-        // Validate phone number (exactly 10 digits)
-        if (!phoneNumber.matches("^[0-9]{10}$")) {
-            redirectAttributes.addFlashAttribute("error", "Phone number must be exactly 10 digits.");
-            return "redirect:/user-info";
-        }
-
-        // Check if phone number already exists (excluding current user)
-        Optional<User> existingUser = userRepository.findByPhoneNumber(phoneNumber);
-        if (existingUser.isPresent() && !existingUser.get().getUserId().equals(loggedInUser.getUserId())) {
-            redirectAttributes.addFlashAttribute("error", "Phone number already exists!");
-            return "redirect:/user-info";
-        }
-
-        try {
-            // Update user in database
-            loggedInUser.setPhoneNumber(phoneNumber);
-            userRepository.save(loggedInUser);
-
-            // Update session with new data
-            session.setAttribute("loggedInUser", loggedInUser);
+        if ("success".equals(result)) {
+            session.setAttribute(LOGGED_IN_USER, loggedInUser);
+            session.setAttribute("userPhone", loggedInUser.getPhoneNumber());
 
             redirectAttributes.addFlashAttribute("success", "Phone number changed successfully!");
-            return "redirect:/user-info";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to change phone number. Please try again.");
-            return "redirect:/user-info";
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
         }
+
+        return "redirect:/user-info";
     }
 
     @GetMapping("/logout")

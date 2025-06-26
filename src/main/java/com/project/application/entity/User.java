@@ -60,9 +60,24 @@ public class User {
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 16, message = "Password must be between 8 and 16 characters")
     @Pattern(regexp = "^[A-Za-z0-9@$!%*?&]+$", message = "Password can only contain letters, numbers, and special characters (@$!%*?&)")
-    private String encryptedPassword;
+    private String password;
 
     @Column(name = "date_of_issue", nullable = false)
     @CreationTimestamp
     private LocalDateTime dateOfIssue;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "FK_user_role"))
+    private Role role;
+
+    // Convenience method to get role name
+    public String getRoleName() {
+        return role != null ? role.getName() : null;
+    }
+
+    // Convenience method to check if user has specific role
+    public boolean hasRole(String roleName) {
+        return role != null && role.getName().equals(roleName);
+    }
 }

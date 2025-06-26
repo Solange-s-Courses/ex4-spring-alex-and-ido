@@ -310,6 +310,13 @@
 
     <div class="info-section">
       <div class="info-content">
+        <div class="info-label">Role</div>
+        <div class="info-value" th:text="${#strings.capitalize(userRole)}"></div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-content">
         <div class="info-label">Member Since</div>
         <div class="info-value" th:text="${#temporals.format(user.dateOfIssue, 'dd/MM/yyyy')}"></div>
       </div>
