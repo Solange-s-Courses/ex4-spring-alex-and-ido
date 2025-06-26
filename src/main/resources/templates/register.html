@@ -142,11 +142,11 @@
     </div>
 
     <div class="form-group">
-        <label for="encryptedPassword">Password:</label>
-        <input type="password" id="encryptedPassword" th:field="*{encryptedPassword}"
-               th:classappend="${#fields.hasErrors('encryptedPassword')} ? 'error' : ''" required>
-        <div th:if="${#fields.hasErrors('encryptedPassword')}" class="field-error">
-            <span th:errors="*{encryptedPassword}"></span>
+        <label for="password">Password:</label>
+        <input type="password" id="password" th:field="*{password}">
+               th:classappend="${#fields.hasErrors('password')} ? 'error' : ''" required>
+        <div th:if="${#fields.hasErrors('password')}" class="field-error">
+            <span th:errors="*{password}"></span>
         </div>
         <small style="color: #666;">Password must be at least 8 characters with uppercase, lowercase, number, and special character</small>
     </div>
