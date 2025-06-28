@@ -167,6 +167,29 @@ public class UserService {
         return userRepository.findAllNonAdminUsers();
     }
 
+    //Delete user by ID (an admin functionality)
+    public String deleteUser(Long userId) {
+        try {
+            Optional<User> userOptional = userRepository.findById(userId);
+
+            if (userOptional.isPresent()) {
+                User userToDelete = userOptional.get();
+
+                // Safety check: prevent deleting admin users
+                if ("admin".equals(userToDelete.getRole().getName())) {
+                    return "Cannot delete admin users";
+                }
+
+                userRepository.deleteById(userId);
+                return "success";
+            } else {
+                return "User not found";
+            }
+        } catch (Exception e) {
+            return "Failed to delete user: " + e.getMessage();
+        }
+    }
+
     // Get user by ID
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);

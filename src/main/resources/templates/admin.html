@@ -71,6 +71,25 @@
       margin-bottom: 2rem;
     }
 
+    /* Alert Messages */
+    .alert {
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
     /* User List Styles */
     .user-list-section {
       background: white;
@@ -177,6 +196,63 @@
       font-size: 0.9rem;
       margin-bottom: 1rem;
     }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal h3 {
+      color: #dc3545;
+      margin-bottom: 1rem;
+    }
+
+    .modal p {
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn-confirm {
+      background-color: #dc3545;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background-color: #6c757d;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -192,6 +268,10 @@
 <div class="container">
   <h1>Admin Dashboard</h1>
   <p class="text-muted">Manage users and system settings</p>
+
+  <!-- Alert Messages -->
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
   <!-- User List Section -->
   <div class="user-list-section">
@@ -212,7 +292,12 @@
         </div>
         <div class="user-actions">
           <button class="btn btn-edit" type="button">Edit</button>
-          <button class="btn btn-delete" type="button">Delete</button>
+          <button class="btn btn-delete" type="button"
+                  th:data-user-id="${userItem.userId}"
+                  th:data-user-name="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                  onclick="showDeleteModal(this.dataset.userId, this.dataset.userName)">
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -222,5 +307,53 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <h3>Confirm Delete</h3>
+    <p id="deleteMessage">Are you sure you want to delete this user?</p>
+    <div class="modal-buttons">
+      <button class="btn-confirm" onclick="confirmDelete()">Yes, Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for deletion -->
+<form id="deleteForm" method="post" th:action="@{/admin/delete-user}" style="display: none;">
+  <input type="hidden" id="userIdToDelete" name="userId" />
+</form>
+
+<script>
+  let userIdToDelete = null;
+
+  function showDeleteModal(userId, userName) {
+    userIdToDelete = userId;
+    document.getElementById('deleteMessage').textContent =
+            'Are you sure you want to delete ' + userName + '? This action cannot be undone.';
+    document.getElementById('deleteModal').style.display = 'block';
+  }
+
+  function confirmDelete() {
+    if (userIdToDelete) {
+      document.getElementById('userIdToDelete').value = userIdToDelete;
+      document.getElementById('deleteForm').submit();
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    userIdToDelete = null;
+  }
+
+  // Close modal when clicking outside of it
+  window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
+</script>
 </body>
 </html>

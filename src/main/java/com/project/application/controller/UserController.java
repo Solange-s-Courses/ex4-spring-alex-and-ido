@@ -210,4 +210,36 @@ public class UserController {
         model.addAttribute("users", users);
         return "admin";
     }
+
+    @PostMapping("/admin/delete-user")
+    public String deleteUser(@RequestParam Long userId,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is admin
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"admin".equals(user.getRole().getName())) {
+            return "error/404";
+        }
+
+        // Prevent admin from deleting themselves
+        if (user.getUserId().equals(userId)) {
+            redirectAttributes.addFlashAttribute("error", "You cannot delete your own account!");
+            return "redirect:/admin";
+        }
+
+        String result = userService.deleteUser(userId);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "User deleted successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/admin";
+    }
 }
