@@ -91,7 +91,7 @@ public class UserService {
         return userRepository.findByPhoneNumber(phoneNumber);
     }
 
-    // Update user name - matches your current logic
+    // Update username - matches your current logic
     public String updateUserName(User loggedInUser, String firstName, String lastName) {
         try {
             // Trim and convert names to lowercase
@@ -187,6 +187,64 @@ public class UserService {
             }
         } catch (Exception e) {
             return "Failed to delete user: " + e.getMessage();
+        }
+    }
+
+    // Update user name and role (an admin functionality)
+    public String updateUserByAdmin(Long userId, String firstName, String lastName, String roleName) {
+        try {
+            // Find the user
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (!userOptional.isPresent()) {
+                return "User not found";
+            }
+
+            User user = userOptional.get();
+
+            // Validate and update names if provided
+            if (firstName != null && lastName != null) {
+                // Trim and convert names to lowercase
+                firstName = firstName.trim().toLowerCase();
+                lastName = lastName.trim().toLowerCase();
+
+                // Validate names (only letters, max 20 characters)
+                if (!firstName.matches(NAME_PATTERN)) {
+                    return "First name must contain only letters and be 1-20 characters long.";
+                }
+
+                if (!lastName.matches(NAME_PATTERN)) {
+                    return "Last name must contain only letters and be 1-20 characters long.";
+                }
+
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+            }
+
+            // Update role if provided
+            if (roleName != null && !roleName.trim().isEmpty()) {
+                Optional<Role> roleOptional = roleService.findByName(roleName);
+                if (!roleOptional.isPresent()) {
+                    return "Role not found";
+                }
+
+                // Prevent changing admin role
+                if ("admin".equals(user.getRole().getName())) {
+                    return "Cannot modify admin users";
+                }
+
+                // Prevent setting admin role
+                if ("admin".equals(roleName)) {
+                    return "Cannot assign admin role";
+                }
+
+                user.setRole(roleOptional.get());
+            }
+
+            userRepository.save(user);
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to update user: " + e.getMessage();
         }
     }
 

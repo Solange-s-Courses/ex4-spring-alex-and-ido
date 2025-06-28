@@ -1,10 +1,11 @@
 package com.project.application.controller;
 
+import com.project.application.entity.Role;
 import com.project.application.entity.User;
+import com.project.application.service.RoleService;
 import com.project.application.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,12 +17,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final RoleService roleService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -206,8 +209,14 @@ public class UserController {
         // Get all non-admin users for the user list
         List<User> users = userService.getAllNonAdminUsers();
 
+        // Get all roles for the dropdown (excluding admin)
+        List<Role> roles = roleService.getAllRoles().stream()
+                .filter(role -> !"admin".equals(role.getName()))
+                .collect(Collectors.toList());
+
         model.addAttribute("user", user);
         model.addAttribute("users", users);
+        model.addAttribute("roles", roles);
         return "admin";
     }
 
@@ -236,6 +245,41 @@ public class UserController {
 
         if ("success".equals(result)) {
             redirectAttributes.addFlashAttribute("success", "User deleted successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/admin";
+    }
+
+    @PostMapping("/admin/edit-user")
+    public String editUser(@RequestParam Long userId,
+                           @RequestParam String firstName,
+                           @RequestParam String lastName,
+                           @RequestParam String roleName,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is admin
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"admin".equals(user.getRole().getName())) {
+            return "error/404";
+        }
+
+        // Prevent admin from editing themselves
+        if (user.getUserId().equals(userId)) {
+            redirectAttributes.addFlashAttribute("error", "You cannot edit your own account!");
+            return "redirect:/admin";
+        }
+
+        String result = userService.updateUserByAdmin(userId, firstName, lastName, roleName);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "User updated successfully!");
         } else {
             redirectAttributes.addFlashAttribute("error", result);
         }
