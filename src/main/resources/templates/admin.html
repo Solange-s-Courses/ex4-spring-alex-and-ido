@@ -298,6 +298,71 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
+    /* Tooltip Styles */
+    .user-name {
+      font-weight: bold;
+      color: #333;
+      font-size: 1.1rem;
+      position: relative;
+      cursor: help;
+      transition: color 0.3s;
+    }
+
+    .user-name:hover {
+      color: #007bff;
+    }
+
+    .tooltip {
+      position: absolute;
+      background-color: #333;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: normal;
+      white-space: nowrap;
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      max-width: 300px;
+      white-space: normal;
+      line-height: 1.4;
+      cursor: default; /* Allow text selection */
+      user-select: text; /* Enable text selection */
+      border: 1px solid #555; /* Slight border for better definition */
+    }
+
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 20px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 6px solid #333;
+    }
+
+    .tooltip.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .tooltip-row {
+      margin-bottom: 4px;
+      padding: 1px 0;
+      user-select: text;
+      cursor: text;
+    }
+
+    .tooltip-label {
+      font-weight: bold;
+      color: #ffd700;
+      min-width: 80px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -331,8 +396,17 @@
     <div th:if="${users != null and not #lists.isEmpty(users)}">
       <div class="user-item" th:each="userItem : ${users}">
         <div class="user-info">
-          <div class="user-name" th:text="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}">User Name</div>
-          <div class="user-role" th:text="${userItem.roleName}">Role</div>
+          <div class="user-name"
+               th:text="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+               th:data-user-id="${userItem.userId}"
+               th:data-user-email="${userItem.emailAddress}"
+               th:data-user-phone="${userItem.phoneNumber}"
+               th:data-user-role="${userItem.roleName}"
+               th:data-user-date="${#temporals.format(userItem.dateOfIssue, 'dd/MM/yyyy')}"
+               onmouseenter="showTooltip(this)"
+               onmouseleave="hideTooltip(this)">
+            User Name
+          </div>          <div class="user-role" th:text="${userItem.roleName}">Role</div>
           <div class="user-phone" th:text="${userItem.phoneNumber}">Phone</div>
         </div>
         <div class="user-actions">
@@ -412,6 +486,123 @@
 
 <script>
   let userIdToDelete = null;
+  let tooltipTimeout;
+  let hideTimeout;
+  let currentTooltip = null;
+  let isTooltipHovered = false;
+
+  function showTooltip(element) {
+    // Clear any existing timeouts
+    if (tooltipTimeout) {
+      clearTimeout(tooltipTimeout);
+    }
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+    }
+
+    // Set timeout for 1 second
+    tooltipTimeout = setTimeout(() => {
+      // Remove any existing tooltip
+      hideTooltipImmediate();
+
+      // Create tooltip content
+      const userId = element.dataset.userId;
+      const userEmail = element.dataset.userEmail;
+      const userPhone = element.dataset.userPhone;
+      const userRole = element.dataset.userRole;
+      const userDate = element.dataset.userDate;
+      const userName = element.textContent;
+
+      const tooltipContent = `
+      <div class="tooltip-row"><span class="tooltip-label">UserID:</span> ${userId}</div>
+      <div class="tooltip-row"><span class="tooltip-label">FullName:</span> ${userName}</div>
+      <div class="tooltip-row"><span class="tooltip-label">Email:</span> ${userEmail}</div>
+      <div class="tooltip-row"><span class="tooltip-label">Phone:</span> ${userPhone}</div>
+      <div class="tooltip-row"><span class="tooltip-label">Role:</span> ${userRole.toUpperCase()}</div>
+      <div class="tooltip-row"><span class="tooltip-label">Member Since:</span> ${userDate}</div>
+    `;
+
+      // Create tooltip element
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.innerHTML = tooltipContent;
+
+      // Add mouse events to tooltip itself
+      tooltip.addEventListener('mouseenter', () => {
+        isTooltipHovered = true;
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+        }
+      });
+
+      tooltip.addEventListener('mouseleave', () => {
+        isTooltipHovered = false;
+        hideTooltipDelayed();
+      });
+
+      // Position tooltip
+      const rect = element.getBoundingClientRect();
+      tooltip.style.left = (rect.left + window.scrollX) + 'px';
+      tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+
+      // Add to document
+      document.body.appendChild(tooltip);
+      currentTooltip = tooltip;
+
+      // Show tooltip with animation
+      setTimeout(() => {
+        if (currentTooltip === tooltip) {
+          tooltip.classList.add('show');
+        }
+      }, 10);
+
+    }, 1000); // 1-second delay
+  }
+
+  function hideTooltip(element) {
+    // Clear show timeout
+    if (tooltipTimeout) {
+      clearTimeout(tooltipTimeout);
+      tooltipTimeout = null;
+    }
+
+    // Don't hide immediately, use a small delay to allow moving to tooltip
+    hideTooltipDelayed();
+  }
+
+  function hideTooltipDelayed() {
+    // Clear any existing hide timeout
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+    }
+
+    // Set a small delay before hiding to allow mouse movement to tooltip
+    hideTimeout = setTimeout(() => {
+      if (!isTooltipHovered) {
+        hideTooltipImmediate();
+      }
+    }, 100); // Small delay to allow mouse movement
+  }
+
+  function hideTooltipImmediate() {
+    // Clear all timeouts
+    if (tooltipTimeout) {
+      clearTimeout(tooltipTimeout);
+      tooltipTimeout = null;
+    }
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      hideTimeout = null;
+    }
+
+    // Remove current tooltip
+    if (currentTooltip) {
+      currentTooltip.remove();
+      currentTooltip = null;
+    }
+
+    isTooltipHovered = false;
+  }
 
   // Edit Modal Functions
   function showEditModal(userId, firstName, lastName, role) {
