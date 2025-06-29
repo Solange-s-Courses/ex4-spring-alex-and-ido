@@ -223,53 +223,92 @@ function executeDeleteAll() {
     }
 }
 
-// User Filtering Functions
-function filterUsersByRole() {
-    const filterValue = document.getElementById('roleFilter').value;
+// Combined User Filtering Functions
+let searchTimeout;
+
+function filterUsers() {
+    // Clear existing timeout to debounce the search
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+
+    // Add small delay for search input to avoid excessive filtering while typing
+    searchTimeout = setTimeout(() => {
+        performFiltering();
+    }, 150); // 150ms delay for smooth typing experience
+}
+
+function performFiltering() {
+    const roleFilter = document.getElementById('roleFilter').value;
+    const searchValue = document.getElementById('userSearch').value.toLowerCase().trim();
     const userItems = document.querySelectorAll('.user-item');
     const totalUserCount = userItems.length;
     let visibleCount = 0;
 
-    // Filter user items
+    // Filter user items based on both role and search
     userItems.forEach(userItem => {
         const userRole = userItem.getAttribute('data-user-role-filter');
+        const userSearchData = userItem.getAttribute('data-user-search');
 
-        if (filterValue === 'all' || userRole === filterValue) {
+        // Check role filter
+        const roleMatches = (roleFilter === 'all') || (userRole === roleFilter);
+
+        // Check search filter
+        const searchMatches = (searchValue === '') || userSearchData.includes(searchValue);
+
+        // Show item only if both filters match
+        if (roleMatches && searchMatches) {
             userItem.classList.remove('hidden');
-            userItem.style.display = 'flex'; // Show the item
+            userItem.style.display = 'flex';
             visibleCount++;
         } else {
             userItem.classList.add('hidden');
-            userItem.style.display = 'none'; // Hide the item
+            userItem.style.display = 'none';
         }
     });
 
     // Update user count display
-    updateUserCountDisplay(totalUserCount, visibleCount, filterValue);
+    updateUserCountDisplay(totalUserCount, visibleCount, roleFilter, searchValue);
 
     // Show/hide no users message
     updateNoUsersMessage(visibleCount);
 }
 
-function updateUserCountDisplay(totalCount, visibleCount, filterValue) {
+function updateUserCountDisplay(totalCount, visibleCount, roleFilter, searchValue) {
     const totalUserCountElement = document.getElementById('totalUserCount');
     const filteredUserCountElement = document.getElementById('filteredUserCount');
 
-    if (filterValue === 'all') {
-        // Show only total count
-        totalUserCountElement.textContent = totalCount;
+    totalUserCountElement.textContent = totalCount;
+
+    // Determine what to show in filtered count
+    if (roleFilter === 'all' && searchValue === '') {
+        // No filters applied
         filteredUserCountElement.style.display = 'none';
     } else {
-        // Show total and filtered count
-        totalUserCountElement.textContent = totalCount;
+        // Some filters applied
         filteredUserCountElement.style.display = 'inline';
-        filteredUserCountElement.textContent = ` (Showing ${visibleCount} ${capitalizeRole(filterValue)}${visibleCount !== 1 ? 's' : ''})`;
+
+        let filterDescription = '';
+
+        if (roleFilter !== 'all' && searchValue !== '') {
+            // Both role and search filters
+            const roleName = capitalizeRole(roleFilter);
+            filterDescription = ` (Showing ${visibleCount} ${roleName}${visibleCount !== 1 ? 's' : ''} matching '${searchValue}')`;
+        } else if (roleFilter !== 'all') {
+            // Only role filter
+            const roleName = capitalizeRole(roleFilter);
+            filterDescription = ` (Showing ${visibleCount} ${roleName}${visibleCount !== 1 ? 's' : ''})`;
+        } else if (searchValue !== '') {
+            // Only search filter
+            filterDescription = ` (Showing ${visibleCount} matching '${searchValue}')`;
+        }
+
+        filteredUserCountElement.textContent = filterDescription;
     }
 }
 
 function updateNoUsersMessage(visibleCount) {
-    const noUsersMessage = document.getElementById('noFilteredUsers');
-    const userListContainer = document.querySelector('.user-list-section > div:nth-child(3)'); // The div with user items
+    const userListContainer = document.querySelector('.user-list-section > div:nth-child(3)');
 
     if (visibleCount === 0 && userListContainer) {
         // Show "no filtered users" message
@@ -277,7 +316,7 @@ function updateNoUsersMessage(visibleCount) {
             const noFilteredMessage = document.createElement('div');
             noFilteredMessage.id = 'noFilteredUsersMessage';
             noFilteredMessage.className = 'no-users';
-            noFilteredMessage.textContent = 'No users found with the selected role.';
+            noFilteredMessage.textContent = 'No users found matching the selected criteria.';
             userListContainer.parentNode.appendChild(noFilteredMessage);
         } else {
             document.getElementById('noFilteredUsersMessage').style.display = 'block';
@@ -295,12 +334,29 @@ function capitalizeRole(role) {
     return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-// Initialize filter on page load
+// Clear search function (optional - for future "clear" button)
+function clearSearch() {
+    document.getElementById('userSearch').value = '';
+    document.getElementById('roleFilter').value = 'all';
+    filterUsers();
+}
+
+// Initialize filters on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default filter value
+    // Set default filter values
     const roleFilter = document.getElementById('roleFilter');
+    const searchInput = document.getElementById('userSearch');
+
     if (roleFilter) {
         roleFilter.value = 'all';
-        filterUsersByRole(); // Apply initial filter
+    }
+
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    // Apply initial filter
+    if (roleFilter || searchInput) {
+        performFiltering();
     }
 });

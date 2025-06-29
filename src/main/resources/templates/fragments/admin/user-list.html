@@ -7,24 +7,32 @@
             <h2>User Management</h2>
         </div>
 
-        <!-- Filter and Count Section -->
+        <!-- Filter, Search and Count Section -->
         <div class="user-list-controls" th:if="${users != null}">
             <div class="filter-section">
                 <label for="roleFilter" class="filter-label">Filter by Role:</label>
-                <select id="roleFilter" class="filter-dropdown" onchange="filterUsersByRole()">
+                <select id="roleFilter" class="filter-dropdown" onchange="filterUsers()">
                     <option value="all">All Roles</option>
                     <option th:each="role : ${roles}" th:value="${role.name}" th:text="${#strings.capitalize(role.name)}">Role</option>
                 </select>
             </div>
+
             <div class="user-count">
                 Total Users: <span id="totalUserCount" th:text="${#lists.size(users)}">0</span>
                 <span id="filteredUserCount" style="display: none;"></span>
+            </div>
+
+            <div class="search-section">
+                <input type="text" id="userSearch" class="search-input"
+                       placeholder="Search users..."
+                       oninput="filterUsers()">
             </div>
         </div>
 
         <div th:if="${users != null and not #lists.isEmpty(users)}">
             <div class="user-item" th:each="userItem : ${users}"
-                 th:data-user-role-filter="${userItem.roleName}">
+                 th:data-user-role-filter="${userItem.roleName}"
+                 th:data-user-search="${(userItem.firstName + ' ' + userItem.lastName).toLowerCase()}">
                 <div class="user-info">
                     <div class="user-name"
                          th:text="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"

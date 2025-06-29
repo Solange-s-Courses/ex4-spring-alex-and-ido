@@ -66,7 +66,6 @@ public class User {
     @CreationTimestamp
     private LocalDateTime dateOfIssue;
 
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "FK_user_role"))
     private Role role;
