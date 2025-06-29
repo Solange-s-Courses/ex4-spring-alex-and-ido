@@ -222,3 +222,85 @@ function executeDeleteAll() {
         closeFinalConfirmModal();
     }
 }
+
+// User Filtering Functions
+function filterUsersByRole() {
+    const filterValue = document.getElementById('roleFilter').value;
+    const userItems = document.querySelectorAll('.user-item');
+    const totalUserCount = userItems.length;
+    let visibleCount = 0;
+
+    // Filter user items
+    userItems.forEach(userItem => {
+        const userRole = userItem.getAttribute('data-user-role-filter');
+
+        if (filterValue === 'all' || userRole === filterValue) {
+            userItem.classList.remove('hidden');
+            userItem.style.display = 'flex'; // Show the item
+            visibleCount++;
+        } else {
+            userItem.classList.add('hidden');
+            userItem.style.display = 'none'; // Hide the item
+        }
+    });
+
+    // Update user count display
+    updateUserCountDisplay(totalUserCount, visibleCount, filterValue);
+
+    // Show/hide no users message
+    updateNoUsersMessage(visibleCount);
+}
+
+function updateUserCountDisplay(totalCount, visibleCount, filterValue) {
+    const totalUserCountElement = document.getElementById('totalUserCount');
+    const filteredUserCountElement = document.getElementById('filteredUserCount');
+
+    if (filterValue === 'all') {
+        // Show only total count
+        totalUserCountElement.textContent = totalCount;
+        filteredUserCountElement.style.display = 'none';
+    } else {
+        // Show total and filtered count
+        totalUserCountElement.textContent = totalCount;
+        filteredUserCountElement.style.display = 'inline';
+        filteredUserCountElement.textContent = ` (Showing ${visibleCount} ${capitalizeRole(filterValue)}${visibleCount !== 1 ? 's' : ''})`;
+    }
+}
+
+function updateNoUsersMessage(visibleCount) {
+    const noUsersMessage = document.getElementById('noFilteredUsers');
+    const userListContainer = document.querySelector('.user-list-section > div:nth-child(3)'); // The div with user items
+
+    if (visibleCount === 0 && userListContainer) {
+        // Show "no filtered users" message
+        if (!document.getElementById('noFilteredUsersMessage')) {
+            const noFilteredMessage = document.createElement('div');
+            noFilteredMessage.id = 'noFilteredUsersMessage';
+            noFilteredMessage.className = 'no-users';
+            noFilteredMessage.textContent = 'No users found with the selected role.';
+            userListContainer.parentNode.appendChild(noFilteredMessage);
+        } else {
+            document.getElementById('noFilteredUsersMessage').style.display = 'block';
+        }
+    } else {
+        // Hide "no filtered users" message
+        const noFilteredMessage = document.getElementById('noFilteredUsersMessage');
+        if (noFilteredMessage) {
+            noFilteredMessage.style.display = 'none';
+        }
+    }
+}
+
+function capitalizeRole(role) {
+    return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+// Initialize filter on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default filter value
+    const roleFilter = document.getElementById('roleFilter');
+    if (roleFilter) {
+        roleFilter.value = 'all';
+        filterUsersByRole(); // Apply initial filter
+    }
+});

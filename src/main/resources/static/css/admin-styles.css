@@ -112,6 +112,84 @@ h1 {
     margin-bottom: 1rem;
 }
 
+/* Filter and Controls Section */
+.user-list-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.filter-dropdown {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    min-width: 120px;
+}
+
+.filter-dropdown:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0,123,255,0.3);
+}
+
+.filter-dropdown:hover {
+    border-color: #007bff;
+}
+
+/* Updated User Count Styles */
+.user-count {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0; /* Remove margin since it's now in controls section */
+    font-weight: 500;
+}
+
+.user-count #filteredUserCount {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Hidden User Items (for filtering) */
+.user-item.hidden {
+    display: none !important;
+}
+
+/* No Filtered Users Message */
+.no-filtered-users {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 2rem;
+    display: none;
+}
+
+.no-filtered-users.show {
+    display: block;
+}
+
 .user-item {
     display: flex;
     justify-content: space-between;
