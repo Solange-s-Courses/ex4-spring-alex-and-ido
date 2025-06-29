@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="userList">
+    <div class="user-list-section">
+        <div class="user-list-header">
+            <h2>User Management</h2>
+        </div>
+
+        <div class="user-count" th:if="${users != null}">
+            Total Users: <span th:text="${#lists.size(users)}">0</span>
+        </div>
+
+        <div th:if="${users != null and not #lists.isEmpty(users)}">
+            <div class="user-item" th:each="userItem : ${users}">
+                <div class="user-info">
+                    <div class="user-name"
+                         th:text="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                         th:data-user-id="${userItem.userId}"
+                         th:data-user-email="${userItem.emailAddress}"
+                         th:data-user-phone="${userItem.phoneNumber}"
+                         th:data-user-role="${userItem.roleName}"
+                         th:data-user-date="${#temporals.format(userItem.dateOfIssue, 'dd/MM/yyyy')}"
+                         onmouseenter="showTooltip(this)"
+                         onmouseleave="hideTooltip(this)">
+                        User Name
+                    </div>
+                    <div class="user-role" th:text="${userItem.roleName}">Role</div>
+                    <div class="user-phone" th:text="${userItem.phoneNumber}">Phone</div>
+                </div>
+                <div class="user-actions">
+                    <button class="btn btn-edit" type="button"
+                            th:data-user-id="${userItem.userId}"
+                            th:data-user-fname="${userItem.firstName}"
+                            th:data-user-lname="${userItem.lastName}"
+                            th:data-user-role="${userItem.roleName}"
+                            th:data-user-name="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                            onclick="showEditModal(this.dataset.userId, this.dataset.userFname, this.dataset.userLname, this.dataset.userRole, this.dataset.userName)">
+                        Edit
+                    </button>
+                    <button class="btn btn-delete" type="button"
+                            th:data-user-id="${userItem.userId}"
+                            th:data-user-name="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                            onclick="showDeleteModal(this.dataset.userId, this.dataset.userName)">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${users == null or #lists.isEmpty(users)}" class="no-users">
+            No users found in the system.
+        </div>
+    </div>
+</div>
+</html>

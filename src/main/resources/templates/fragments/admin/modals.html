@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="allModals">
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal edit-modal">
+        <div class="modal-content">
+            <h3>Edit User</h3>
+            <form id="editForm" method="post" th:action="@{/admin/edit-user}">
+                <input type="hidden" id="editUserId" name="userId" />
+
+                <div class="form-group">
+                    <label for="editFirstName">First Name:</label>
+                    <input type="text" id="editFirstName" name="firstName" required maxlength="20" pattern="[A-Za-z]+" />
+                </div>
+
+                <div class="form-group">
+                    <label for="editLastName">Last Name:</label>
+                    <input type="text" id="editLastName" name="lastName" required maxlength="20" pattern="[A-Za-z]+" />
+                </div>
+
+                <div class="form-group">
+                    <label for="editRole">Role:</label>
+                    <select id="editRole" name="roleName" required>
+                        <option th:each="role : ${roles}" th:value="${role.name}" th:text="${#strings.capitalize(role.name)}">Role</option>
+                    </select>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-save">Save Changes</button>
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p id="deleteMessage">Are you sure you want to delete this user?</p>
+            <div class="modal-buttons">
+                <button class="btn-confirm" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Action Modal -->
+    <div id="criticalModal" class="modal critical-modal">
+        <div class="modal-content">
+            <h3>⚠️ CRITICAL ACTION</h3>
+            <div class="warning-text">
+                This will permanently delete ALL users except admins!<br>
+                Enter your password to proceed:
+            </div>
+            <form id="criticalForm" method="post" th:action="@{/admin/delete-all-users}">
+                <input type="password" id="adminPassword" name="adminPassword"
+                       class="password-input" placeholder="Enter your password" required />
+                <div class="modal-buttons">
+                    <button type="button" class="btn-confirm" onclick="showFinalConfirmation()">Continue</button>
+                    <button type="button" class="btn-cancel" onclick="closeCriticalModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Final Confirmation Modal -->
+    <div id="finalConfirmModal" class="modal critical-modal">
+        <div class="modal-content">
+            <h3>⚠️ FINAL CONFIRMATION</h3>
+            <p class="warning-text">
+                Are you absolutely sure?<br>
+                This will delete <span th:text="${#lists.size(users)}">X</span> users permanently!<br>
+                <strong>This action cannot be undone!</strong>
+            </p>
+            <div class="modal-buttons">
+                <button type="button" class="btn-confirm" onclick="executeDeleteAll()">Yes, Delete All</button>
+                <button type="button" class="btn-cancel" onclick="closeFinalConfirmModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for deletion -->
+    <form id="deleteForm" method="post" th:action="@{/admin/delete-user}" style="display: none;">
+        <input type="hidden" id="userIdToDelete" name="userId" />
+    </form>
+</div>
+</html>

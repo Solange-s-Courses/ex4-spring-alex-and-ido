@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="criticalActions">
+    <!-- Critical Actions Section -->
+    <div class="critical-action-section" th:if="${users != null and not #lists.isEmpty(users)}">
+        <button class="btn-critical" type="button" onclick="showCriticalModal()">
+            ⚠️ Delete All Users
+        </button>
+    </div>
+</div>
+</html>

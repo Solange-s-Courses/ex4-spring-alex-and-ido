@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Navbar Fragment -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="navbar-container">
+        <a class="navbar-brand">Event Management System</a>
+        <div class="navbar-nav">
+            <a th:href="@{/dashboard}" class="nav-link">Back to Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Footer Scripts Fragment -->
+<div th:fragment="scripts">
+    <script th:src="@{/js/admin-scripts.js}"></script>
+</div>
+</html>
