@@ -248,6 +248,44 @@ public class UserService {
         }
     }
 
+    // Delete all non-admin users (critical admin functionality)
+    public String deleteAllNonAdminUsers() {
+        try {
+            List<User> nonAdminUsers = userRepository.findAllNonAdminUsers();
+
+            if (nonAdminUsers.isEmpty()) {
+                return "No users to delete";
+            }
+
+            int deletedCount = nonAdminUsers.size();
+
+            // Delete all non-admin users
+            for (User user : nonAdminUsers) {
+                userRepository.delete(user);
+            }
+
+            return "success:" + deletedCount;
+
+        } catch (Exception e) {
+            return "Failed to delete users: " + e.getMessage();
+        }
+    }
+
+    // Verify admin password (for critical operations)
+    public boolean verifyAdminPassword(Long adminId, String password) {
+        try {
+            Optional<User> adminOptional = userRepository.findById(adminId);
+            if (adminOptional.isPresent()) {
+                User admin = adminOptional.get();
+                // Using plain text comparison like your current code
+                return password.equals(admin.getPassword());
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     // Get user by ID
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);

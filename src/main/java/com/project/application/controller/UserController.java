@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -285,5 +287,61 @@ public class UserController {
         }
 
         return "redirect:/admin";
+    }
+
+    @PostMapping("/admin/delete-all-users")
+    public String deleteAllUsers(@RequestParam String adminPassword,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is admin
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"admin".equals(user.getRole().getName())) {
+            return "error/404";
+        }
+
+        // Verify admin password
+        if (!userService.verifyAdminPassword(user.getUserId(), adminPassword)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid password! Operation cancelled.");
+            return "redirect:/admin";
+        }
+
+        String result = userService.deleteAllNonAdminUsers();
+
+        if (result.startsWith("success:")) {
+            String countStr = result.substring(8); // Remove "success:" prefix
+            redirectAttributes.addFlashAttribute("success",
+                    "Successfully deleted " + countStr + " users from the database!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/admin";
+    }
+
+    @PostMapping("/admin/verify-password")
+    @ResponseBody
+    public String verifyPassword(@RequestParam String adminPassword,
+                                 HttpSession session) {
+
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null || !"admin".equals(user.getRole().getName())) {
+            return "invalid";
+        }
+
+        // Temporary debug - remove after testing
+        System.out.println("Session user password: '" + user.getPassword() + "'");
+        System.out.println("Entered password: '" + adminPassword + "'");
+
+        // Simple direct comparison for testing
+        if (adminPassword.equals(user.getPassword())) {
+            return "valid";
+        } else {
+            return "invalid";
+        }
     }
 }

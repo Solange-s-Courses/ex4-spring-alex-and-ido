@@ -360,6 +360,62 @@
       min-width: 80px;
       display: inline-block;
     }
+    /* Critical Action Button */
+    .critical-action-section {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9ecef;
+      text-align: center;
+    }
+
+    .btn-critical {
+      background-color: #dc3545;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.3s;
+      border: 1px solid #c82333;
+    }
+
+    .btn-critical:hover {
+      background-color: #c82333;
+      box-shadow: 0 2px 4px rgba(220,53,69,0.3);
+    }
+
+    /* Critical Modal */
+    .critical-modal h3 {
+      color: #dc3545;
+      text-align: center;
+    }
+
+    .critical-modal .modal-content {
+      border: 2px solid #dc3545;
+    }
+
+    .warning-text {
+      color: #dc3545;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .password-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid #dc3545;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 1rem;
+    }
+
+    .password-input:focus {
+      outline: none;
+      border-color: #c82333;
+      box-shadow: 0 0 5px rgba(220,53,69,0.3);
+    }
   </style>
 </head>
 <body>
@@ -428,6 +484,50 @@
 
     <div th:if="${users == null or #lists.isEmpty(users)}" class="no-users">
       No users found in the system.
+    </div>
+  </div>
+</div>
+
+<!-- Critical Actions Section -->
+<div class="critical-action-section" th:if="${users != null and not #lists.isEmpty(users)}">
+  <button class="btn-critical" type="button" onclick="showCriticalModal()">
+    ⚠️ Delete All Users
+  </button>
+</div>
+</div>
+</div>
+
+<!-- Critical Action Modal -->
+<div id="criticalModal" class="modal critical-modal">
+  <div class="modal-content">
+    <h3>⚠️ CRITICAL ACTION</h3>
+    <div class="warning-text">
+      This will permanently delete ALL users except admins!<br>
+      Enter your password to proceed:
+    </div>
+    <form id="criticalForm" method="post" th:action="@{/admin/delete-all-users}">
+      <input type="password" id="adminPassword" name="adminPassword"
+             class="password-input" placeholder="Enter your password" required />
+      <div class="modal-buttons">
+        <button type="button" class="btn-confirm" onclick="showFinalConfirmation()">Continue</button>
+        <button type="button" class="btn-cancel" onclick="closeCriticalModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Final Confirmation Modal -->
+<div id="finalConfirmModal" class="modal critical-modal">
+  <div class="modal-content">
+    <h3>⚠️ FINAL CONFIRMATION</h3>
+    <p class="warning-text">
+      Are you absolutely sure?<br>
+      This will delete <span th:text="${#lists.size(users)}">X</span> users permanently!<br>
+      <strong>This action cannot be undone!</strong>
+    </p>
+    <div class="modal-buttons">
+      <button type="button" class="btn-confirm" onclick="executeDeleteAll()">Yes, Delete All</button>
+      <button type="button" class="btn-cancel" onclick="closeFinalConfirmModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -634,16 +734,80 @@
     userIdToDelete = null;
   }
 
-  // Close modals when clicking outside
+  // Critical Action Functions
+  function showCriticalModal() {
+    document.getElementById('criticalModal').style.display = 'block';
+    document.getElementById('adminPassword').focus();
+  }
+
+  function closeCriticalModal() {
+    document.getElementById('criticalModal').style.display = 'none';
+    document.getElementById('adminPassword').value = '';
+  }
+
+  function showFinalConfirmation() {
+    const password = document.getElementById('adminPassword').value;
+    if (!password.trim()) {
+      alert('Please enter your password!');
+      return;
+    }
+
+    // Verify password with server before showing final confirmation
+    verifyPasswordAndShowConfirmation(password);
+  }
+
+  function verifyPasswordAndShowConfirmation(password) {
+    // Use fetch to verify password without page reload
+    fetch('/admin/verify-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'adminPassword=' + encodeURIComponent(password)
+    })
+            .then(response => response.text())
+            .then(result => {
+              if (result === 'valid') {
+                document.getElementById('criticalModal').style.display = 'none';
+                document.getElementById('finalConfirmModal').style.display = 'block';
+              } else {
+                alert('Invalid password! Please try again.');
+                document.getElementById('adminPassword').focus();
+              }
+            })
+            .catch(error => {
+              alert('Error verifying password. Please try again.');
+              console.error('Password verification error:', error);
+            });
+  }
+
+  function closeFinalConfirmModal() {
+    document.getElementById('finalConfirmModal').style.display = 'none';
+  }
+
+  function executeDeleteAll() {
+    // Password already verified, just submit the form directly
+    document.getElementById('criticalForm').submit();
+  }
+
+  // Close modals when clicking outside (updated to include critical modals)
   window.onclick = function(event) {
     const editModal = document.getElementById('editModal');
     const deleteModal = document.getElementById('deleteModal');
+    const criticalModal = document.getElementById('criticalModal');
+    const finalConfirmModal = document.getElementById('finalConfirmModal');
 
     if (event.target === editModal) {
       closeEditModal();
     }
     if (event.target === deleteModal) {
       closeDeleteModal();
+    }
+    if (event.target === criticalModal) {
+      closeCriticalModal();
+    }
+    if (event.target === finalConfirmModal) {
+      closeFinalConfirmModal();
     }
   }
 </script>
