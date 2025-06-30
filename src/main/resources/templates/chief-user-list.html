@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: head('Chief User List')}"></head>
+
+<body>
+<!-- Navigation -->
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <h1>Chief User List</h1>
+    <p class="text-muted">View managers and users in the system</p>
+
+    <!-- Alert Messages -->
+    <div th:replace="~{fragments/common/alerts :: alerts}"></div>
+
+    <!-- User List Section -->
+    <div th:replace="~{fragments/chief/user-list :: chiefUserList}"></div>
+</div>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -195,6 +195,37 @@ public class UserController {
         return "redirect:/login";
     }
 
+    // Chief Routes
+    @GetMapping("/chief/user-list")
+    public String chiefUserList(HttpSession session, Model model) {
+        // Check if user is logged in
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Check if user has chief role
+        if (!"chief".equals(user.getRole().getName())) {
+            return "error/404"; // Redirect to 404 for non-chief users
+        }
+
+        // Get only managers and users (exclude admins and chiefs)
+        List<User> users = userService.getAllNonAdminUsers().stream()
+                .filter(u -> "manager".equals(u.getRole().getName()) || "user".equals(u.getRole().getName()))
+                .collect(Collectors.toList());
+
+        // Get only manager and user roles for the dropdown
+        List<Role> roles = roleService.getAllRoles().stream()
+                .filter(role -> "manager".equals(role.getName()) || "user".equals(role.getName()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("user", user);
+        model.addAttribute("users", users);
+        model.addAttribute("roles", roles);
+        return "chief-user-list";
+    }
+
+    // Admin Routes
     @GetMapping("/admin")
     public String adminPage(HttpSession session, Model model) {
         // Check if user is logged in
