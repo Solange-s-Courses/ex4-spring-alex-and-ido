@@ -271,8 +271,12 @@
     <span>Welcome <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>!</span>
   </div>
   <div class="navbar-right">
-    <a href="/admin" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
-    <a th:href="@{/user-info}" class="nav-btn">User Info</a>
+    <!-- Dashboard button (only show on user-info page) -->
+    <a th:href="@{/dashboard}" class="nav-btn">Dashboard</a>
+    <!-- Chief User List button (only for chief) -->
+    <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
+    <!-- Admin Page button (only for admin) -->
+    <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
     <a th:href="@{/logout}" class="logout-btn">Logout</a>
   </div>
 </nav>
@@ -323,7 +327,6 @@
       </div>
     </div>
 
-    <a th:href="@{/dashboard}" class="back-btn">Back to Dashboard</a>
   </div>
 </div>
 
