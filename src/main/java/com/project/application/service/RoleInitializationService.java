@@ -18,18 +18,22 @@ public class RoleInitializationService {
     @Bean
     public ApplicationRunner initializeRoles() {
         return args -> {
-            // Create roles only if they don't exist
+            boolean roleAdded = false;
+
+            // Check if any roles are missing and create them
             for (String roleName : PREDEFINED_ROLES) {
                 if (!roleRepository.existsByName(roleName)) {
                     Role role = new Role(roleName);
                     roleRepository.save(role);
                     System.out.println("Created role: " + roleName);
-                } else {
-                    System.out.println("Role already exists: " + roleName);
+                    roleAdded = true;
                 }
             }
 
-            System.out.println("Role initialization completed.");
+            // Only print if no roles were added (everything was already valid)
+            if (!roleAdded) {
+                System.out.println("roles - valid");
+            }
         };
     }
 }
