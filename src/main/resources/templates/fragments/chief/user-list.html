@@ -38,15 +38,81 @@
                          th:text="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}">
                         User Name
                     </div>
-                    <div class="user-role" th:text="${userItem.roleName}">Role</div>
+                    <div class="user-role"
+                         th:id="'user-role-' + ${userItem.userId}"
+                         th:text="${userItem.displayRole}">Role</div>
                     <div class="user-phone" th:text="${userItem.phoneNumber}">Phone</div>
                 </div>
-                <!-- No user-actions div - chiefs cannot edit/delete users -->
+                <div class="user-actions">
+                    <!-- Show Assign button if user has no responsibility -->
+                    <button class="btn btn-assign" type="button"
+                            th:data-user-id="${userItem.userId}"
+                            th:data-user-name="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                            th:if="${userItem.responsibilityName == null}"
+                            onclick="showAssignModal(this.dataset.userId, this.dataset.userName)">
+                        Assign Responsibility
+                    </button>
+
+                    <!-- Show Remove button if user has a responsibility -->
+                    <button class="btn btn-remove" type="button"
+                            th:data-user-id="${userItem.userId}"
+                            th:data-user-name="${#strings.capitalize(userItem.firstName) + ' ' + #strings.capitalize(userItem.lastName)}"
+                            th:data-responsibility-name="${userItem.responsibilityName}"
+                            th:if="${userItem.responsibilityName != null}"
+                            onclick="showRemoveModal(this.dataset.userId, this.dataset.userName, this.dataset.responsibilityName)">
+                        Remove Responsibility
+                    </button>
+                </div>
             </div>
         </div>
 
         <div id="noFilteredUsers" th:if="${users == null or #lists.isEmpty(users)}" class="no-users">
             No users found in the system.
+        </div>
+    </div>
+
+    <!-- Assign Responsibility Modal -->
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Assign Responsibility</h3>
+                <span class="close" onclick="closeAssignModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="assignMessage">Assign responsibility to user:</p>
+                <form id="assignForm" th:action="@{/chief/assign-responsibility}" method="post">
+                    <input type="hidden" id="assignUserId" name="userId">
+                    <div class="form-group">
+                        <label for="responsibilityName">Responsibility Name:</label>
+                        <input type="text" id="responsibilityName" name="responsibilityName"
+                               class="form-input" maxlength="100" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeAssignModal()">Cancel</button>
+                <button type="button" class="btn btn-assign" onclick="confirmAssign()">Assign</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Responsibility Modal -->
+    <div id="removeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Remove Responsibility</h3>
+                <span class="close" onclick="closeRemoveModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="removeMessage">Remove responsibility from user:</p>
+                <form id="removeForm" th:action="@{/chief/remove-responsibility}" method="post">
+                    <input type="hidden" id="removeUserId" name="userId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeRemoveModal()">Cancel</button>
+                <button type="button" class="btn btn-remove" onclick="confirmRemove()">Remove</button>
+            </div>
         </div>
     </div>
 </div>

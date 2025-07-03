@@ -206,13 +206,11 @@ public class UserController {
 
         // Check if user has chief role
         if (!"chief".equals(user.getRole().getName())) {
-            return "error/404"; // Redirect to 404 for non-chief users
+            return "error/404";
         }
 
-        // Get only managers and users (exclude admins and chiefs)
-        List<User> users = userService.getAllNonAdminUsers().stream()
-                .filter(u -> "manager".equals(u.getRole().getName()) || "user".equals(u.getRole().getName()))
-                .collect(Collectors.toList());
+        // Get managers and users with their responsibilities populated
+        List<User> users = userService.getManagersAndUsersWithResponsibilities();
 
         // Get only manager and user roles for the dropdown
         List<Role> roles = roleService.getAllRoles().stream()
@@ -223,6 +221,63 @@ public class UserController {
         model.addAttribute("users", users);
         model.addAttribute("roles", roles);
         return "chief-user-list";
+    }
+
+    // Add this method for assigning responsibility
+    @PostMapping("/chief/assign-responsibility")
+    public String assignResponsibility(@RequestParam Long userId,
+                                       @RequestParam String responsibilityName,
+                                       HttpSession session,
+                                       RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is chief
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"chief".equals(user.getRole().getName())) {
+            return "error/404";
+        }
+
+        // Assign responsibility using service
+        String result = userService.assignResponsibility(userId, responsibilityName);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "Responsibility assigned successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/chief/user-list";
+    }
+
+    // Add this method for removing responsibility
+    @PostMapping("/chief/remove-responsibility")
+    public String removeResponsibility(@RequestParam Long userId,
+                                       HttpSession session,
+                                       RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is chief
+        User user = (User) session.getAttribute(LOGGED_IN_USER);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"chief".equals(user.getRole().getName())) {
+            return "error/404";
+        }
+
+        // Remove responsibility using service
+        String result = userService.removeUserFromResponsibility(userId);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "Responsibility removed successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/chief/user-list";
     }
 
     // Admin Routes

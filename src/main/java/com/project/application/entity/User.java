@@ -75,8 +75,19 @@ public class User {
         return role != null ? role.getName() : null;
     }
 
+    @Transient
+    private String responsibilityName;
+
     // Convenience method to check if user has specific role
     public boolean hasRole(String roleName) {
         return role != null && role.getName().equals(roleName);
+    }
+
+    // Method to get display role with responsibility
+    public String getDisplayRole() {
+        if ("manager".equals(getRoleName()) && responsibilityName != null) {
+            return "MANAGER (" + responsibilityName + ")";
+        }
+        return getRoleName().toUpperCase();
     }
 }

@@ -6,10 +6,15 @@ import com.project.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import com.project.application.entity.Responsibility;
+import com.project.application.entity.UserResponsibility;
+import com.project.application.repository.UserResponsibilityRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +22,12 @@ public class UserService {
 
     private static final String NAME_PATTERN = "^[A-Za-z]{1,20}$";
     private static final String PHONE_PATTERN = "^[0-9]{10}$";
+
+    // Dependency Injections
     private final UserRepository userRepository;
-    private final RoleService roleService; // NEW: Inject RoleService
+    private final RoleService roleService;
+    private final ResponsibilityService responsibilityService;
+    private final UserResponsibilityRepository userResponsibilityRepository;
 
     // Register new user with default "user" role
     public String registerUser(User user) {
@@ -289,5 +298,156 @@ public class UserService {
     // Get user by ID
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
+    }
+
+    /**
+     * Assign responsibility to a user and automatically make them manager
+    */
+    @Transactional
+    public String assignResponsibility(Long userId, String responsibilityName) {
+        try {
+            // Validate responsibility name
+            if (responsibilityName == null || responsibilityName.trim().isEmpty()) {
+                return "Responsibility name cannot be empty";
+            }
+
+            responsibilityName = responsibilityName.trim();
+
+            // Find the user
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (!userOptional.isPresent()) {
+                return "User not found";
+            }
+
+            User user = userOptional.get();
+
+            // Check if user already has a responsibility
+            if (userResponsibilityRepository.existsByUser_UserId(userId)) {
+                return "User already has a responsibility assigned";
+            }
+
+            // Get or create responsibility
+            Responsibility responsibility;
+            Optional<Responsibility> existingResponsibility = responsibilityService.findByName(responsibilityName);
+
+            if (existingResponsibility.isPresent()) {
+                responsibility = existingResponsibility.get();
+            } else {
+                responsibility = responsibilityService.createResponsibility(responsibilityName);
+            }
+
+            // Create user-responsibility assignment
+            UserResponsibility userResponsibility = new UserResponsibility(user, responsibility);
+            userResponsibilityRepository.save(userResponsibility);
+
+            // Change user role to manager
+            Optional<Role> managerRole = roleService.findByName("manager");
+            if (managerRole.isPresent()) {
+                user.setRole(managerRole.get());
+                userRepository.save(user);
+            } else {
+                return "Manager role not found in system";
+            }
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to assign responsibility: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Remove user from their responsibility and demote to user role if needed
+     */
+    @Transactional
+    public String removeUserFromResponsibility(Long userId) {
+        try {
+            // Find user's current responsibility assignment
+            Optional<UserResponsibility> userResponsibilityOptional =
+                    userResponsibilityRepository.findByUserId(userId);
+
+            if (!userResponsibilityOptional.isPresent()) {
+                return "User has no responsibility assigned";
+            }
+
+            UserResponsibility userResponsibility = userResponsibilityOptional.get();
+            Long responsibilityId = userResponsibility.getResponsibility().getResponsibilityId();
+
+            // Remove user assignment
+            userResponsibilityRepository.deleteByUser_UserId(userId);
+
+            // Check if responsibility has any remaining managers
+            long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+
+            // If no managers left, delete the responsibility
+            if (remainingManagers == 0) {
+                responsibilityService.deleteResponsibility(responsibilityId);
+            }
+
+            // Demote user to "user" role (unless they're chief or admin)
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                String currentRole = user.getRoleName();
+
+                // Only demote if they're currently a manager
+                if ("manager".equals(currentRole)) {
+                    Optional<Role> userRole = roleService.findByName("user");
+                    if (userRole.isPresent()) {
+                        user.setRole(userRole.get());
+                        userRepository.save(user);
+                    }
+                }
+            }
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to remove responsibility: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Get user's current responsibility name (for display purposes)
+     */
+    public String getUserResponsibilityName(Long userId) {
+        Optional<UserResponsibility> userResponsibilityOptional =
+                userResponsibilityRepository.findByUserId(userId);
+
+        if (userResponsibilityOptional.isPresent()) {
+            return userResponsibilityOptional.get().getResponsibility().getResponsibilityName();
+        }
+
+        return null; // User has no responsibility
+    }
+
+    /**
+     * Get all managers for a specific responsibility
+     */
+    public List<User> getResponsibilityManagers(Long responsibilityId) {
+        List<UserResponsibility> assignments =
+                userResponsibilityRepository.findByResponsibilityId(responsibilityId);
+
+        return assignments.stream()
+                .map(UserResponsibility::getUser)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Get managers and users with their responsibility information populated
+     */
+    public List<User> getManagersAndUsersWithResponsibilities() {
+        // Get only managers and users (exclude admins and chiefs)
+        List<User> users = getAllNonAdminUsers().stream()
+                .filter(u -> "manager".equals(u.getRole().getName()) || "user".equals(u.getRole().getName()))
+                .collect(Collectors.toList());
+
+        // Populate responsibility names for each user
+        for (User user : users) {
+            String responsibilityName = getUserResponsibilityName(user.getUserId());
+            user.setResponsibilityName(responsibilityName);
+        }
+
+        return users;
     }
 }

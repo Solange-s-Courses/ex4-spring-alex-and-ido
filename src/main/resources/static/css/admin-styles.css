@@ -547,3 +547,87 @@ h1 {
     border-color: #c82333;
     box-shadow: 0 0 5px rgba(220,53,69,0.3);
 }
+
+/* Modal Header, Body, Footer */
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Close button */
+.close {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close:hover {
+    color: #000;
+}
+
+/* Form input class */
+.form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0,123,255,0.3);
+}
+
+/* Assign and Remove buttons */
+.btn-assign {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-assign:hover {
+    background-color: #218838;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+}

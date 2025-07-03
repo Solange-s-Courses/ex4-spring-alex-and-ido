@@ -3,6 +3,8 @@ let tooltipTimeout;
 let hideTimeout;
 let currentTooltip = null;
 let isTooltipHovered = false;
+let userIdToAssign = null;
+let userIdToRemove = null;
 
 function showTooltip(element) {
     // Clear any existing timeouts
@@ -91,7 +93,7 @@ function hideTooltipDelayed() {
     // Set a small delay before hiding to allow mouse movement to tooltip
     hideTimeout = setTimeout(() => {
         if (!isTooltipHovered) {
-        hideTooltipImmediate();
+            hideTooltipImmediate();
         }
     }, 100); // Small delay to allow mouse movement
 }
@@ -131,7 +133,7 @@ function closeEditModal() {
 function showDeleteModal(userId, userName) {
     userIdToDelete = userId;
     document.getElementById('deleteMessage').textContent =
-    'Are you sure you want to delete ' + userName + '? This action cannot be undone.';
+        'Are you sure you want to delete ' + userName + '? This action cannot be undone.';
     document.getElementById('deleteModal').style.display = 'block';
 }
 
@@ -162,7 +164,7 @@ function showFinalConfirmation() {
     const password = document.getElementById('adminPassword').value;
     if (!password.trim()) {
         alert('Please enter your password!');
-    return;
+        return;
     }
     // Verify password with server before showing final confirmation
     verifyPasswordAndShowConfirmation(password);
@@ -200,27 +202,6 @@ function closeFinalConfirmModal() {
 function executeDeleteAll() {
     // Password already verified, just submit the form directly
     document.getElementById('criticalForm').submit();
-}
-
-// Close modals when clicking outside (updated to include critical modals)
-    window.onclick = function(event) {
-    const editModal = document.getElementById('editModal');
-    const deleteModal = document.getElementById('deleteModal');
-    const criticalModal = document.getElementById('criticalModal');
-    const finalConfirmModal = document.getElementById('finalConfirmModal');
-
-    if (event.target === editModal) {
-        closeEditModal();
-    }
-    if (event.target === deleteModal) {
-        closeDeleteModal();
-    }
-    if (event.target === criticalModal) {
-        closeCriticalModal();
-    }
-    if (event.target === finalConfirmModal) {
-        closeFinalConfirmModal();
-    }
 }
 
 // Combined User Filtering Functions
@@ -339,6 +320,84 @@ function clearSearch() {
     document.getElementById('userSearch').value = '';
     document.getElementById('roleFilter').value = 'all';
     filterUsers();
+}
+
+// Assign Responsibility Modal Functions
+function showAssignModal(userId, userName) {
+    userIdToAssign = userId;
+    document.getElementById('assignUserId').value = userId;
+    document.getElementById('assignMessage').textContent =
+        'Assign responsibility to ' + userName + ':';
+    document.getElementById('responsibilityName').value = '';
+    document.getElementById('assignModal').style.display = 'block';
+    document.getElementById('responsibilityName').focus();
+}
+
+function closeAssignModal() {
+    document.getElementById('assignModal').style.display = 'none';
+    userIdToAssign = null;
+    document.getElementById('responsibilityName').value = '';
+}
+
+function confirmAssign() {
+    const responsibilityName = document.getElementById('responsibilityName').value.trim();
+
+    if (!responsibilityName) {
+        alert('Please enter a responsibility name!');
+        document.getElementById('responsibilityName').focus();
+        return;
+    }
+
+    // Submit the form
+    document.getElementById('assignForm').submit();
+}
+
+// Remove Responsibility Modal Functions
+function showRemoveModal(userId, userName, responsibilityName) {
+    userIdToRemove = userId;
+    document.getElementById('removeUserId').value = userId;
+    document.getElementById('removeMessage').textContent =
+        'Remove responsibility "' + responsibilityName + '" from ' + userName + '?';
+    document.getElementById('removeModal').style.display = 'block';
+}
+
+function closeRemoveModal() {
+    document.getElementById('removeModal').style.display = 'none';
+    userIdToRemove = null;
+}
+
+function confirmRemove() {
+    // Submit the form
+    document.getElementById('removeForm').submit();
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const editModal = document.getElementById('editModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const criticalModal = document.getElementById('criticalModal');
+    const finalConfirmModal = document.getElementById('finalConfirmModal');
+    const assignModal = document.getElementById('assignModal');
+    const removeModal = document.getElementById('removeModal');
+
+    if (event.target === editModal) {
+        closeEditModal();
+    }
+    if (event.target === deleteModal) {
+        closeDeleteModal();
+    }
+    if (event.target === criticalModal) {
+        closeCriticalModal();
+    }
+    if (event.target === finalConfirmModal) {
+        closeFinalConfirmModal();
+    }
+    if (event.target === assignModal) {
+        closeAssignModal();
+    }
+    if (event.target === removeModal) {
+        closeRemoveModal();
+    }
 }
 
 // Initialize filters on page load
