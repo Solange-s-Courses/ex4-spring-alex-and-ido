@@ -258,6 +258,7 @@ public class UserService {
     }
 
     // Delete all non-admin users (critical admin functionality)
+    @Transactional
     public String deleteAllNonAdminUsers() {
         try {
             List<User> nonAdminUsers = userRepository.findAllNonAdminUsers();
@@ -268,7 +269,29 @@ public class UserService {
 
             int deletedCount = nonAdminUsers.size();
 
-            // Delete all non-admin users
+            // Step 1: Remove all responsibility assignments for users being deleted
+            for (User user : nonAdminUsers) {
+                // Check if user has any responsibility
+                Optional<UserResponsibility> userResponsibility =
+                        userResponsibilityRepository.findByUserId(user.getUserId());
+
+                if (userResponsibility.isPresent()) {
+                    Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
+
+                    // Remove user's assignment
+                    userResponsibilityRepository.deleteByUser_UserId(user.getUserId());
+
+                    // Check if responsibility has any remaining managers
+                    long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+
+                    // If no managers left, delete the responsibility
+                    if (remainingManagers == 0) {
+                        responsibilityService.deleteResponsibility(responsibilityId);
+                    }
+                }
+            }
+
+            // Step 2: Now safely delete all non-admin users
             for (User user : nonAdminUsers) {
                 userRepository.delete(user);
             }
