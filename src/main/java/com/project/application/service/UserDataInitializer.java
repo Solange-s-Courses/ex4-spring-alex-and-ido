@@ -47,7 +47,7 @@ public class UserDataInitializer implements ApplicationRunner {
         if (initializeTestUsers) {
             initializeTestUsersData();
         } else {
-            System.out.println("Test user initialization is disabled.");
+            System.out.println("user initialization for testing is disabled.");
         }
     }
 
@@ -56,17 +56,17 @@ public class UserDataInitializer implements ApplicationRunner {
             // Check if test users already exist (skip if database already has many users)
             long userCount = userRepository.count();
             if (userCount >= 10) { // Assuming you have admin + a few test users already
-                System.out.println("Test users already exist. Skipping initialization.");
+                System.out.println("test users already exist. skipping initialization.");
                 return;
             }
 
-            System.out.println("Initializing 50 test users...");
+            System.out.println("Initializing test users...");
 
             int createdCount = 0;
-            int maxAttempts = 100; // Attempts to handle potential duplicates
+            int maxAttempts = 60; // Reduced attempts since we only need 30 users
             int attempts = 0;
 
-            while (createdCount < 50 && attempts < maxAttempts) {
+            while (createdCount < 30 && attempts < maxAttempts) {
                 attempts++;
 
                 try {
@@ -75,7 +75,6 @@ public class UserDataInitializer implements ApplicationRunner {
                     String email = generateEmail(firstName, lastName, createdCount);
                     String phone = generatePhone();
                     String password = generatePassword();
-                    String roleName = getRandomRole();
 
                     // Check if email or phone already exists
                     if (userRepository.findByEmailAddress(email).isPresent() ||
@@ -92,10 +91,10 @@ public class UserDataInitializer implements ApplicationRunner {
                     user.setPassword(password);
                     user.setDateOfIssue(generateRandomDate());
 
-                    // Set role
-                    Role role = roleService.findByName(roleName)
+                    // Set role to "user" only
+                    Role userRole = roleService.findByName("user")
                             .orElse(roleService.getDefaultUserRole());
-                    user.setRole(role);
+                    user.setRole(userRole);
 
                     // Save user
                     userRepository.save(user);
@@ -110,7 +109,7 @@ public class UserDataInitializer implements ApplicationRunner {
                 }
             }
 
-            System.out.println("Test user initialization completed. Created " + createdCount + " users.");
+            System.out.println("Test user initialization completed. Created " + createdCount + " users with 'user' role.");
 
         } catch (Exception e) {
             System.err.println("Failed to initialize test users: " + e.getMessage());
@@ -131,8 +130,8 @@ public class UserDataInitializer implements ApplicationRunner {
 
         // Create variations to avoid duplicates
         String baseEmail = firstName + "." + lastName;
-        if (userNumber > 25) {
-            baseEmail = firstName + lastName + (userNumber - 25);
+        if (userNumber > 15) { // Adjusted for 30 users instead of 50
+            baseEmail = firstName + lastName + (userNumber - 15);
         }
 
         return baseEmail + "@" + domain;
@@ -156,14 +155,6 @@ public class UserDataInitializer implements ApplicationRunner {
                 "welcome123", "test12345", "demo12345", "sample123", "default123"
         };
         return passwords[random.nextInt(passwords.length)];
-    }
-
-    private String getRandomRole() {
-        // 60% users, 30% managers, 10% chiefs
-        int rand = random.nextInt(100);
-        if (rand < 60) return "user";
-        else if (rand < 90) return "manager";
-        else return "chief";
     }
 
     private LocalDateTime generateRandomDate() {
