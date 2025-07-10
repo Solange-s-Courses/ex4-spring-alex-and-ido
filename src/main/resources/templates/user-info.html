@@ -271,12 +271,18 @@
     <span>Welcome <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>!</span>
   </div>
   <div class="navbar-right">
-    <!-- Dashboard button (only show on user-info page) -->
+    <!-- Dashboard button -->
     <a th:href="@{/dashboard}" class="nav-btn">Dashboard</a>
+    <!-- Manage Items button (only for managers with assigned responsibility) -->
+    <a th:href="@{/manager/items}" class="nav-btn"
+       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+      Manage Items
+    </a>
     <!-- Chief User List button (only for chief) -->
     <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
     <!-- Admin Page button (only for admin) -->
     <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
+    <!-- User Info button is intentionally removed since they're on this page -->
     <a th:href="@{/logout}" class="logout-btn">Logout</a>
   </div>
 </nav>
