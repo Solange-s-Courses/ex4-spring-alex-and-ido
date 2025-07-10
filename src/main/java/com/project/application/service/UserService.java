@@ -25,6 +25,7 @@ public class UserService {
 
     // Dependency Injections
     private final UserRepository userRepository;
+    private final ItemService itemService;
     private final RoleService roleService;
     private final ResponsibilityService responsibilityService;
     private final UserResponsibilityRepository userResponsibilityRepository;
@@ -177,6 +178,7 @@ public class UserService {
     }
 
     //Delete user by ID (an admin functionality)
+    @Transactional
     public String deleteUser(Long userId) {
         try {
             Optional<User> userOptional = userRepository.findById(userId);
@@ -189,8 +191,33 @@ public class UserService {
                     return "Cannot delete admin users";
                 }
 
+                // Step 1: Handle responsibility assignment if user is a manager
+                Optional<UserResponsibility> userResponsibility =
+                        userResponsibilityRepository.findByUserId(userId);
+
+                if (userResponsibility.isPresent()) {
+                    Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
+
+                    // Remove user's responsibility assignment
+                    userResponsibilityRepository.deleteByUser_UserId(userId);
+
+                    // Check if responsibility has any remaining managers
+                    long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+
+                    // If no managers left, delete the responsibility and its items
+                    if (remainingManagers == 0) {
+                        // Delete all items for this responsibility first
+                        itemService.deleteAllItemsByResponsibilityId(responsibilityId);
+
+                        // Then delete the responsibility
+                        responsibilityService.deleteResponsibility(responsibilityId);
+                    }
+                }
+
+                // Step 2: Now safely delete the user
                 userRepository.deleteById(userId);
                 return "success";
+
             } else {
                 return "User not found";
             }
@@ -402,8 +429,12 @@ public class UserService {
             // Check if responsibility has any remaining managers
             long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
 
-            // If no managers left, delete the responsibility
+            // If no managers left, delete the responsibility and its items
             if (remainingManagers == 0) {
+                // Delete all items for this responsibility first
+                itemService.deleteAllItemsByResponsibilityId(responsibilityId);
+
+                // Then delete the responsibility
                 responsibilityService.deleteResponsibility(responsibilityId);
             }
 

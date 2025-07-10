@@ -331,9 +331,6 @@
             <span class="close" onclick="closeAddItemModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <!-- Modal Error Display -->
-            <div id="addItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
-
             <form id="addItemForm" th:action="@{/manager/items/add}" method="post">
                 <div class="form-group">
                     <label for="addItemName">Item Name:</label>
@@ -348,6 +345,8 @@
                         <option value="Maintenance">Maintenance</option>
                     </select>
                 </div>
+                <!-- Modal Error Display -->
+                <div id="addItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
             </form>
         </div>
         <div class="modal-footer">
@@ -365,9 +364,6 @@
             <span class="close" onclick="closeEditItemModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <!-- Modal Error Display -->
-            <div id="editItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
-
             <form id="editItemForm" th:action="@{/manager/items/update}" method="post">
                 <input type="hidden" id="editItemId" name="itemId">
                 <div class="form-group">
@@ -383,6 +379,8 @@
                         <option value="Maintenance">Maintenance</option>
                     </select>
                 </div>
+                <!-- Modal Error Display -->
+                <div id="editItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
             </form>
         </div>
         <div class="modal-footer">
