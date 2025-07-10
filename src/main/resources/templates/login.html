@@ -5,6 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Event Management System</title>
   <link th:href="@{/css/auth-styles.css}" rel="stylesheet">
+  <style>
+    /* Password toggle specific styles */
+    .password-field-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #718096;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 8px;
+      transition: color 0.3s ease;
+      z-index: 10;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .password-toggle:hover {
+      color: #0891b2;
+    }
+
+    .password-toggle:focus {
+      outline: 2px solid #0891b2;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* Adjust password input to make room for toggle */
+    .form-input.password-input {
+      padding-right: 50px;
+    }
+  </style>
 </head>
 <body>
 <div class="auth-container">
@@ -33,15 +72,20 @@
 
     <div class="form-group">
       <label for="password" class="form-label">Password</label>
-      <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-input"
-              placeholder="Enter your password"
-              required
-              autocomplete="current-password"
-      >
+      <div class="password-field-container">
+        <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-input password-input"
+                placeholder="Enter your password"
+                required
+                autocomplete="current-password"
+        >
+        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+          SHOW
+        </button>
+      </div>
     </div>
 
     <button type="submit" class="auth-button" id="loginBtn">
@@ -56,6 +100,21 @@
 </div>
 
 <script>
+  // Password toggle functionality
+  const passwordInput = document.getElementById('password');
+  const passwordToggle = document.getElementById('passwordToggle');
+
+  passwordToggle.addEventListener('click', function() {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+
+    // Update text
+    this.textContent = type === 'password' ? 'SHOW' : 'HIDE';
+
+    // Update aria-label for accessibility
+    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+  });
+
   // Add loading state to button on form submission
   document.getElementById('loginForm').addEventListener('submit', function() {
     const button = document.getElementById('loginBtn');
