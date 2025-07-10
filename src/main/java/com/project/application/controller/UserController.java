@@ -103,9 +103,17 @@ public class UserController {
             session.setAttribute("userLastName", user.getLastName());
             session.setAttribute("userPhone", user.getPhoneNumber());
 
-            // NEW: Store role information in session
+            // Store role information in session
             session.setAttribute("userRole", user.getRole());
             session.setAttribute("userRoleName", user.getRoleName());
+
+            // Store responsibility name in session for managers
+            if ("manager".equals(user.getRoleName())) {
+                String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
+                session.setAttribute("userResponsibilityName", responsibilityName);
+            } else {
+                session.setAttribute("userResponsibilityName", null);
+            }
 
             return "redirect:/dashboard";
         } else {
