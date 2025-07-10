@@ -225,7 +225,7 @@
             color: #856404;
         }
 
-        .status-maintenance {
+        .status-unavailable {
             background-color: #f8d7da;
             color: #721c24;
         }
@@ -291,7 +291,7 @@
                     <td>
                             <span class="status-badge"
                                   th:classappend="${item.status == 'Available' ? 'status-available' :
-                                                  (item.status == 'In Use' ? 'status-in-use' : 'status-maintenance')}"
+                                                    (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
                                   th:text="${item.status}">Status</span>
                     </td>
                     <td>
@@ -342,7 +342,7 @@
                     <select id="addItemStatus" name="status" class="form-input" required>
                         <option value="Available">Available</option>
                         <option value="In Use">In Use</option>
-                        <option value="Maintenance">Maintenance</option>
+                        <option value="Unavailable">Unavailable</option>
                     </select>
                 </div>
                 <!-- Modal Error Display -->
@@ -376,7 +376,7 @@
                     <select id="editItemStatus" name="status" class="form-input" required>
                         <option value="Available">Available</option>
                         <option value="In Use">In Use</option>
-                        <option value="Maintenance">Maintenance</option>
+                        <option value="Unavailable">Unavailable</option>
                     </select>
                 </div>
                 <!-- Modal Error Display -->
