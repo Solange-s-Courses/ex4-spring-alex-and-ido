@@ -21,7 +21,7 @@ public class Item {
     @Column(name = "item_name", nullable = false, length = 32)
     @NotBlank(message = "Item name is required")
     @Size(max = 32, message = "Item name cannot exceed 32 characters")
-    @Pattern(regexp = "^[A-Za-z ]+$", message = "Item name can only contain letters and spaces")
+    @Pattern(regexp = "^[A-Za-z0-9 ]+$", message = "Item name can only contain letters, numbers, and spaces")
     private String itemName;
 
     @Column(name = "status", nullable = false, length = 20)

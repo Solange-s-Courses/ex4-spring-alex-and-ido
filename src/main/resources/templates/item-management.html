@@ -260,7 +260,6 @@
 <div class="main-content">
     <div class="content-card">
         <h1>Item Management</h1>
-        <p class="text-muted">Manage items for responsibility: <strong th:text="${responsibility.responsibilityName}"></strong></p>
 
         <!-- Alert Messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
@@ -268,7 +267,7 @@
 
         <!-- Items Section -->
         <div class="items-header">
-            <h2 class="items-title">Items List</h2>
+            <h2 class="items-title"><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong>'s Items List</h2>
             <button class="add-item-btn" onclick="showAddItemModal()">Add New Item</button>
         </div>
 
@@ -319,8 +318,7 @@
 
         <!-- No Items Message -->
         <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
-            <p>No items found for this responsibility.</p>
-            <p>Click "Add New Item" to get started!</p>
+            <p>this responsibility list is empty.</p>
         </div>
     </div>
 </div>
@@ -333,17 +331,18 @@
             <span class="close" onclick="closeAddItemModal()">&times;</span>
         </div>
         <div class="modal-body">
+            <!-- Modal Error Display -->
+            <div id="addItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
+
             <form id="addItemForm" th:action="@{/manager/items/add}" method="post">
                 <div class="form-group">
                     <label for="addItemName">Item Name:</label>
                     <input type="text" id="addItemName" name="itemName"
-                           class="form-input" maxlength="32" pattern="[A-Za-z ]+" required>
-                    <div class="field-help">Only letters and spaces allowed, max 32 characters</div>
+                           class="form-input" maxlength="32" required>
                 </div>
                 <div class="form-group">
                     <label for="addItemStatus">Status:</label>
                     <select id="addItemStatus" name="status" class="form-input" required>
-                        <option value="">Select status</option>
                         <option value="Available">Available</option>
                         <option value="In Use">In Use</option>
                         <option value="Maintenance">Maintenance</option>
@@ -366,13 +365,15 @@
             <span class="close" onclick="closeEditItemModal()">&times;</span>
         </div>
         <div class="modal-body">
+            <!-- Modal Error Display -->
+            <div id="editItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
+
             <form id="editItemForm" th:action="@{/manager/items/update}" method="post">
                 <input type="hidden" id="editItemId" name="itemId">
                 <div class="form-group">
                     <label for="editItemName">Item Name:</label>
                     <input type="text" id="editItemName" name="itemName"
-                           class="form-input" maxlength="32" pattern="[A-Za-z ]+" required>
-                    <div class="field-help">Only letters and spaces allowed, max 32 characters</div>
+                           class="form-input" maxlength="32" required>
                 </div>
                 <div class="form-group">
                     <label for="editItemStatus">Status:</label>
@@ -414,8 +415,43 @@
 <!-- Scripts -->
 <script th:src="@{/js/admin-scripts.js}"></script>
 <script>
+    // Validation function
+    function validateItemName(itemName) {
+        if (!itemName || itemName.trim().length === 0) {
+            return "Item name is required";
+        }
+
+        itemName = itemName.trim();
+
+        if (itemName.length > 32) {
+            return "Item name cannot exceed 32 characters";
+        }
+
+        // Allow letters, numbers, and spaces
+        const pattern = /^[A-Za-z0-9 ]+$/;
+        if (!pattern.test(itemName)) {
+            return "Item name can only contain letters, numbers, and spaces";
+        }
+
+        return null; // No error
+    }
+
+    // Show error in modal
+    function showModalError(modalType, message) {
+        const errorDiv = document.getElementById(modalType + 'ItemError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    // Hide error in modal
+    function hideModalError(modalType) {
+        const errorDiv = document.getElementById(modalType + 'ItemError');
+        errorDiv.style.display = 'none';
+    }
+
     // Add Item Modal Functions
     function showAddItemModal() {
+        hideModalError('add');
         document.getElementById('addItemModal').style.display = 'block';
         document.getElementById('addItemName').focus();
     }
@@ -423,27 +459,36 @@
     function closeAddItemModal() {
         document.getElementById('addItemModal').style.display = 'none';
         document.getElementById('addItemForm').reset();
+        hideModalError('add');
     }
 
     function confirmAddItem() {
-        const itemName = document.getElementById('addItemName').value.trim();
+        const itemName = document.getElementById('addItemName').value;
         const status = document.getElementById('addItemStatus').value;
 
-        if (!itemName) {
-            alert('Please enter an item name!');
+        // Validate item name
+        const nameError = validateItemName(itemName);
+        if (nameError) {
+            showModalError('add', nameError);
+            document.getElementById('addItemName').focus();
             return;
         }
 
+        // Validate status
         if (!status) {
-            alert('Please select a status!');
+            showModalError('add', 'Please select a status');
+            document.getElementById('addItemStatus').focus();
             return;
         }
 
+        // Hide error and submit
+        hideModalError('add');
         document.getElementById('addItemForm').submit();
     }
 
     // Edit Item Modal Functions
     function showEditItemModal(itemId, itemName, itemStatus) {
+        hideModalError('edit');
         document.getElementById('editItemId').value = itemId;
         document.getElementById('editItemName').value = itemName;
         document.getElementById('editItemStatus').value = itemStatus;
@@ -454,22 +499,30 @@
     function closeEditItemModal() {
         document.getElementById('editItemModal').style.display = 'none';
         document.getElementById('editItemForm').reset();
+        hideModalError('edit');
     }
 
     function confirmEditItem() {
-        const itemName = document.getElementById('editItemName').value.trim();
+        const itemName = document.getElementById('editItemName').value;
         const status = document.getElementById('editItemStatus').value;
 
-        if (!itemName) {
-            alert('Please enter an item name!');
+        // Validate item name
+        const nameError = validateItemName(itemName);
+        if (nameError) {
+            showModalError('edit', nameError);
+            document.getElementById('editItemName').focus();
             return;
         }
 
+        // Validate status
         if (!status) {
-            alert('Please select a status!');
+            showModalError('edit', 'Please select a status');
+            document.getElementById('editItemStatus').focus();
             return;
         }
 
+        // Hide error and submit
+        hideModalError('edit');
         document.getElementById('editItemForm').submit();
     }
 

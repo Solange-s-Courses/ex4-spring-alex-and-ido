@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ItemService {
 
-    private static final String ITEM_NAME_PATTERN = "^[A-Za-z ]{1,32}$";
+    private static final String ITEM_NAME_PATTERN = "^[A-Za-z0-9 ]{1,32}$";
 
     private final ItemRepository itemRepository;
     private final ResponsibilityService responsibilityService;
@@ -47,7 +47,7 @@ public class ItemService {
 
             // Validate item name pattern
             if (!itemName.matches(ITEM_NAME_PATTERN)) {
-                return "Item name must contain only letters and spaces, max 32 characters";
+                return "Item name must contain only letters, numbers, and spaces, max 32 characters";
             }
 
             // Find responsibility
