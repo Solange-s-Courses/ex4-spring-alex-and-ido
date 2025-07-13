@@ -281,22 +281,23 @@
            th:text="${entry.key.description}">Description here</p>
 
         <div class="managers-label">Managers</div>
-          <div th:if="${entry.value != null and !entry.value.isEmpty()}" class="managers-list">
-            <!-- Show first 2 managers -->
-            <div th:each="manager, iterStat : ${entry.value}"
-                 th:if="${iterStat.index < 2}"
-                 class="manager-badge"
-                 th:text="${#strings.capitalize(manager.firstName) + ' ' + #strings.capitalize(manager.lastName)}">Manager Name</div>
-            <!-- Show "+X more" if there are more than 2 managers -->
-            <div th:if="${entry.value.size() > 2}"
-                 class="manager-badge more-managers"
-                 th:text="${'+' + (entry.value.size() - 2) + ' more'}">+1 more</div>
-          </div>
+        <div th:if="${entry.value != null and !entry.value.isEmpty()}" class="managers-list">
+          <!-- Show first 2 managers -->
+          <div th:each="manager, iterStat : ${entry.value}"
+               th:if="${iterStat.index < 2}"
+               class="manager-badge"
+               th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</div>
+          <!-- Show "+X more" if there are more than 2 managers -->
+          <div th:if="${entry.value.size() > 2}"
+               class="manager-badge more-managers"
+               th:text="${'+' + (entry.value.size() - 2) + ' more'}">+1 more</div>
+        </div>
         <div th:if="${entry.value == null or entry.value.isEmpty()}" class="no-managers">
           No managers assigned
         </div>
 
-        <button class="view-btn">View</button>
+        <button class="view-btn"
+                th:onclick="'window.location.href=\'/responsibility/view/' + ${entry.key.responsibilityId} + '\''">View</button>
       </div>
     </div>
 

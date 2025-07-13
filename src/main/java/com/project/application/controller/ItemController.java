@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -244,5 +245,46 @@ public class ItemController {
         }
 
         return "redirect:/manager/items";
+    }
+
+    /**
+     * Display responsibility details with item list for all users
+     */
+    @GetMapping("/responsibility/view/{id}")
+    public String viewResponsibility(@PathVariable Long id,
+                                     HttpSession session,
+                                     Model model) {
+        // Check if user is logged in
+        if (!isUserLoggedIn(session)) {
+            return "redirect:/login";
+        }
+
+        User user = getLoggedInUser(session);
+
+        // Get responsibility details
+        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
+                responsibilityService.findById(id);
+
+        if (!responsibilityOptional.isPresent()) {
+            model.addAttribute("error", "Responsibility not found.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
+        com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
+
+        // Get all items for this responsibility
+        List<Item> items = itemService.getItemsByResponsibilityId(id);
+
+        // Get managers for this responsibility
+        List<com.project.application.entity.User> managers = userService.getResponsibilityManagers(id);
+
+        // Add data to model
+        model.addAttribute("user", user);
+        model.addAttribute("responsibility", responsibility);
+        model.addAttribute("items", items);
+        model.addAttribute("responsibilityManagers", managers);
+
+        return "responsibility-view";
     }
 }

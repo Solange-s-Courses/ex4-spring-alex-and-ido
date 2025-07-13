@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${responsibility.responsibilityName + ' - Event Management System'}">Responsibility - Event Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-left {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: #218838;
+            text-decoration: none;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .responsibility-title {
+            color: #333;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .responsibility-description {
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .items-section {
+            margin-top: 0;
+        }
+
+        .managers-section {
+            margin-top: 2rem;
+        }
+
+        .managers-title {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .managers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: flex-start;
+        }
+
+        .manager-badge {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #555;
+            margin: 3px;
+        }
+
+        .no-managers {
+            text-align: left;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .items-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .items-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .item-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-in-use {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-items {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .responsibility-title {
+                font-size: 1.5rem;
+            }
+
+            .responsibility-description {
+                font-size: 1rem;
+            }
+
+            .item-entry {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .item-status {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <span>Event Management System</span>
+    </div>
+    <div class="navbar-right">
+        <!-- Dashboard button (specific to responsibility view page) -->
+        <a th:href="@{/dashboard}" class="nav-btn">Dashboard</a>
+        <!-- Manage Items button (only for managers with assigned responsibility) -->
+        <a th:href="@{/manager/items}" class="nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+            Manage Items
+        </a>
+        <!-- Chief User List button (only for chief) -->
+        <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
+        <!-- Admin Page button (only for admin) -->
+        <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
+        <a th:href="@{/user-info}" class="nav-btn">User Info</a>
+        <a th:href="@{/logout}" class="logout-btn">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Responsibility Details Block -->
+    <div class="content-card">
+        <!-- Responsibility Title -->
+        <h1 class="responsibility-title" th:text="${responsibility.responsibilityName}">Responsibility Name</h1>
+
+        <!-- Responsibility Description (if exists) -->
+        <div th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+             class="responsibility-description"
+             th:text="${responsibility.description}">
+            Responsibility description here
+        </div>
+
+        <!-- Managers Section -->
+        <div class="managers-section">
+            <h3 class="managers-title">Managers</h3>
+            <div class="managers-list">
+                <!-- Show managers if available -->
+                <div th:if="${responsibilityManagers != null and !responsibilityManagers.isEmpty()}">
+          <span th:each="manager, iterStat : ${responsibilityManagers}"
+                class="manager-badge"
+                th:text="${#strings.capitalize(manager.firstName) + ' ' + #strings.capitalize(manager.lastName)}">Manager Name</span>
+                </div>
+                <!-- Show no managers message -->
+                <div th:if="${responsibilityManagers == null or responsibilityManagers.isEmpty()}"
+                     class="no-managers">
+                    No managers assigned
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items List Block -->
+    <div class="content-card">
+        <div class="items-section">
+            <h2 class="items-title">Items</h2>
+
+            <!-- Items List -->
+            <div th:if="${items != null and !items.isEmpty()}">
+                <ul class="items-list">
+                    <li th:each="item : ${items}" class="item-entry">
+                        <span class="item-name" th:text="${item.itemName}">Item Name</span>
+                        <span class="item-status"
+                              th:class="'item-status ' + ${item.status == 'Available' ? 'status-available' :
+                            item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
+                              th:text="${item.status}">Status</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- No Items Message -->
+            <div th:if="${items == null or items.isEmpty()}" class="no-items">
+                No items available
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
