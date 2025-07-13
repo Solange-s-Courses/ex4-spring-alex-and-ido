@@ -3,8 +3,13 @@
 <head th:replace="~{fragments/common/head :: head('Admin Dashboard')}"></head>
 
 <body>
+<!-- Include Navbar Styles -->
+<div th:replace="~{fragments/layout :: navbar-styles}"></div>
+
 <!-- Navigation -->
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:with="showDashboardBtn=true, hideAdminPageBtn=true">
+  <div th:replace="~{fragments/layout :: navbar}"></div>
+</div>
 
 <div class="container">
   <h1>Admin Dashboard</h1>
@@ -25,5 +30,8 @@
 
 <!-- Scripts -->
 <div th:replace="~{fragments/layout :: scripts}"></div>
+
+<!-- Include Navbar Scripts -->
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
 </body>
 </html>

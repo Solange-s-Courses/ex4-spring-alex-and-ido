@@ -1,15 +1,286 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- Navbar Fragment -->
+<!-- Comprehensive Navbar Fragment with Hamburger -->
 <nav th:fragment="navbar" class="navbar">
-    <div class="navbar-container">
-        <a class="navbar-brand">Event Management System</a>
-        <div class="navbar-nav">
-            <a th:href="@{/dashboard}" class="nav-link">Back to Dashboard</a>
-        </div>
+    <div class="navbar-left">
+        <span>Welcome <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>!</span>
+    </div>
+
+    <!-- Hamburger Button (mobile only) -->
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Desktop Navigation (hidden on mobile) -->
+    <div class="navbar-right">
+        <!-- Dashboard button (only for responsibility view page and chief user list) -->
+        <a th:href="@{/dashboard}" class="nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
+
+        <!-- Manage Responsibility button (only for managers with assigned responsibility) -->
+        <a th:href="@{/manager/items}" class="nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+            Manage Responsibility
+        </a>
+
+        <!-- Chief User List button (only for chief, hide on user list page) -->
+        <a th:href="@{/chief/user-list}" class="nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
+
+        <!-- Admin Page button (only for admin, hide on admin page) -->
+        <a th:href="@{/admin}" class="nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin' and (hideAdminPageBtn == null or !hideAdminPageBtn)}">Admin Page</a>
+
+        <!-- User Info button (hide only on user-info page) -->
+        <a th:href="@{/user-info}" class="nav-btn" th:if="${hideUserInfoBtn == null or !hideUserInfoBtn}">User Info</a>
+
+        <!-- Logout button -->
+        <a th:href="@{/logout}" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- Mobile Menu (hidden by default) -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Dashboard button (only for responsibility view page and chief user list) -->
+        <a th:href="@{/dashboard}" class="mobile-nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
+
+        <!-- Manage Responsibility button (only for managers with assigned responsibility) -->
+        <a th:href="@{/manager/items}" class="mobile-nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+            Manage Responsibility
+        </a>
+
+        <!-- Chief User List button (only for chief, hide on user list page) -->
+        <a th:href="@{/chief/user-list}" class="mobile-nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
+
+        <!-- Admin Page button (only for admin, hide on admin page) -->
+        <a th:href="@{/admin}" class="mobile-nav-btn"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin' and (hideAdminPageBtn == null or !hideAdminPageBtn)}">Admin Page</a>
+
+        <!-- User Info button (hide only on user-info page) -->
+        <a th:href="@{/user-info}" class="mobile-nav-btn" th:if="${hideUserInfoBtn == null or !hideUserInfoBtn}">User Info</a>
+
+        <!-- Logout button -->
+        <a th:href="@{/logout}" class="mobile-logout-btn">Logout</a>
     </div>
 </nav>
+
+<!-- Navbar Styles Fragment with Hamburger -->
+<div th:fragment="navbar-styles">
+    <style>
+        /* Desktop Navbar Styles */
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .navbar-left {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: #218838;
+            text-decoration: none;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Hamburger Button (hidden on desktop) */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        /* Hamburger Animation */
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        /* Mobile Menu (hidden by default) */
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .mobile-menu.show {
+            max-height: 400px;
+        }
+
+        .mobile-nav-btn, .mobile-logout-btn {
+            display: block;
+            padding: 12px 2rem;
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        .mobile-nav-btn:hover, .mobile-logout-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+            text-decoration: none;
+            color: white;
+        }
+
+        .mobile-logout-btn {
+            background-color: #dc3545;
+            border-bottom: none;
+        }
+
+        .mobile-logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .navbar-left {
+                font-size: 16px;
+            }
+
+            /* Hide desktop menu on mobile */
+            .navbar-right {
+                display: none;
+            }
+
+            /* Show hamburger on mobile */
+            .hamburger {
+                display: flex;
+            }
+
+            /* Show mobile menu on mobile */
+            .mobile-menu {
+                display: block;
+            }
+        }
+
+        /* Prevent body scroll when mobile menu is open */
+        body.mobile-menu-open {
+            overflow: hidden;
+        }
+    </style>
+</div>
+
+<!-- Navbar JavaScript Fragment -->
+<div th:fragment="navbar-scripts">
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const hamburger = document.querySelector('.hamburger');
+
+            // Toggle mobile menu
+            mobileMenu.classList.toggle('show');
+
+            // Toggle hamburger animation
+            hamburger.classList.toggle('active');
+
+            // Prevent body scroll when menu is open (optional)
+            if (mobileMenu.classList.contains('show')) {
+                document.body.classList.add('mobile-menu-open');
+            } else {
+                document.body.classList.remove('mobile-menu-open');
+            }
+        }
+
+        // Close mobile menu when clicking outside (optional)
+        document.addEventListener('click', function(event) {
+            const navbar = document.querySelector('.navbar');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenu && mobileMenu.classList.contains('show') && !navbar.contains(event.target)) {
+                toggleMobileMenu();
+            }
+        });
+
+        // Close mobile menu when window is resized to desktop size
+        window.addEventListener('resize', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const hamburger = document.querySelector('.hamburger');
+
+            if (window.innerWidth > 768 && mobileMenu.classList.contains('show')) {
+                mobileMenu.classList.remove('show');
+                hamburger.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
+            }
+        });
+    </script>
+</div>
 
 <!-- Footer Scripts Fragment -->
 <div th:fragment="scripts">

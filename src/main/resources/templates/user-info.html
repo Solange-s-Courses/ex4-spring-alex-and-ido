@@ -4,68 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Info - Event Management System</title>
+  <!-- Include Navbar Styles -->
+  <div th:replace="~{fragments/layout :: navbar-styles}"></div>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f8f9fa;
-    }
-
-    /* Navbar Styles */
-    .navbar {
-      background-color: #007bff;
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .navbar-left {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .navbar-right {
-      display: flex;
-      align-items: center;
-    }
-
-    .nav-btn {
-      background-color: #28a745;
-      color: white;
-      padding: 8px 16px;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 14px;
-      margin-right: 10px;
-      transition: background-color 0.3s;
-    }
-
-    .nav-btn:hover {
-      background-color: #218838;
-      text-decoration: none;
-      color: white;
-    }
-
-    .logout-btn {
-      background-color: #dc3545;
-      color: white;
-      padding: 8px 16px;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .logout-btn:hover {
-      background-color: #c82333;
-      text-decoration: none;
-      color: white;
     }
 
     /* Main Content */
@@ -263,29 +209,13 @@
       border: 1px solid #f5c6cb;
     }
   </style>
+
 </head>
 <body>
 <!-- Navigation Bar -->
-<nav class="navbar">
-  <div class="navbar-left">
-    <span>Welcome <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>!</span>
-  </div>
-  <div class="navbar-right">
-    <!-- Dashboard button -->
-    <a th:href="@{/dashboard}" class="nav-btn">Dashboard</a>
-    <!-- Manage Items button (only for managers with assigned responsibility) -->
-    <a th:href="@{/manager/items}" class="nav-btn"
-       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
-      Manage Items
-    </a>
-    <!-- Chief User List button (only for chief) -->
-    <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
-    <!-- Admin Page button (only for admin) -->
-    <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
-    <!-- User Info button is intentionally removed since they're on this page -->
-    <a th:href="@{/logout}" class="logout-btn">Logout</a>
-  </div>
-</nav>
+<div th:with="hideUserInfoBtn=true, showDashboardBtn=true">
+  <div th:replace="~{fragments/layout :: navbar}"></div>
+</div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -418,5 +348,8 @@
     }
   }
 </script>
+
+<!-- Include Navbar Scripts -->
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
 </body>
 </html>

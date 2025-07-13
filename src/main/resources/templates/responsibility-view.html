@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${responsibility.responsibilityName + ' - Event Management System'}">Responsibility - Event Management System</title>
+    <div th:replace="fragments/layout :: navbar-styles"></div>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -230,26 +231,9 @@
 </head>
 <body>
 <!-- Navigation Bar -->
-<nav class="navbar">
-    <div class="navbar-left">
-        <span>Event Management System</span>
-    </div>
-    <div class="navbar-right">
-        <!-- Dashboard button (specific to responsibility view page) -->
-        <a th:href="@{/dashboard}" class="nav-btn">Dashboard</a>
-        <!-- Manage Items button (only for managers with assigned responsibility) -->
-        <a th:href="@{/manager/items}" class="nav-btn"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
-            Manage Items
-        </a>
-        <!-- Chief User List button (only for chief) -->
-        <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
-        <!-- Admin Page button (only for admin) -->
-        <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
-        <a th:href="@{/user-info}" class="nav-btn">User Info</a>
-        <a th:href="@{/logout}" class="logout-btn">Logout</a>
-    </div>
-</nav>
+<div th:with="showDashboardBtn=true">
+    <div th:replace="fragments/layout :: navbar"></div>
+</div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -309,5 +293,6 @@
         </div>
     </div>
 </div>
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
 </body>
 </html>
