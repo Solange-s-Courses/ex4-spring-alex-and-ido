@@ -7,6 +7,7 @@ import com.project.application.repository.ResponsibilityRepository;
 import com.project.application.repository.UserResponsibilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +53,7 @@ public class ResponsibilityService {
         responsibilityRepository.deleteById(responsibilityId);
     }
 
-    // NEW METHOD: Get all responsibilities with their assigned managers
+    // Get all responsibilities with their assigned managers
     public Map<Responsibility, List<User>> getAllResponsibilitiesWithManagers() {
         List<Responsibility> responsibilities = responsibilityRepository.findAll();
         Map<Responsibility, List<User>> responsibilityManagerMap = new HashMap<>();
@@ -66,5 +67,27 @@ public class ResponsibilityService {
         }
 
         return responsibilityManagerMap;
+    }
+
+    /**
+     * Update responsibility description
+     */
+    @Transactional
+    public String updateDescription(Long responsibilityId, String description) {
+        try {
+            Optional<Responsibility> responsibilityOptional = findById(responsibilityId);
+            if (!responsibilityOptional.isPresent()) {
+                return "Responsibility not found";
+            }
+
+            Responsibility responsibility = responsibilityOptional.get();
+            responsibility.setDescription(description);
+            responsibilityRepository.save(responsibility);
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to update description: " + e.getMessage();
+        }
     }
 }

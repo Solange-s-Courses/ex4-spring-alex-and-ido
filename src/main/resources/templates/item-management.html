@@ -61,6 +61,47 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Description Section */
+        .description-section {
+            margin-bottom: 2rem;
+        }
+
+        .description-content {
+            margin-bottom: 1rem;
+        }
+
+        .description-text {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            border-radius: 4px;
+            color: #555;
+            font-style: italic;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .no-description {
+            color: #999;
+            font-style: italic;
+        }
+
+        .edit-description-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .edit-description-btn:hover {
+            background-color: #138496;
+        }
+
         /* Items Section Styling */
         .items-header {
             display: flex;
@@ -186,6 +227,29 @@
             background-color: #f8f9fa;
             border-radius: 6px;
         }
+
+        /* Character counter */
+        .char-counter {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .char-counter.warning {
+            color: #856404;
+        }
+
+        .char-counter.danger {
+            color: #721c24;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .description-section {
+                margin-bottom: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -197,15 +261,33 @@
 <!-- Main Content -->
 <div class="main-content">
     <div class="content-card">
-        <h1>Item Management</h1>
+        <h1><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong>'s Management</h1>
 
         <!-- Alert Messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
+        <!-- Description Section -->
+        <div class="description-section">
+            <div class="description-content">
+                <div th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+                     class="description-text"
+                     th:text="${responsibility.description}">
+                    Description text here
+                </div>
+                <div th:if="${responsibility.description == null or #strings.isEmpty(responsibility.description)}"
+                     class="description-text no-description">
+                    No description set for this responsibility
+                </div>
+            </div>
+            <button class="edit-description-btn" onclick="showEditDescriptionModal()">
+                Edit Description
+            </button>
+        </div>
+
         <!-- Items Section -->
         <div class="items-header">
-            <h2 class="items-title"><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong>'s Items List</h2>
+            <h2 class="items-title">Items List</h2>
             <button class="add-item-btn" onclick="showAddItemModal()">Add New Item</button>
         </div>
 
@@ -257,6 +339,36 @@
         <!-- No Items Message -->
         <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
             <p>this responsibility list is empty.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Description Modal -->
+<div id="editDescriptionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Responsibility Description</h3>
+            <span class="close" onclick="closeEditDescriptionModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editDescriptionForm" th:action="@{/manager/items/update-description}" method="post">
+                <div class="form-group">
+                    <label for="descriptionText">Description:</label>
+                    <textarea id="descriptionText" name="description"
+                              class="form-input"
+                              rows="4"
+                              maxlength="200"
+                              placeholder="Enter a description for your responsibility..."
+                              th:text="${responsibility.description}"></textarea>
+                    <div id="charCounter" class="char-counter">0/200 characters</div>
+                </div>
+                <!-- Modal Error Display -->
+                <div id="editDescriptionError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeEditDescriptionModal()">Cancel</button>
+            <button type="button" class="btn btn-assign" onclick="confirmEditDescription()">Update Description</button>
         </div>
     </div>
 </div>
@@ -351,6 +463,55 @@
 <!-- Scripts -->
 <script th:src="@{/js/admin-scripts.js}"></script>
 <script>
+    // Description validation and character counter
+    function updateCharCounter() {
+        const textarea = document.getElementById('descriptionText');
+        const counter = document.getElementById('charCounter');
+        const currentLength = textarea.value.length;
+
+        counter.textContent = currentLength + '/200 characters';
+
+        // Change color based on character count
+        if (currentLength >= 180) {
+            counter.className = 'char-counter danger';
+        } else if (currentLength >= 150) {
+            counter.className = 'char-counter warning';
+        } else {
+            counter.className = 'char-counter';
+        }
+    }
+
+    // Edit Description Modal Functions
+    function showEditDescriptionModal() {
+        hideModalError('editDescription');
+        document.getElementById('editDescriptionModal').style.display = 'block';
+        const textarea = document.getElementById('descriptionText');
+        textarea.focus();
+        updateCharCounter();
+
+        // Add event listener for character counter
+        textarea.addEventListener('input', updateCharCounter);
+    }
+
+    function closeEditDescriptionModal() {
+        document.getElementById('editDescriptionModal').style.display = 'none';
+        hideModalError('editDescription');
+    }
+
+    function confirmEditDescription() {
+        const description = document.getElementById('descriptionText').value;
+
+        // Validate description length
+        if (description.length > 200) {
+            showModalError('editDescription', 'Description cannot exceed 200 characters');
+            return;
+        }
+
+        // Hide error and submit
+        hideModalError('editDescription');
+        document.getElementById('editDescriptionForm').submit();
+    }
+
     // Validation function
     function validateItemName(itemName) {
         if (!itemName || itemName.trim().length === 0) {
@@ -374,20 +535,20 @@
 
     // Show error in modal
     function showModalError(modalType, message) {
-        const errorDiv = document.getElementById(modalType + 'ItemError');
+        const errorDiv = document.getElementById(modalType + 'Error');
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
     }
 
     // Hide error in modal
     function hideModalError(modalType) {
-        const errorDiv = document.getElementById(modalType + 'ItemError');
+        const errorDiv = document.getElementById(modalType + 'Error');
         errorDiv.style.display = 'none';
     }
 
     // Add Item Modal Functions
     function showAddItemModal() {
-        hideModalError('add');
+        hideModalError('addItem');
         document.getElementById('addItemModal').style.display = 'block';
         document.getElementById('addItemName').focus();
     }
@@ -395,7 +556,7 @@
     function closeAddItemModal() {
         document.getElementById('addItemModal').style.display = 'none';
         document.getElementById('addItemForm').reset();
-        hideModalError('add');
+        hideModalError('addItem');
     }
 
     function confirmAddItem() {
@@ -405,26 +566,26 @@
         // Validate item name
         const nameError = validateItemName(itemName);
         if (nameError) {
-            showModalError('add', nameError);
+            showModalError('addItem', nameError);
             document.getElementById('addItemName').focus();
             return;
         }
 
         // Validate status
         if (!status) {
-            showModalError('add', 'Please select a status');
+            showModalError('addItem', 'Please select a status');
             document.getElementById('addItemStatus').focus();
             return;
         }
 
         // Hide error and submit
-        hideModalError('add');
+        hideModalError('addItem');
         document.getElementById('addItemForm').submit();
     }
 
     // Edit Item Modal Functions
     function showEditItemModal(itemId, itemName, itemStatus) {
-        hideModalError('edit');
+        hideModalError('editItem');
         document.getElementById('editItemId').value = itemId;
         document.getElementById('editItemName').value = itemName;
         document.getElementById('editItemStatus').value = itemStatus;
@@ -435,7 +596,7 @@
     function closeEditItemModal() {
         document.getElementById('editItemModal').style.display = 'none';
         document.getElementById('editItemForm').reset();
-        hideModalError('edit');
+        hideModalError('editItem');
     }
 
     function confirmEditItem() {
@@ -445,20 +606,20 @@
         // Validate item name
         const nameError = validateItemName(itemName);
         if (nameError) {
-            showModalError('edit', nameError);
+            showModalError('editItem', nameError);
             document.getElementById('editItemName').focus();
             return;
         }
 
         // Validate status
         if (!status) {
-            showModalError('edit', 'Please select a status');
+            showModalError('editItem', 'Please select a status');
             document.getElementById('editItemStatus').focus();
             return;
         }
 
         // Hide error and submit
-        hideModalError('edit');
+        hideModalError('editItem');
         document.getElementById('editItemForm').submit();
     }
 
@@ -483,6 +644,7 @@
         const addModal = document.getElementById('addItemModal');
         const editModal = document.getElementById('editItemModal');
         const deleteModal = document.getElementById('deleteItemModal');
+        const descriptionModal = document.getElementById('editDescriptionModal');
 
         if (event.target === addModal) {
             closeAddItemModal();
@@ -492,6 +654,9 @@
         }
         if (event.target === deleteModal) {
             closeDeleteItemModal();
+        }
+        if (event.target === descriptionModal) {
+            closeEditDescriptionModal();
         }
     }
 </script>

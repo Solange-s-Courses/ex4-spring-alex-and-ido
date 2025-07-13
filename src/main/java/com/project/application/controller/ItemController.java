@@ -89,6 +89,69 @@ public class ItemController {
     }
 
     /**
+     * Update responsibility description
+     */
+    @PostMapping("/manager/items/update-description")
+    public String updateDescription(@RequestParam String description,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is manager
+        if (!isUserLoggedIn(session)) {
+            return "redirect:/login";
+        }
+
+        User user = getLoggedInUser(session);
+        if (!"manager".equals(user.getRoleName())) {
+            return "error/404";
+        }
+
+        // Get user's responsibility
+        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (responsibilityName == null) {
+            redirectAttributes.addFlashAttribute("error", "You have no responsibility assigned.");
+            return "redirect:/manager/items";
+        }
+
+        // Get responsibility
+        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
+                responsibilityService.findByName(responsibilityName);
+
+        if (!responsibilityOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
+            return "redirect:/manager/items";
+        }
+
+        com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
+
+        // Validate description
+        if (description != null) {
+            description = description.trim();
+
+            if (description.length() > 200) {
+                redirectAttributes.addFlashAttribute("error", "Description cannot exceed 200 characters.");
+                return "redirect:/manager/items";
+            }
+
+            // If description is empty, set to null
+            if (description.isEmpty()) {
+                description = null;
+            }
+        }
+
+        // Update description using service
+        String result = responsibilityService.updateDescription(responsibility.getResponsibilityId(), description);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "Description updated successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/manager/items";
+    }
+
+    /**
      * Add new item
      */
     @PostMapping("/manager/items/add")
