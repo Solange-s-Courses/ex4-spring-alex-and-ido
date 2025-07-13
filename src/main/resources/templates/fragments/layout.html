@@ -19,9 +19,9 @@
         <!-- Dashboard button (only for responsibility view page and chief user list) -->
         <a th:href="@{/dashboard}" class="nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
 
-        <!-- Manage Responsibility button (only for managers with assigned responsibility) -->
+        <!-- Manage Responsibility button (only for managers with assigned responsibility, hide on item management page) -->
         <a th:href="@{/manager/items}" class="nav-btn"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}">
             Manage Responsibility
         </a>
 
@@ -45,9 +45,9 @@
         <!-- Dashboard button (only for responsibility view page and chief user list) -->
         <a th:href="@{/dashboard}" class="mobile-nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
 
-        <!-- Manage Responsibility button (only for managers with assigned responsibility) -->
+        <!-- Manage Responsibility button (only for managers with assigned responsibility, hide on item management page) -->
         <a th:href="@{/manager/items}" class="mobile-nav-btn"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null}">
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}">
             Manage Responsibility
         </a>
 
