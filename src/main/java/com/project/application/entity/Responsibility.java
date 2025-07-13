@@ -20,8 +20,17 @@ public class Responsibility {
     @Column(name = "responsibility_name", nullable = false, length = 100)
     private String responsibilityName;
 
+    @Column(name = "description", length = 500)
+    private String description;
+
     // Constructor for creating responsibility with name only
     public Responsibility(String responsibilityName) {
         this.responsibilityName = responsibilityName;
+    }
+
+    // Constructor for creating responsibility with name and description
+    public Responsibility(String responsibilityName, String description) {
+        this.responsibilityName = responsibilityName;
+        this.description = description;
     }
 }

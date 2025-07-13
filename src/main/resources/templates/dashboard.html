@@ -80,11 +80,17 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
     }
 
     h1 {
       color: #333;
       margin-bottom: 1rem;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 1.5rem;
     }
 
     .user-info {
@@ -96,6 +102,146 @@
 
     .user-info p {
       margin: 0.5rem 0;
+    }
+
+    /* Responsibility Cards Styles */
+    .responsibilities-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 1rem;
+      justify-content: flex-start;
+    }
+
+    .responsibility-card {
+      width: 200px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: fit-content;
+    }
+
+    .responsibility-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.4;
+    }
+
+    .managers-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .managers-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-grow: 1;
+      align-content: flex-start;
+    }
+
+    .manager-badge {
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #555;
+      flex-shrink: 0;
+      width: fit-content;
+    }
+
+    .more-managers {
+      background: #e9ecef;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .no-managers {
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 30px;
+      flex-grow: 1;
+    }
+
+    .view-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 15px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-top: auto;
+    }
+
+    .view-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .no-responsibilities {
+      text-align: center;
+      color: #6c757d;
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h2 {
+        text-align: center;
+      }
+
+      .responsibilities-grid {
+        gap: 1.5rem;
+      }
+
+      .responsibility-card {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+      }
+
+      .main-content {
+        padding: 0 1rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .responsibility-card {
+        padding: 20px;
+      }
+
+      .card-title {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
@@ -113,7 +259,7 @@
     </a>
     <!-- Chief User List button (only for chief) -->
     <a th:href="@{/chief/user-list}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
-    <!-- In the navbar-nav section, add: -->
+    <!-- Admin Page button (only for admin) -->
     <a th:href="@{/admin}" class="nav-btn" th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
     <a th:href="@{/user-info}" class="nav-btn">User Info</a>
     <a th:href="@{/logout}" class="logout-btn">Logout</a>
@@ -122,11 +268,41 @@
 
 <!-- Main Content -->
 <div class="main-content">
+  <!-- Responsibilities Section -->
   <div class="content-card">
-    <h1>Dashboard</h1>
+    <h2>Responsibilities</h2>
 
-    <!-- Future content will go here -->
-    <p>Welcome to the Event Management System dashboard!</p>
+    <div th:if="${responsibilitiesWithManagers != null and !responsibilitiesWithManagers.isEmpty()}" class="responsibilities-grid">
+      <div th:each="entry : ${responsibilitiesWithManagers}" class="responsibility-card">
+        <h2 class="card-title" th:text="${entry.key.responsibilityName}">Responsibility Name</h2>
+
+        <p th:if="${entry.key.description != null and !#strings.isEmpty(entry.key.description)}"
+           class="card-subtitle"
+           th:text="${entry.key.description}">Description here</p>
+
+        <div class="managers-label">Managers</div>
+        <div th:if="${entry.value != null and !entry.value.isEmpty()}" class="managers-list">
+          <!-- Show first 2 managers -->
+          <div th:each="manager, iterStat : ${entry.value}"
+               th:if="${iterStat.index < 2}"
+               class="manager-badge"
+               th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</div>
+          <!-- Show "+X more" if there are more than 2 managers -->
+          <div th:if="${entry.value.size() > 2}"
+               class="manager-badge more-managers"
+               th:text="${'+' + (entry.value.size() - 2) + ' more'}">+1 more</div>
+        </div>
+        <div th:if="${entry.value == null or entry.value.isEmpty()}" class="no-managers">
+          No managers assigned
+        </div>
+
+        <button class="view-btn">View</button>
+      </div>
+    </div>
+
+    <div th:if="${responsibilitiesWithManagers == null or responsibilitiesWithManagers.isEmpty()}" class="no-responsibilities">
+      No responsibilities available at the moment.
+    </div>
   </div>
 </div>
 </body>

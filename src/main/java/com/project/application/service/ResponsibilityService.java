@@ -1,18 +1,25 @@
 package com.project.application.service;
 
 import com.project.application.entity.Responsibility;
+import com.project.application.entity.User;
+import com.project.application.entity.UserResponsibility;
 import com.project.application.repository.ResponsibilityRepository;
+import com.project.application.repository.UserResponsibilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ResponsibilityService {
 
     private final ResponsibilityRepository responsibilityRepository;
+    private final UserResponsibilityRepository userResponsibilityRepository;
 
     // Get all responsibilities
     public List<Responsibility> getAllResponsibilities() {
@@ -43,5 +50,21 @@ public class ResponsibilityService {
     // Delete responsibility
     public void deleteResponsibility(Long responsibilityId) {
         responsibilityRepository.deleteById(responsibilityId);
+    }
+
+    // NEW METHOD: Get all responsibilities with their assigned managers
+    public Map<Responsibility, List<User>> getAllResponsibilitiesWithManagers() {
+        List<Responsibility> responsibilities = responsibilityRepository.findAll();
+        Map<Responsibility, List<User>> responsibilityManagerMap = new HashMap<>();
+
+        for (Responsibility responsibility : responsibilities) {
+            List<UserResponsibility> userResponsibilities = userResponsibilityRepository.findByResponsibilityId(responsibility.getResponsibilityId());
+            List<User> managers = userResponsibilities.stream()
+                    .map(UserResponsibility::getUser)
+                    .collect(Collectors.toList());
+            responsibilityManagerMap.put(responsibility, managers);
+        }
+
+        return responsibilityManagerMap;
     }
 }

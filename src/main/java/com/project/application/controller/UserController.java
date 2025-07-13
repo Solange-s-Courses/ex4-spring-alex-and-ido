@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
-
-
+import com.project.application.service.ResponsibilityService;
+import com.project.application.entity.Responsibility;
+import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final RoleService roleService;
+    private final ResponsibilityService responsibilityService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -128,8 +130,14 @@ public class UserController {
         if (loggedInUser == null) {
             return "redirect:/login";
         }
+
+        // Get all responsibilities with their managers for the dashboard
+        Map<Responsibility, List<User>> responsibilitiesWithManagers = responsibilityService.getAllResponsibilitiesWithManagers();
+
         model.addAttribute("user", loggedInUser);
         model.addAttribute("userRole", session.getAttribute("userRoleName"));
+        model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
+
         return "dashboard";
     }
 
