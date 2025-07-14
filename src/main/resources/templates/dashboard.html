@@ -41,15 +41,213 @@
       margin-bottom: 1.5rem;
     }
 
-    .user-info {
-      background-color: #f8f9fa;
-      padding: 1rem;
+    /* Alert Styles */
+    .alert {
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      border-left: 4px solid;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border-color: #28a745;
+      border-left-color: #28a745;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-color: #dc3545;
+      border-left-color: #dc3545;
+    }
+
+    /* Event Form Error Styles */
+    .event-form-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 0.75rem;
       border-radius: 4px;
+      border: 1px solid #f5c6cb;
+      margin-bottom: 1rem;
+      font-size: 14px;
+    }
+
+    /* Event Creation Button */
+    .create-event-toggle-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
       margin-bottom: 1rem;
     }
 
-    .user-info p {
-      margin: 0.5rem 0;
+    .create-event-toggle-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Event Creation Form Styles */
+    .event-form-container {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #28a745;
+      display: none; /* Hidden by default */
+    }
+
+    .event-form-container.show {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .create-event-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .create-event-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .cancel-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .cancel-btn:hover {
+      transform: translateY(-2px);
+      background: #5a6268;
+    }
+
+    /* Events Grid Styles */
+    .events-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      justify-content: flex-start;
+    }
+
+    .event-card {
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+      border-left: 4px solid #007bff;
+    }
+
+    .event-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .event-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .event-description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .event-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+    }
+
+    .event-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .status-not-active {
+      background-color: #f8f9fa;
+      color: #6c757d;
+    }
+
+    .status-active {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-equipment-return {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .event-date {
+      font-size: 12px;
+      color: #999;
     }
 
     /* Responsibility Cards Styles */
@@ -161,19 +359,33 @@
       font-style: italic;
     }
 
+    .no-events {
+      text-align: center;
+      color: #6c757d;
+      padding: 2rem;
+      font-style: italic;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
+      .alert {
+        margin: 1rem;
+        padding: 0.75rem 1rem;
+      }
+
       h2 {
         text-align: center;
       }
 
-      .responsibilities-grid {
+      .responsibilities-grid,
+      .events-grid {
         gap: 1.5rem;
       }
 
-      .responsibility-card {
+      .responsibility-card,
+      .event-card {
         width: 100%;
-        max-width: 200px;
+        max-width: 300px;
         margin: 0 auto;
       }
 
@@ -190,6 +402,10 @@
       .card-title {
         font-size: 20px;
       }
+
+      .event-card {
+        padding: 1rem;
+      }
     }
   </style>
 </head>
@@ -197,8 +413,88 @@
 <!-- Include Navbar Fragment -->
 <div th:replace="~{fragments/layout :: navbar}"></div>
 
+<!-- Include Alerts Fragment -->
+<div th:replace="~{fragments/common/alerts :: alerts}"></div>
+
 <!-- Main Content -->
 <div class="main-content">
+
+  <!-- Events Section -->
+  <div class="content-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 th:text="${userRole == 'chief'} ? 'My Events' : 'Ongoing Events'" style="margin-bottom: 0;">Events</h2>
+
+      <!-- Create Event Button (Chief Only) -->
+      <button th:if="${userRole == 'chief'}"
+              class="create-event-toggle-btn"
+              id="createEventBtn"
+              onclick="showEventForm()"
+              th:style="${showEventForm} ? 'display: none;' : ''">
+        + Create Event
+      </button>
+    </div>
+
+    <!-- Event Creation Form (Chief Only) - Hidden by default -->
+    <div th:if="${userRole == 'chief'}"
+         class="event-form-container"
+         id="eventFormContainer"
+         th:classappend="${showEventForm} ? 'show' : ''">
+      <h3 style="margin-top: 0; color: #28a745;">Create New Event</h3>
+
+      <!-- Error Message -->
+      <div th:if="${eventFormError}" class="event-form-error" th:text="${eventFormError}">
+        Error message here
+      </div>
+
+      <form th:action="@{/chief/events/create}" method="post">
+        <div class="form-group">
+          <label for="eventName">Event Name *</label>
+          <input type="text" id="eventName" name="eventName" required maxlength="100"
+                 placeholder="Enter event name"
+                 th:value="${eventFormData != null ? eventFormData.eventName : ''}">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" maxlength="500"
+                    placeholder="Enter event description (optional)"
+                    th:text="${eventFormData != null ? eventFormData.description : ''}"></textarea>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="create-event-btn">Create Event</button>
+          <button type="button" class="cancel-btn" onclick="hideEventForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Events Grid -->
+    <div th:if="${events != null and !events.isEmpty()}" class="events-grid">
+      <div th:each="event : ${events}" class="event-card">
+        <div class="event-title" th:text="${event.eventName}">Event Name</div>
+
+        <div th:if="${event.description != null and !#strings.isEmpty(event.description)}"
+             class="event-description"
+             th:text="${event.description}">Event description here</div>
+
+        <div class="event-meta">
+          <span class="event-status"
+                th:class="'event-status status-' + ${event.status.replace(' ', '-').replace('-', '-')}"
+                th:text="${event.displayStatus}">Status</span>
+
+          <span class="event-date"
+                th:text="${#temporals.format(event.dateOfCreation, 'MMM dd, yyyy')}">Date</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events Section - Empty State -->
+    <div th:if="${events == null or events.isEmpty()}" class="no-events">
+      <span th:if="${userRole == 'chief'}">No events created yet. Create your first event above!</span>
+      <span th:if="${userRole != 'chief'}">No ongoing events at the moment.</span>
+    </div>
+  </div>
+
   <!-- Responsibilities Section -->
   <div class="content-card">
     <h2>Responsibilities</h2>
@@ -237,7 +533,34 @@
     </div>
   </div>
 </div>
+
 <!-- Include Navbar Scripts -->
 <div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+<!-- Event Form Toggle Scripts -->
+<script>
+  function showEventForm() {
+    const formContainer = document.getElementById('eventFormContainer');
+    const createBtn = document.getElementById('createEventBtn');
+
+    formContainer.classList.add('show');
+    createBtn.style.display = 'none';
+
+    // Focus on the event name input
+    document.getElementById('eventName').focus();
+  }
+
+  function hideEventForm() {
+    const formContainer = document.getElementById('eventFormContainer');
+    const createBtn = document.getElementById('createEventBtn');
+
+    formContainer.classList.remove('show');
+    createBtn.style.display = 'inline-block';
+
+    // Clear form inputs
+    document.getElementById('eventName').value = '';
+    document.getElementById('description').value = '';
+  }
+</script>
 </body>
 </html>

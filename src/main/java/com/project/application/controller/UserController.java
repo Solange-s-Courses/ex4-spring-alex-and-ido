@@ -4,7 +4,11 @@ import com.project.application.entity.Role;
 import com.project.application.entity.User;
 import com.project.application.service.RoleService;
 import com.project.application.service.UserService;
+import com.project.application.service.EventService;
+import com.project.application.entity.Event;
+
 import jakarta.servlet.http.HttpSession;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +33,7 @@ public class UserController {
     private final UserService userService;
     private final RoleService roleService;
     private final ResponsibilityService responsibilityService;
+    private final EventService eventService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -134,9 +139,20 @@ public class UserController {
         // Get all responsibilities with their managers for the dashboard
         Map<Responsibility, List<User>> responsibilitiesWithManagers = responsibilityService.getAllResponsibilitiesWithManagers();
 
+        // Get events based on user role
+        List<Event> events;
+        if ("chief".equals(loggedInUser.getRoleName())) {
+            // Chiefs see all events they created
+            events = eventService.getAllEvents();
+        } else {
+            // Other users see only ongoing events
+            events = eventService.getOngoingEvents();
+        }
+
         model.addAttribute("user", loggedInUser);
         model.addAttribute("userRole", session.getAttribute("userRoleName"));
         model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
+        model.addAttribute("events", events);
 
         return "dashboard";
     }
@@ -294,6 +310,73 @@ public class UserController {
         }
 
         return "redirect:/chief/user-list";
+    }
+
+    /**
+     * Create new event (Chief only)
+     */
+    @PostMapping("/chief/events/create")
+    public String createEvent(@RequestParam String eventName,
+                              @RequestParam(required = false) String description,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes,
+                              Model model) {
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            return "error/404";
+        }
+
+        // Create event using service
+        String result = eventService.createEvent(eventName, description);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "Event created successfully!");
+            return "redirect:/dashboard";
+        } else {
+            // Error occurred - reload dashboard with form data and error message
+
+            // Get all responsibilities with their managers for the dashboard
+            Map<Responsibility, List<User>> responsibilitiesWithManagers = responsibilityService.getAllResponsibilitiesWithManagers();
+
+            // Get all events for chief
+            List<Event> events = eventService.getAllEvents();
+
+            // Add all necessary data to model
+            model.addAttribute("user", user);
+            model.addAttribute("userRole", user.getRoleName());
+            model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
+            model.addAttribute("events", events);
+
+            // Add form data to preserve user input
+            model.addAttribute("eventFormData", new EventFormData(eventName, description));
+
+            // Add error message for the form
+            model.addAttribute("eventFormError", result);
+
+            // Add flag to show the form
+            model.addAttribute("showEventForm", true);
+
+            return "dashboard";
+        }
+    }
+
+    // Helper class for form data
+    @Getter
+    public static class EventFormData {
+        private final String eventName;
+        private final String description;
+
+        public EventFormData(String eventName, String description) {
+            this.eventName = eventName;
+            this.description = description;
+        }
+
     }
 
     // Admin Routes
