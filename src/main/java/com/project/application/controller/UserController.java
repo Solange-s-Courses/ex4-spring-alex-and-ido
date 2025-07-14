@@ -129,6 +129,9 @@ public class UserController {
         }
     }
 
+    /**
+     * Updated dashboard method to include events
+     */
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User loggedInUser = getLoggedInUser(session);
@@ -377,6 +380,36 @@ public class UserController {
             this.description = description;
         }
 
+    }
+
+    /**
+     * Delete event (Chief only, not-active events only)
+     */
+    @PostMapping("/chief/events/delete")
+    public String deleteEvent(@RequestParam Long eventId,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            return "error/404";
+        }
+
+        // Delete event using service
+        String result = eventService.deleteEvent(eventId);
+
+        if ("success".equals(result)) {
+            redirectAttributes.addFlashAttribute("success", "Event deleted successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        return "redirect:/dashboard";
     }
 
     // Admin Routes

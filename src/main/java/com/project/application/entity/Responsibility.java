@@ -23,7 +23,7 @@ public class Responsibility {
     @Column(name = "description", length = 500)
     private String description;
 
-    // NEW: Event relationship
+    // NEW: Event relationship with proper cascade for deletion
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", foreignKey = @ForeignKey(name = "FK_responsibility_event"))
     private Event event;

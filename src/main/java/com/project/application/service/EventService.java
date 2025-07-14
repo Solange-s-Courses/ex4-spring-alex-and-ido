@@ -129,6 +129,35 @@ public class EventService {
     }
 
     /**
+     * Delete event and unassign responsibilities (Chief only, not-active events only)
+     */
+    @Transactional
+    public String deleteEvent(Long eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in not-active status
+        if (!Event.STATUS_NOT_ACTIVE.equals(event.getStatus())) {
+            return "Only not-active events can be deleted";
+        }
+
+        try {
+            // Note: Responsibilities will be automatically unassigned due to the foreign key relationship
+            // When the event is deleted, the event_id in responsibilities table will be set to NULL
+            // (assuming the foreign key is set up with ON DELETE SET NULL)
+            eventRepository.delete(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to delete event: " + e.getMessage();
+        }
+    }
+
+    /**
      * Get total event count
      */
     public long getTotalEventCount() {

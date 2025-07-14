@@ -176,6 +176,110 @@
       background: #5a6268;
     }
 
+    /* Event Card Delete Button */
+    .event-delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .event-delete-btn:hover {
+      background: #c82333;
+      transform: scale(1.1);
+    }
+
+    /* Delete Confirmation Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal-title {
+      color: #dc3545;
+      margin-bottom: 1rem;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .modal-message {
+      color: #333;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .modal-btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    .modal-btn-delete:hover {
+      background: #c82333;
+    }
+
+    .modal-btn-cancel {
+      background: #6c757d;
+      color: white;
+    }
+
+    .modal-btn-cancel:hover {
+      background: #5a6268;
+    }
+
     /* Events Grid Styles */
     .events-grid {
       display: flex;
@@ -193,6 +297,7 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
       transition: transform 0.3s ease;
       border-left: 4px solid #007bff;
+      position: relative; /* Added for delete button positioning */
     }
 
     .event-card:hover {
@@ -471,6 +576,16 @@
     <!-- Events Grid -->
     <div th:if="${events != null and !events.isEmpty()}" class="events-grid">
       <div th:each="event : ${events}" class="event-card">
+
+        <!-- Delete Button (Chief only, not-active events only) -->
+        <button th:if="${userRole == 'chief' and event.status == 'not-active'}"
+                class="event-delete-btn"
+                th:data-event-id="${event.eventId}"
+                th:data-event-name="${event.eventName}"
+                onclick="showDeleteModalFromData(this)">
+          ×
+        </button>
+
         <div class="event-title" th:text="${event.eventName}">Event Name</div>
 
         <div th:if="${event.description != null and !#strings.isEmpty(event.description)}"
@@ -534,11 +649,33 @@
   </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-content">
+    <h3 class="modal-title">Delete Event</h3>
+    <p class="modal-message">
+      Are you sure you want to delete the event "<span id="eventNameToDelete"></span>"?
+      <br><br>
+      This action cannot be undone. Any responsibilities assigned to this event will be unassigned.
+    </p>
+    <div class="modal-buttons">
+      <button class="modal-btn modal-btn-delete" onclick="confirmDeleteEvent()">Delete</button>
+      <button class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for delete submission -->
+<form id="deleteEventForm" th:action="@{/chief/events/delete}" method="post" style="display: none;">
+  <input type="hidden" id="eventIdToDelete" name="eventId">
+</form>
+
 <!-- Include Navbar Scripts -->
 <div th:replace="~{fragments/layout :: navbar-scripts}"></div>
 
 <!-- Event Form Toggle Scripts -->
 <script>
+  // Event form toggle functions
   function showEventForm() {
     const formContainer = document.getElementById('eventFormContainer');
     const createBtn = document.getElementById('createEventBtn');
@@ -561,6 +698,40 @@
     document.getElementById('eventName').value = '';
     document.getElementById('description').value = '';
   }
+
+  // Delete modal functions
+  let eventIdToDelete = null;
+
+  function showDeleteModalFromData(button) {
+    const eventId = button.getAttribute('data-event-id');
+    const eventName = button.getAttribute('data-event-name');
+    showDeleteModal(eventId, eventName);
+  }
+
+  function showDeleteModal(eventId, eventName) {
+    eventIdToDelete = eventId;
+    document.getElementById('eventNameToDelete').textContent = eventName;
+    document.getElementById('deleteModal').classList.add('show');
+  }
+
+  function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+    eventIdToDelete = null;
+  }
+
+  function confirmDeleteEvent() {
+    if (eventIdToDelete) {
+      document.getElementById('eventIdToDelete').value = eventIdToDelete;
+      document.getElementById('deleteEventForm').submit();
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      hideDeleteModal();
+    }
+  });
 </script>
 </body>
 </html>
