@@ -23,11 +23,6 @@ public class Responsibility {
     @Column(name = "description", length = 500)
     private String description;
 
-    // NEW: Event relationship with proper cascade for deletion
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", foreignKey = @ForeignKey(name = "FK_responsibility_event"))
-    private Event event;
-
     // Constructor for creating responsibility with name only
     public Responsibility(String responsibilityName) {
         this.responsibilityName = responsibilityName;
@@ -37,22 +32,5 @@ public class Responsibility {
     public Responsibility(String responsibilityName, String description) {
         this.responsibilityName = responsibilityName;
         this.description = description;
-    }
-
-    // Constructor for creating responsibility with name, description, and event
-    public Responsibility(String responsibilityName, String description, Event event) {
-        this.responsibilityName = responsibilityName;
-        this.description = description;
-        this.event = event;
-    }
-
-    // Convenience method to get event name
-    public String getEventName() {
-        return event != null ? event.getEventName() : null;
-    }
-
-    // Convenience method to check if responsibility is assigned to an event
-    public boolean hasEvent() {
-        return event != null;
     }
 }

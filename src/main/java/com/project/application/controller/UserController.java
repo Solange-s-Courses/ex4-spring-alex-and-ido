@@ -153,7 +153,6 @@ public class UserController {
         return "dashboard";
     }
 
-
     @GetMapping("/user-info")
     public String userInfo(HttpSession session, Model model) {
         User loggedInUser = getLoggedInUser(session);
@@ -252,7 +251,6 @@ public class UserController {
         return "chief-user-list";
     }
 
-    // Add this method for assigning responsibility
     @PostMapping("/chief/assign-responsibility")
     public String assignResponsibility(@RequestParam Long userId,
                                        @RequestParam String responsibilityName,
@@ -281,7 +279,6 @@ public class UserController {
         return "redirect:/chief/user-list";
     }
 
-    // Add this method for removing responsibility
     @PostMapping("/chief/remove-responsibility")
     public String removeResponsibility(@RequestParam Long userId,
                                        HttpSession session,
@@ -373,7 +370,6 @@ public class UserController {
             this.eventName = eventName;
             this.description = description;
         }
-
     }
 
     /**
@@ -468,7 +464,7 @@ public class UserController {
     }
 
     /**
-     * Get unassigned responsibilities for event assignment (AJAX endpoint)
+     * Get unassigned responsibilities for event assignment (AJAX endpoint) - UPDATED
      */
     @GetMapping("/chief/events/{eventId}/available-responsibilities")
     @ResponseBody
@@ -480,8 +476,8 @@ public class UserController {
             return new ArrayList<>();
         }
 
-        // Get unassigned responsibilities
-        List<Responsibility> unassignedResponsibilities = eventService.getUnassignedResponsibilities();
+        // Get responsibilities not assigned to THIS specific event
+        List<Responsibility> unassignedResponsibilities = eventService.getUnassignedResponsibilities(eventId);
 
         // Convert to simplified format for frontend
         List<Map<String, Object>> responsibilityList = new ArrayList<>();

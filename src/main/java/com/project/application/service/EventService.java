@@ -4,6 +4,9 @@ import com.project.application.entity.Event;
 import com.project.application.repository.EventRepository;
 import com.project.application.entity.Responsibility;
 import com.project.application.repository.ResponsibilityRepository;
+import com.project.application.entity.EventResponsibility;
+import com.project.application.repository.EventResponsibilityRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final ResponsibilityRepository responsibilityRepository;
+    private final EventResponsibilityRepository eventResponsibilityRepository;
 
     /**
      * Create a new event
@@ -150,9 +154,8 @@ public class EventService {
         }
 
         try {
-            // Note: Responsibilities will be automatically unassigned due to the foreign key relationship
-            // When the event is deleted, the event_id in responsibilities table will be set to NULL
-            // (assuming the foreign key is set up with ON DELETE SET NULL)
+            // With junction table, the EventResponsibility records will be automatically deleted
+            // due to foreign key CASCADE constraints when the event is deleted
             eventRepository.delete(event);
             return "success";
         } catch (Exception e) {
@@ -161,7 +164,7 @@ public class EventService {
     }
 
     /**
-     * Add responsibility to event
+     * Add responsibility to event (UPDATED - allows same responsibility in multiple events)
      */
     @Transactional
     public String addResponsibilityToEvent(Long eventId, Long responsibilityId) {
@@ -177,18 +180,17 @@ public class EventService {
             return "Responsibility not found";
         }
 
-        Event event = eventOptional.get();
-        Responsibility responsibility = responsibilityOptional.get();
-
-        // Check if responsibility is already assigned to another event
-        if (responsibility.getEvent() != null) {
-            return "Responsibility is already assigned to another event";
+        // Check if responsibility is already assigned to THIS specific event
+        if (eventResponsibilityRepository.existsByEventEventIdAndResponsibilityResponsibilityId(eventId, responsibilityId)) {
+            return "Responsibility is already assigned to this event";
         }
 
         try {
-            // Assign responsibility to event
-            responsibility.setEvent(event);
-            responsibilityRepository.save(responsibility);
+            // Create new assignment
+            Event event = eventOptional.get();
+            Responsibility responsibility = responsibilityOptional.get();
+            EventResponsibility eventResponsibility = new EventResponsibility(event, responsibility);
+            eventResponsibilityRepository.save(eventResponsibility);
             return "success";
         } catch (Exception e) {
             return "Failed to add responsibility to event: " + e.getMessage();
@@ -196,27 +198,18 @@ public class EventService {
     }
 
     /**
-     * Remove responsibility from event
+     * Remove responsibility from event (UPDATED)
      */
     @Transactional
     public String removeResponsibilityFromEvent(Long eventId, Long responsibilityId) {
-        // Find responsibility
-        Optional<Responsibility> responsibilityOptional = responsibilityRepository.findById(responsibilityId);
-        if (!responsibilityOptional.isPresent()) {
-            return "Responsibility not found";
-        }
-
-        Responsibility responsibility = responsibilityOptional.get();
-
-        // Check if responsibility belongs to the specified event
-        if (responsibility.getEvent() == null || !responsibility.getEvent().getEventId().equals(eventId)) {
+        // Check if assignment exists
+        if (!eventResponsibilityRepository.existsByEventEventIdAndResponsibilityResponsibilityId(eventId, responsibilityId)) {
             return "Responsibility is not assigned to this event";
         }
 
         try {
-            // Remove responsibility from event
-            responsibility.setEvent(null);
-            responsibilityRepository.save(responsibility);
+            // Remove assignment
+            eventResponsibilityRepository.deleteByEventEventIdAndResponsibilityResponsibilityId(eventId, responsibilityId);
             return "success";
         } catch (Exception e) {
             return "Failed to remove responsibility from event: " + e.getMessage();
@@ -224,17 +217,17 @@ public class EventService {
     }
 
     /**
-     * Get responsibilities assigned to a specific event
+     * Get responsibilities assigned to a specific event (UPDATED)
      */
     public List<Responsibility> getEventResponsibilities(Long eventId) {
-        return responsibilityRepository.findByEventEventId(eventId);
+        return eventResponsibilityRepository.findResponsibilitiesByEventId(eventId);
     }
 
     /**
-     * Get responsibilities not assigned to any event
+     * Get responsibilities not assigned to a specific event (UPDATED)
      */
-    public List<Responsibility> getUnassignedResponsibilities() {
-        return responsibilityRepository.findByEventIsNull();
+    public List<Responsibility> getUnassignedResponsibilities(Long eventId) {
+        return eventResponsibilityRepository.findResponsibilitiesNotAssignedToEvent(eventId);
     }
 
     /**
