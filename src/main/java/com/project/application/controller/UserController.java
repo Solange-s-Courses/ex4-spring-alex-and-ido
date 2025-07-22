@@ -18,9 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import com.project.application.service.ResponsibilityService;
 import com.project.application.entity.Responsibility;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -408,7 +407,7 @@ public class UserController {
     }
 
     /**
-     * Display event details page for authorized users
+     * Display event details page for authorized users (UPDATED)
      */
     @GetMapping("/event/view/{eventId}")
     public String viewEvent(@PathVariable Long eventId,
@@ -450,12 +449,173 @@ public class UserController {
             return "error/404";
         }
 
+        // Get event responsibilities with their managers
+        List<Responsibility> eventResponsibilities = eventService.getEventResponsibilities(eventId);
+        Map<Responsibility, List<User>> responsibilitiesWithManagers = new HashMap<>();
+
+        for (Responsibility responsibility : eventResponsibilities) {
+            List<User> managers = userService.getResponsibilityManagers(responsibility.getResponsibilityId());
+            responsibilitiesWithManagers.put(responsibility, managers);
+        }
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("event", event);
         model.addAttribute("userRole", userRole);
+        model.addAttribute("eventResponsibilities", responsibilitiesWithManagers);
 
         return "event-view";
+    }
+
+    /**
+     * Get unassigned responsibilities for event assignment (AJAX endpoint)
+     */
+    @GetMapping("/chief/events/{eventId}/available-responsibilities")
+    @ResponseBody
+    public List<Map<String, Object>> getAvailableResponsibilities(@PathVariable Long eventId,
+                                                                  HttpSession session) {
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null || !"chief".equals(user.getRoleName())) {
+            return new ArrayList<>();
+        }
+
+        // Get unassigned responsibilities
+        List<Responsibility> unassignedResponsibilities = eventService.getUnassignedResponsibilities();
+
+        // Convert to simplified format for frontend
+        List<Map<String, Object>> responsibilityList = new ArrayList<>();
+        for (Responsibility responsibility : unassignedResponsibilities) {
+            Map<String, Object> respMap = new HashMap<>();
+            respMap.put("id", responsibility.getResponsibilityId());
+            respMap.put("name", responsibility.getResponsibilityName());
+            respMap.put("description", responsibility.getDescription());
+            responsibilityList.add(respMap);
+        }
+
+        return responsibilityList;
+    }
+
+    /**
+     * Add responsibility to event (Chief only)
+     */
+    @PostMapping("/chief/events/{eventId}/add-responsibility")
+    @ResponseBody
+    public Map<String, Object> addResponsibilityToEvent(@PathVariable Long eventId,
+                                                        @RequestParam Long responsibilityId,
+                                                        HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Not logged in");
+            return response;
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            response.put("success", false);
+            response.put("message", "Access denied");
+            return response;
+        }
+
+        // Add responsibility to event
+        String result = eventService.addResponsibilityToEvent(eventId, responsibilityId);
+
+        if ("success".equals(result)) {
+            response.put("success", true);
+            response.put("message", "Responsibility added successfully");
+
+            // Get updated responsibilities list for the event
+            List<Responsibility> eventResponsibilities = eventService.getEventResponsibilities(eventId);
+            List<Map<String, Object>> responsibilitiesData = new ArrayList<>();
+
+            for (Responsibility responsibility : eventResponsibilities) {
+                Map<String, Object> respData = new HashMap<>();
+                respData.put("id", responsibility.getResponsibilityId());
+                respData.put("name", responsibility.getResponsibilityName());
+                respData.put("description", responsibility.getDescription());
+
+                // Get managers for this responsibility
+                List<User> managers = userService.getResponsibilityManagers(responsibility.getResponsibilityId());
+                List<String> managerNames = new ArrayList<>();
+                for (User manager : managers) {
+                    managerNames.add(manager.getFirstName() + " " + manager.getLastName());
+                }
+                respData.put("managers", managerNames);
+
+                responsibilitiesData.add(respData);
+            }
+
+            response.put("responsibilities", responsibilitiesData);
+        } else {
+            response.put("success", false);
+            response.put("message", result);
+        }
+
+        return response;
+    }
+
+    /**
+     * Remove responsibility from event (Chief only)
+     */
+    @PostMapping("/chief/events/{eventId}/remove-responsibility")
+    @ResponseBody
+    public Map<String, Object> removeResponsibilityFromEvent(@PathVariable Long eventId,
+                                                             @RequestParam Long responsibilityId,
+                                                             HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Not logged in");
+            return response;
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            response.put("success", false);
+            response.put("message", "Access denied");
+            return response;
+        }
+
+        // Remove responsibility from event
+        String result = eventService.removeResponsibilityFromEvent(eventId, responsibilityId);
+
+        if ("success".equals(result)) {
+            response.put("success", true);
+            response.put("message", "Responsibility removed successfully");
+
+            // Get updated responsibilities list for the event
+            List<Responsibility> eventResponsibilities = eventService.getEventResponsibilities(eventId);
+            List<Map<String, Object>> responsibilitiesData = new ArrayList<>();
+
+            for (Responsibility responsibility : eventResponsibilities) {
+                Map<String, Object> respData = new HashMap<>();
+                respData.put("id", responsibility.getResponsibilityId());
+                respData.put("name", responsibility.getResponsibilityName());
+                respData.put("description", responsibility.getDescription());
+
+                // Get managers for this responsibility
+                List<User> managers = userService.getResponsibilityManagers(responsibility.getResponsibilityId());
+                List<String> managerNames = new ArrayList<>();
+                for (User manager : managers) {
+                    managerNames.add(manager.getFirstName() + " " + manager.getLastName());
+                }
+                respData.put("managers", managerNames);
+
+                responsibilitiesData.add(respData);
+            }
+
+            response.put("responsibilities", responsibilitiesData);
+        } else {
+            response.put("success", false);
+            response.put("message", result);
+        }
+
+        return response;
     }
 
     // Admin Routes

@@ -2,6 +2,8 @@ package com.project.application.service;
 
 import com.project.application.entity.Event;
 import com.project.application.repository.EventRepository;
+import com.project.application.entity.Responsibility;
+import com.project.application.repository.ResponsibilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import java.util.Optional;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final ResponsibilityRepository responsibilityRepository;
 
     /**
      * Create a new event
@@ -155,6 +158,83 @@ public class EventService {
         } catch (Exception e) {
             return "Failed to delete event: " + e.getMessage();
         }
+    }
+
+    /**
+     * Add responsibility to event
+     */
+    @Transactional
+    public String addResponsibilityToEvent(Long eventId, Long responsibilityId) {
+        // Find event
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        // Find responsibility
+        Optional<Responsibility> responsibilityOptional = responsibilityRepository.findById(responsibilityId);
+        if (!responsibilityOptional.isPresent()) {
+            return "Responsibility not found";
+        }
+
+        Event event = eventOptional.get();
+        Responsibility responsibility = responsibilityOptional.get();
+
+        // Check if responsibility is already assigned to another event
+        if (responsibility.getEvent() != null) {
+            return "Responsibility is already assigned to another event";
+        }
+
+        try {
+            // Assign responsibility to event
+            responsibility.setEvent(event);
+            responsibilityRepository.save(responsibility);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to add responsibility to event: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Remove responsibility from event
+     */
+    @Transactional
+    public String removeResponsibilityFromEvent(Long eventId, Long responsibilityId) {
+        // Find responsibility
+        Optional<Responsibility> responsibilityOptional = responsibilityRepository.findById(responsibilityId);
+        if (!responsibilityOptional.isPresent()) {
+            return "Responsibility not found";
+        }
+
+        Responsibility responsibility = responsibilityOptional.get();
+
+        // Check if responsibility belongs to the specified event
+        if (responsibility.getEvent() == null || !responsibility.getEvent().getEventId().equals(eventId)) {
+            return "Responsibility is not assigned to this event";
+        }
+
+        try {
+            // Remove responsibility from event
+            responsibility.setEvent(null);
+            responsibilityRepository.save(responsibility);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to remove responsibility from event: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Get responsibilities assigned to a specific event
+     */
+    public List<Responsibility> getEventResponsibilities(Long eventId) {
+        return responsibilityRepository.findByEventEventId(eventId);
+    }
+
+    /**
+     * Get responsibilities not assigned to any event
+     */
+    public List<Responsibility> getUnassignedResponsibilities() {
+        return responsibilityRepository.findByEventIsNull();
     }
 
     /**

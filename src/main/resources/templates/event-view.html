@@ -29,17 +29,326 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
-            text-align: center;
+        }
+
+        /* Two Column Layout */
+        .event-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Event Information Section */
+        .event-info {
+            display: flex;
+            flex-direction: column;
         }
 
         .event-title {
             color: #333;
             font-size: 2.5rem;
             font-weight: bold;
-            margin-bottom: 2rem;
-            text-align: center;
+            margin-bottom: 1.5rem;
+            text-align: left;
         }
 
+        .event-details {
+            flex-grow: 1;
+        }
+
+        .event-detail-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .detail-value {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .detail-value.no-description {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .status-not-active {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-equipment-return {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn, .add-responsibility-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .add-responsibility-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+
+        .edit-btn:hover, .add-responsibility-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Responsibilities Section */
+        .responsibilities-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .responsibilities-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .responsibilities-container {
+            flex-grow: 1;
+            min-height: 200px;
+        }
+
+        /* Responsibility Items */
+        .responsibility-item {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+
+        .responsibility-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .responsibility-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .responsibility-description.no-description {
+            color: #999;
+            font-style: italic;
+        }
+
+        .responsibility-managers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .manager-badge {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .no-managers {
+            color: #999;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .remove-responsibility-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-responsibility-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        /* Empty State */
+        .no-responsibilities {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px dashed #dee2e6;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 16px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .responsibility-option {
+            padding: 0.5rem 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-add {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .modal-btn-add:hover {
+            background: #138496;
+        }
+
+        .modal-btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        /* Return Button */
         .return-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -52,7 +361,8 @@
             transition: transform 0.3s ease;
             text-decoration: none;
             display: inline-block;
-            margin-top: 1rem;
+            text-align: center;
+            margin: 0 auto;
         }
 
         .return-btn:hover {
@@ -61,14 +371,33 @@
             text-decoration: none;
         }
 
+        .return-btn-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-content {
                 padding: 0 1rem;
             }
 
+            .event-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
             .event-title {
                 font-size: 2rem;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .responsibility-item {
+                padding: 1rem;
             }
 
             .return-btn {
@@ -81,6 +410,18 @@
             .event-title {
                 font-size: 1.5rem;
             }
+
+            .event-detail-item {
+                padding: 0.75rem;
+            }
+
+            .detail-value {
+                font-size: 14px;
+            }
+
+            .responsibility-item {
+                padding: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -92,17 +433,274 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <!-- Event Details Block -->
+    <!-- Event Details Layout -->
     <div class="content-card">
-        <!-- Event Title -->
-        <h1 class="event-title" th:text="${event.eventName}">Event Name</h1>
+        <div class="event-layout">
 
-        <!-- Return to Dashboard Button -->
+            <!-- Left Side: Event Information -->
+            <div class="event-info">
+                <!-- Event Title -->
+                <h1 class="event-title" th:text="${event.eventName}">Event Name</h1>
+
+                <!-- Event Details -->
+                <div class="event-details">
+                    <!-- Description -->
+                    <div class="event-detail-item">
+                        <span class="detail-label">Description</span>
+                        <div th:if="${event.description != null and !#strings.isEmpty(event.description)}"
+                             class="detail-value"
+                             th:text="${event.description}">Event description here</div>
+                        <div th:if="${event.description == null or #strings.isEmpty(event.description)}"
+                             class="detail-value no-description">No description provided</div>
+                    </div>
+
+                    <!-- Creation Date -->
+                    <div class="event-detail-item">
+                        <span class="detail-label">Creation Date</span>
+                        <div class="detail-value"
+                             th:text="${#temporals.format(event.dateOfCreation, 'MMMM dd, yyyy')}">January 15, 2025</div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="event-detail-item">
+                        <span class="detail-label">Status</span>
+                        <div class="detail-value">
+                            <span class="status-badge"
+                                  th:class="'status-badge status-' + ${event.status.replace(' ', '-')}"
+                                  th:text="${event.displayStatus}">Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Chief Only) -->
+                <div th:if="${userRole == 'chief'}" class="action-buttons">
+                    <button class="edit-btn" onclick="alert('Edit functionality coming soon!')">
+                        Edit Event
+                    </button>
+                    <button class="add-responsibility-btn" onclick="showAddResponsibilityModal()">
+                        Add Responsibility
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Side: Responsibilities Section -->
+            <div class="responsibilities-section">
+                <h2 class="responsibilities-title">Event Responsibilities</h2>
+
+                <!-- Responsibilities Container -->
+                <div class="responsibilities-container" id="responsibilitiesContainer">
+                    <!-- Dynamic Responsibilities List -->
+                    <div th:if="${eventResponsibilities != null and !eventResponsibilities.isEmpty()}">
+                        <div th:each="entry : ${eventResponsibilities}" class="responsibility-item">
+                            <!-- Remove Button (Chief Only) -->
+                            <button th:if="${userRole == 'chief'}"
+                                    class="remove-responsibility-btn"
+                                    th:onclick="'removeResponsibility(' + ${entry.key.responsibilityId} + ')'">
+                                ×
+                            </button>
+
+                            <!-- Responsibility Name -->
+                            <div class="responsibility-name" th:text="${entry.key.responsibilityName}">Responsibility Name</div>
+
+                            <!-- Responsibility Description -->
+                            <div th:if="${entry.key.description != null and !#strings.isEmpty(entry.key.description)}"
+                                 class="responsibility-description"
+                                 th:text="${entry.key.description}">Description here</div>
+                            <div th:if="${entry.key.description == null or #strings.isEmpty(entry.key.description)}"
+                                 class="responsibility-description no-description">No description</div>
+
+                            <!-- Managers -->
+                            <div class="responsibility-managers">
+                                <div th:if="${entry.value != null and !entry.value.isEmpty()}">
+                                    <span th:each="manager : ${entry.value}"
+                                          class="manager-badge"
+                                          th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
+                                </div>
+                                <div th:if="${entry.value == null or entry.value.isEmpty()}"
+                                     class="no-managers">No managers assigned</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${eventResponsibilities == null or eventResponsibilities.isEmpty()}"
+                         class="no-responsibilities" id="emptyState">
+                        No responsibilities assigned yet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Button -->
+    <div class="return-btn-container">
         <a href="/dashboard" class="return-btn">Return to Dashboard</a>
+    </div>
+</div>
+
+<!-- Add Responsibility Modal -->
+<div class="modal-overlay" id="addResponsibilityModal">
+    <div class="modal-content">
+        <h3 class="modal-title">Add Responsibility to Event</h3>
+
+        <div class="form-group">
+            <label for="responsibilitySelect">Select Responsibility:</label>
+            <select id="responsibilitySelect" class="form-control">
+                <option value="">Choose a responsibility...</option>
+            </select>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-add" onclick="addSelectedResponsibility()">Add</button>
+            <button class="modal-btn modal-btn-cancel" onclick="hideAddResponsibilityModal()">Cancel</button>
+        </div>
     </div>
 </div>
 
 <!-- Include Navbar Scripts -->
 <div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+<!-- Responsibility Management Scripts -->
+<script th:inline="javascript">
+    const eventId = /*[[${event.eventId}]]*/ 0;
+    const userRole = /*[[${userRole}]]*/ 'user';
+
+    // Show Add Responsibility Modal
+    function showAddResponsibilityModal() {
+        // Load available responsibilities
+        fetch(`/chief/events/${eventId}/available-responsibilities`)
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('responsibilitySelect');
+                select.innerHTML = '<option value="">Choose a responsibility...</option>';
+
+                if (data && data.length > 0) {
+                    data.forEach(responsibility => {
+                        const option = document.createElement('option');
+                        option.value = responsibility.id;
+                        option.textContent = responsibility.name;
+                        if (responsibility.description) {
+                            option.textContent += ` - ${responsibility.description}`;
+                        }
+                        select.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No available responsibilities';
+                    option.disabled = true;
+                    select.appendChild(option);
+                }
+
+                document.getElementById('addResponsibilityModal').classList.add('show');
+            })
+            .catch(error => {
+                console.error('Error loading responsibilities:', error);
+                alert('Error loading available responsibilities');
+            });
+    }
+
+    // Hide Add Responsibility Modal
+    function hideAddResponsibilityModal() {
+        document.getElementById('addResponsibilityModal').classList.remove('show');
+    }
+
+    // Add Selected Responsibility
+    function addSelectedResponsibility() {
+        const select = document.getElementById('responsibilitySelect');
+        const responsibilityId = select.value;
+
+        if (!responsibilityId) {
+            alert('Please select a responsibility');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('responsibilityId', responsibilityId);
+
+        fetch(`/chief/events/${eventId}/add-responsibility`, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateResponsibilitiesList(data.responsibilities);
+                    hideAddResponsibilityModal();
+                } else {
+                    alert(data.message || 'Error adding responsibility');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding responsibility:', error);
+                alert('Error adding responsibility');
+            });
+    }
+
+    // Remove Responsibility
+    function removeResponsibility(responsibilityId) {
+        if (!confirm('Are you sure you want to remove this responsibility from the event?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('responsibilityId', responsibilityId);
+
+        fetch(`/chief/events/${eventId}/remove-responsibility`, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateResponsibilitiesList(data.responsibilities);
+                } else {
+                    alert(data.message || 'Error removing responsibility');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing responsibility:', error);
+                alert('Error removing responsibility');
+            });
+    }
+
+    // Update Responsibilities List
+    function updateResponsibilitiesList(responsibilities) {
+        const container = document.getElementById('responsibilitiesContainer');
+
+        if (!responsibilities || responsibilities.length === 0) {
+            container.innerHTML = '<div class="no-responsibilities" id="emptyState">No responsibilities assigned yet</div>';
+            return;
+        }
+
+        let html = '';
+        responsibilities.forEach(resp => {
+            html += `
+                <div class="responsibility-item">
+                    ${userRole === 'chief' ? `<button class="remove-responsibility-btn" onclick="removeResponsibility(${resp.id})">×</button>` : ''}
+                    <div class="responsibility-name">${resp.name}</div>
+                    <div class="responsibility-description ${!resp.description ? 'no-description' : ''}">
+                        ${resp.description || 'No description'}
+                    </div>
+                    <div class="responsibility-managers">
+                        ${resp.managers && resp.managers.length > 0
+                ? resp.managers.map(manager => `<span class="manager-badge">${manager}</span>`).join('')
+                : '<div class="no-managers">No managers assigned</div>'
+            }
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('addResponsibilityModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideAddResponsibilityModal();
+        }
+    });
+</script>
 </body>
 </html>
