@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${event.eventName + ' - Event Management System'}">Event - Event Management System</title>
+
+    <!-- Include Navbar Styles -->
+    <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .event-title {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .return-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .return-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .event-title {
+                font-size: 2rem;
+            }
+
+            .return-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .event-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<div th:with="showDashboardBtn=true">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Event Details Block -->
+    <div class="content-card">
+        <!-- Event Title -->
+        <h1 class="event-title" th:text="${event.eventName}">Event Name</h1>
+
+        <!-- Return to Dashboard Button -->
+        <a href="/dashboard" class="return-btn">Return to Dashboard</a>
+    </div>
+</div>
+
+<!-- Include Navbar Scripts -->
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+</body>
+</html>

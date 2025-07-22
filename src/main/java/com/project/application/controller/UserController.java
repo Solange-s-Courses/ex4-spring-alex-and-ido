@@ -13,17 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import com.project.application.service.ResponsibilityService;
 import com.project.application.entity.Responsibility;
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -129,9 +126,6 @@ public class UserController {
         }
     }
 
-    /**
-     * Updated dashboard method to include events
-     */
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User loggedInUser = getLoggedInUser(session);
@@ -159,6 +153,7 @@ public class UserController {
 
         return "dashboard";
     }
+
 
     @GetMapping("/user-info")
     public String userInfo(HttpSession session, Model model) {
@@ -410,6 +405,57 @@ public class UserController {
         }
 
         return "redirect:/dashboard";
+    }
+
+    /**
+     * Display event details page for authorized users
+     */
+    @GetMapping("/event/view/{eventId}")
+    public String viewEvent(@PathVariable Long eventId,
+                            HttpSession session,
+                            Model model) {
+
+        // Check if user is logged in
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Get event details
+        Optional<Event> eventOptional = eventService.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            model.addAttribute("error", "Event not found.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check access permissions based on user role and event status
+        String userRole = user.getRoleName();
+        boolean canViewEvent = false;
+
+        if ("chief".equals(userRole) || "admin".equals(userRole)) {
+            // Chiefs and admins can view any event
+            canViewEvent = true;
+        } else if (event.isOngoing()) {
+            // Other users can only view ongoing events (active or equipment return)
+            canViewEvent = true;
+        }
+
+        if (!canViewEvent) {
+            model.addAttribute("error", "You don't have permission to view this event.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
+        // Add data to model
+        model.addAttribute("user", user);
+        model.addAttribute("event", event);
+        model.addAttribute("userRole", userRole);
+
+        return "event-view";
     }
 
     // Admin Routes

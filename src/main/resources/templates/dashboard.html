@@ -298,6 +298,8 @@
       transition: transform 0.3s ease;
       border-left: 4px solid #007bff;
       position: relative; /* Added for delete button positioning */
+      display: flex;
+      flex-direction: column;
     }
 
     .event-card:hover {
@@ -353,6 +355,26 @@
     .event-date {
       font-size: 12px;
       color: #999;
+    }
+
+    /* Event View Button */
+    .event-view-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-top: 1rem;
+      align-self: flex-end;
+    }
+
+    .event-view-btn:hover {
+      transform: translateY(-2px);
     }
 
     /* Responsibility Cards Styles */
@@ -600,6 +622,14 @@
           <span class="event-date"
                 th:text="${#temporals.format(event.dateOfCreation, 'MMM dd, yyyy')}">Date</span>
         </div>
+
+        <!-- View Button with conditional visibility -->
+        <button th:if="${(userRole == 'chief' or userRole == 'admin') or
+                        (event.status == 'active' or event.status == 'equipment return')}"
+                class="event-view-btn"
+                th:onclick="'window.location.href=\'/event/view/' + ${event.eventId} + '\''">
+          View
+        </button>
       </div>
     </div>
 
