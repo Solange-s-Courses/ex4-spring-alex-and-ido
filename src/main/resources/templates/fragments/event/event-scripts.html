@@ -155,10 +155,19 @@
                             ${resp.description || 'No description'}
                         </div>
                         <div class="responsibility-managers">
-                            ${resp.managers && resp.managers.length > 0
-                    ? resp.managers.map(manager => `<span class="manager-badge">${manager}</span>`).join('')
-                    : '<div class="no-managers">No managers assigned</div>'
-                }
+                            ${resp.managers && resp.managers.length > 0 ? (function() {
+                                let managerHtml = '';
+                                // Show first 2 managers
+                                for (let i = 0; i < Math.min(2, resp.managers.length); i++) {
+                                    managerHtml += `<span class="manager-badge">${resp.managers[i]}</span>`;
+                                }
+                                // Add counter if more than 2 managers
+                                if (resp.managers.length > 2) {
+                                    managerHtml += `<span class="manager-badge manager-counter">+${resp.managers.length - 2} more</span>`;
+                                }
+                                return managerHtml;
+                                })() : '<div class="no-managers">No managers assigned</div>'
+                            }
                         </div>
                         <div class="responsibility-actions">
                             <a href="/responsibility/view/${resp.id}" class="view-responsibility-btn">View Details</a>

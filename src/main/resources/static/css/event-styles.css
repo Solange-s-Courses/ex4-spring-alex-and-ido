@@ -200,6 +200,13 @@ body {
     color: #555;
 }
 
+.manager-counter {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    font-weight: bold !important;
+    font-style: italic !important;
+}
+
 .no-managers {
     color: #999;
     font-style: italic;

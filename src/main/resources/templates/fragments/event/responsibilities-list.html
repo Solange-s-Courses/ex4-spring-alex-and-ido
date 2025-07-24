@@ -30,9 +30,16 @@
                 <!-- Managers -->
                 <div class="responsibility-managers">
                     <div th:if="${entry.value != null and !entry.value.isEmpty()}">
-        <span th:each="manager : ${entry.value}"
-              class="manager-badge"
-              th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
+                        <!-- Show first 2 managers -->
+                        <span th:each="manager, iterStat : ${entry.value}"
+                              th:if="${iterStat.index < 2}"
+                              class="manager-badge"
+                              th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
+
+                        <!-- Show "+X more" counter if there are more than 2 managers -->
+                        <span th:if="${#lists.size(entry.value) > 2}"
+                              class="manager-badge manager-counter"
+                              th:text="'+' + ${#lists.size(entry.value) - 2} + ' more'">+X more</span>
                     </div>
                     <div th:if="${entry.value == null or entry.value.isEmpty()}"
                          class="no-managers">No managers assigned</div>
