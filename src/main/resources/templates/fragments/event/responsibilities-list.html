@@ -30,12 +30,20 @@
                 <!-- Managers -->
                 <div class="responsibility-managers">
                     <div th:if="${entry.value != null and !entry.value.isEmpty()}">
-                        <span th:each="manager : ${entry.value}"
-                              class="manager-badge"
-                              th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
+        <span th:each="manager : ${entry.value}"
+              class="manager-badge"
+              th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
                     </div>
                     <div th:if="${entry.value == null or entry.value.isEmpty()}"
                          class="no-managers">No managers assigned</div>
+                </div>
+
+                <!-- View Button -->
+                <div class="responsibility-actions">
+                    <a th:href="@{/responsibility/view/{id}(id=${entry.key.responsibilityId})}"
+                       class="view-responsibility-btn">
+                        View Details
+                    </a>
                 </div>
             </div>
         </div>

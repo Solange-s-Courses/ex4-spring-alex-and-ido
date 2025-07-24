@@ -206,6 +206,31 @@ body {
     font-size: 12px;
 }
 
+/* Responsibility Actions */
+.responsibility-actions {
+    margin-top: 1rem;
+    text-align: right;
+}
+
+.view-responsibility-btn {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%) !important;
+    color: white !important;
+    text-decoration: none !important;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.view-responsibility-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+}
+
 .remove-responsibility-btn {
     position: absolute;
     top: 10px;
