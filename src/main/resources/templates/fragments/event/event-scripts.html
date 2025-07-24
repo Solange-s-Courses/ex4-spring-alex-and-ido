@@ -109,14 +109,39 @@
                 });
         }
 
-        // Remove Responsibility
+        // Global variable to store responsibility info for removal
+        let responsibilityToRemove = null;
+
+        // Show Remove Responsibility Modal
         function removeResponsibility(responsibilityId) {
-            if (!confirm('Are you sure you want to remove this responsibility from the event?')) {
+            // Find responsibility name from current list
+            const responsibilityItem = document.querySelector(`[onclick*="removeResponsibility(${responsibilityId})"]`).closest('.responsibility-item');
+            const responsibilityName = responsibilityItem.querySelector('.responsibility-name').textContent;
+
+            // Store for confirmation
+            responsibilityToRemove = { id: responsibilityId, name: responsibilityName };
+
+            // Update modal content
+            document.getElementById('responsibilityNameToRemove').textContent = responsibilityName;
+
+            // Show modal
+            document.getElementById('removeResponsibilityModal').classList.add('show');
+        }
+
+        // Hide Remove Responsibility Modal
+        function hideRemoveResponsibilityModal() {
+            document.getElementById('removeResponsibilityModal').classList.remove('show');
+            responsibilityToRemove = null;
+        }
+
+        // Confirm Remove Responsibility
+        function confirmRemoveResponsibility() {
+            if (!responsibilityToRemove) {
                 return;
             }
 
             const formData = new FormData();
-            formData.append('responsibilityId', responsibilityId);
+            formData.append('responsibilityId', responsibilityToRemove.id);
 
             fetch(`/chief/events/${eventId}/remove-responsibility`, {
                 method: 'POST',
@@ -126,6 +151,7 @@
                 .then(data => {
                     if (data.success) {
                         updateResponsibilitiesList(data.responsibilities);
+                        hideRemoveResponsibilityModal();
                     } else {
                         alert(data.message || 'Error removing responsibility');
                     }
@@ -183,6 +209,13 @@
         document.getElementById('addResponsibilityModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideAddResponsibilityModal();
+            }
+        });
+
+        // Close remove modal when clicking outside
+        document.getElementById('removeResponsibilityModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideRemoveResponsibilityModal();
             }
         });
     </script>

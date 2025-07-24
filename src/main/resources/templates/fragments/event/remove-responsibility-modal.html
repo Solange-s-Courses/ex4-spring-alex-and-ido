@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modal" class="modal-overlay" id="removeResponsibilityModal">
+    <div class="modal-content">
+        <h3 class="modal-title">Remove Responsibility</h3>
+
+        <div class="modal-message">
+            <p>Are you sure you want to remove <strong id="responsibilityNameToRemove"></strong> from this event?</p>
+            <p style="color: #6c757d; font-size: 14px; margin-top: 1rem;">This action cannot be undone.</p>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-remove" onclick="confirmRemoveResponsibility()">Remove</button>
+            <button class="modal-btn modal-btn-cancel" onclick="hideRemoveResponsibilityModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</html>
