@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modal" class="modal-overlay" id="addResponsibilityModal">
+    <div class="modal-content">
+        <h3 class="modal-title">Add Responsibility to Event</h3>
+
+        <div class="form-group">
+            <label for="responsibilitySelect">Select Responsibility:</label>
+            <select id="responsibilitySelect" class="form-control">
+                <option value="">Choose a responsibility...</option>
+            </select>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-add" onclick="addSelectedResponsibility()">Add</button>
+            <button class="modal-btn modal-btn-cancel" onclick="hideAddResponsibilityModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</html>

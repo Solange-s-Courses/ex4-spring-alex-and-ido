@@ -1,0 +1,483 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.content-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+/* Two Column Layout */
+.event-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Event Information Section */
+.event-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-title {
+    color: #333;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.event-details {
+    flex-grow: 1;
+}
+
+.event-detail-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.detail-label {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.detail-value {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.detail-value.no-description {
+    color: #999;
+    font-style: italic;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+    display: inline-block;
+}
+
+.status-not-active {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-equipment-return {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.edit-btn, .add-responsibility-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.add-responsibility-btn {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.edit-btn:hover, .add-responsibility-btn:hover {
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsibilities Section */
+.responsibilities-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.responsibilities-title {
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+}
+
+.responsibilities-container {
+    flex-grow: 1;
+    min-height: 200px;
+}
+
+/* Responsibility Items */
+.responsibility-item {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #007bff;
+    position: relative;
+}
+
+.responsibility-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.responsibility-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.responsibility-description.no-description {
+    color: #999;
+    font-style: italic;
+}
+
+.responsibility-managers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.manager-badge {
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #555;
+}
+
+.no-managers {
+    color: #999;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.remove-responsibility-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-responsibility-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+/* Empty State */
+.no-responsibilities {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 2rem;
+    text-align: center;
+    border: 2px dashed #dee2e6;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 16px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-title {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.responsibility-option {
+    padding: 0.5rem 0;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+}
+
+.modal-btn-add {
+    background: #17a2b8;
+    color: white;
+}
+
+.modal-btn-add:hover {
+    background: #138496;
+}
+
+.modal-btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.modal-btn-cancel:hover {
+    background: #5a6268;
+}
+
+/* Return Button */
+.return-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.return-btn:hover {
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.return-btn-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 1rem;
+    }
+
+    .event-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .event-title {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+
+    .responsibility-item {
+        padding: 1rem;
+    }
+
+    .return-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .event-title {
+        font-size: 1.5rem;
+    }
+
+    .event-detail-item {
+        padding: 0.75rem;
+    }
+
+    .detail-value {
+        font-size: 14px;
+    }
+
+    .responsibility-item {
+        padding: 0.75rem;
+    }
+}
+
+/* Toast Notification Styles */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #dc3545;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    display: none;
+    max-width: 400px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.toast-notification.show {
+    display: block;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast-notification.hide {
+    animation: slideOutRight 0.3s ease-in;
+}
+
+.toast-notification.info {
+    background: #17a2b8;
+}
+
+.toast-notification.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.toast-notification .toast-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Responsibilities List Fragment -->
+<div th:fragment="responsibilities-list(eventResponsibilities, userRole)" class="responsibilities-section">
+    <h2 class="responsibilities-title">Event Responsibilities</h2>
+
+    <!-- Responsibilities Container -->
+    <div class="responsibilities-container" id="responsibilitiesContainer">
+        <!-- Dynamic Responsibilities List -->
+        <div th:if="${eventResponsibilities != null and !eventResponsibilities.isEmpty()}">
+            <div th:each="entry : ${eventResponsibilities}" class="responsibility-item">
+                <!-- Remove Button (Chief Only) -->
+                <button th:if="${userRole == 'chief'}"
+                        class="remove-responsibility-btn"
+                        th:onclick="'removeResponsibility(' + ${entry.key.responsibilityId} + ')'">
+                    ×
+                </button>
+
+                <!-- Responsibility Name -->
+                <div class="responsibility-name" th:text="${entry.key.responsibilityName}">Responsibility Name</div>
+
+                <!-- Responsibility Description -->
+                <div th:if="${entry.key.description != null and !#strings.isEmpty(entry.key.description)}"
+                     class="responsibility-description"
+                     th:text="${entry.key.description}">Description here</div>
+                <div th:if="${entry.key.description == null or #strings.isEmpty(entry.key.description)}"
+                     class="responsibility-description no-description">No description</div>
+
+                <!-- Managers -->
+                <div class="responsibility-managers">
+                    <div th:if="${entry.value != null and !entry.value.isEmpty()}">
+                        <span th:each="manager : ${entry.value}"
+                              class="manager-badge"
+                              th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</span>
+                    </div>
+                    <div th:if="${entry.value == null or entry.value.isEmpty()}"
+                         class="no-managers">No managers assigned</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${eventResponsibilities == null or eventResponsibilities.isEmpty()}"
+             class="no-responsibilities" id="emptyState">
+            No responsibilities assigned yet
+        </div>
+    </div>
+</div>
+
+</html>

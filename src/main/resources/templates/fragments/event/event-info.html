@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Event Information Fragment -->
+<div th:fragment="event-info(event, userRole)" class="event-info">
+    <!-- Event Title -->
+    <h1 class="event-title" th:text="${event.eventName}">Event Name</h1>
+
+    <!-- Event Details -->
+    <div class="event-details">
+        <!-- Description -->
+        <div class="event-detail-item">
+            <span class="detail-label">Description</span>
+            <div th:if="${event.description != null and !#strings.isEmpty(event.description)}"
+                 class="detail-value"
+                 th:text="${event.description}">Event description here</div>
+            <div th:if="${event.description == null or #strings.isEmpty(event.description)}"
+                 class="detail-value no-description">No description provided</div>
+        </div>
+
+        <!-- Creation Date -->
+        <div class="event-detail-item">
+            <span class="detail-label">Creation Date</span>
+            <div class="detail-value"
+                 th:text="${#temporals.format(event.dateOfCreation, 'MMMM dd, yyyy')}">January 15, 2025</div>
+        </div>
+
+        <!-- Status -->
+        <div class="event-detail-item">
+            <span class="detail-label">Status</span>
+            <div class="detail-value">
+                <span class="status-badge"
+                      th:class="'status-badge status-' + ${event.status.replace(' ', '-')}"
+                      th:text="${event.displayStatus}">Status</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons (Chief Only) -->
+    <div th:if="${userRole == 'chief'}" class="action-buttons">
+        <button class="edit-btn" onclick="alert('Edit functionality coming soon!')">
+            Edit Event
+        </button>
+        <button class="add-responsibility-btn" onclick="showAddResponsibilityModal()">
+            Add Responsibility
+        </button>
+    </div>
+</div>
+
+</html>

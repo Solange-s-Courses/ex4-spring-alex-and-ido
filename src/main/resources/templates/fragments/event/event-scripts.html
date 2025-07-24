@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="event-scripts(eventId, userRole)">
+    <!-- Include Navbar Scripts -->
+    <div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+    <!-- Include Toast Notification -->
+    <div th:replace="~{fragments/common/toast-notification :: toast}"></div>
+
+    <!-- Event Management JavaScript -->
+    <script th:inline="javascript">
+        const eventId = /*[[${eventId}]]*/ 0;
+        const userRole = /*[[${userRole}]]*/ 'user';
+
+        // Show Add Responsibility Modal
+        function showAddResponsibilityModal() {
+            const modal = document.getElementById('addResponsibilityModal');
+
+            // Prevent opening if already open or loading
+            if (modal.classList.contains('show') || modal.classList.contains('loading')) {
+                return;
+            }
+
+            // Set loading state
+            modal.classList.add('loading');
+
+            fetch(`/chief/events/${eventId}/available-responsibilities`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        showToast('No responsibilities available to add. All responsibilities are already assigned to this event.', 'info');
+                        return;
+                    }
+
+                    const select = document.getElementById('responsibilitySelect');
+                    select.innerHTML = '<option value="">Choose a responsibility...</option>';
+
+                    data.forEach(responsibility => {
+                        const option = document.createElement('option');
+                        option.value = responsibility.id;
+                        option.textContent = responsibility.name;
+                        if (responsibility.description) {
+                            option.textContent += ` - ${responsibility.description}`;
+                        }
+                        select.appendChild(option);
+                    });
+
+                    // Show modal only after successful load
+                    modal.classList.add('show');
+                })
+                .catch(error => {
+                    console.error('Error loading responsibilities:', error);
+                    showToast('Error loading available responsibilities', 'error');
+                })
+                .finally(() => {
+                    // Always remove loading state
+                    modal.classList.remove('loading');
+                });
+        }
+
+        // Hide Add Responsibility Modal
+        function hideAddResponsibilityModal() {
+            const modal = document.getElementById('addResponsibilityModal');
+            modal.classList.remove('show');
+            modal.classList.remove('loading'); // Also remove loading state when closing
+        }
+
+        // Add Selected Responsibility
+        function addSelectedResponsibility() {
+            const select = document.getElementById('responsibilitySelect');
+            const responsibilityId = select.value;
+            const modal = document.getElementById('addResponsibilityModal');
+
+            if (!responsibilityId) {
+                alert('Please select a responsibility');
+                return;
+            }
+
+            // Prevent multiple submissions
+            if (modal.classList.contains('submitting')) {
+                return;
+            }
+
+            modal.classList.add('submitting');
+
+            const formData = new FormData();
+            formData.append('responsibilityId', responsibilityId);
+
+            fetch(`/chief/events/${eventId}/add-responsibility`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateResponsibilitiesList(data.responsibilities);
+                        hideAddResponsibilityModal();
+                    } else {
+                        alert(data.message || 'Error adding responsibility');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding responsibility:', error);
+                    alert('Error adding responsibility');
+                })
+                .finally(() => {
+                    modal.classList.remove('submitting');
+                });
+        }
+
+        // Remove Responsibility
+        function removeResponsibility(responsibilityId) {
+            if (!confirm('Are you sure you want to remove this responsibility from the event?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('responsibilityId', responsibilityId);
+
+            fetch(`/chief/events/${eventId}/remove-responsibility`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateResponsibilitiesList(data.responsibilities);
+                    } else {
+                        alert(data.message || 'Error removing responsibility');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing responsibility:', error);
+                    alert('Error removing responsibility');
+                });
+        }
+
+        // Update Responsibilities List
+        function updateResponsibilitiesList(responsibilities) {
+            const container = document.getElementById('responsibilitiesContainer');
+
+            if (!responsibilities || responsibilities.length === 0) {
+                container.innerHTML = '<div class="no-responsibilities" id="emptyState">No responsibilities assigned yet</div>';
+                return;
+            }
+
+            let html = '';
+            responsibilities.forEach(resp => {
+                html += `
+                    <div class="responsibility-item">
+                        ${userRole === 'chief' ? `<button class="remove-responsibility-btn" onclick="removeResponsibility(${resp.id})">×</button>` : ''}
+                        <div class="responsibility-name">${resp.name}</div>
+                        <div class="responsibility-description ${!resp.description ? 'no-description' : ''}">
+                            ${resp.description || 'No description'}
+                        </div>
+                        <div class="responsibility-managers">
+                            ${resp.managers && resp.managers.length > 0
+                    ? resp.managers.map(manager => `<span class="manager-badge">${manager}</span>`).join('')
+                    : '<div class="no-managers">No managers assigned</div>'
+                }
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addResponsibilityModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAddResponsibilityModal();
+            }
+        });
+    </script>
+
+    <!-- Include Toast Scripts -->
+    <script th:replace="~{fragments/common/toast-notification :: toast-scripts}"></script>
+</div>
+
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Toast Notification Fragment -->
+<div th:fragment="toast">
+    <div class="toast-notification" id="toastNotification">
+        <button class="toast-close" onclick="hideToast()">&times;</button>
+        <span id="toastMessage"></span>
+    </div>
+</div>
+
+<!-- Toast JavaScript Functions -->
+<script th:fragment="toast-scripts">
+    // Toast Notification Functions
+    function showToast(message, type = 'error') {
+        const toast = document.getElementById('toastNotification');
+        const messageSpan = document.getElementById('toastMessage');
+
+        messageSpan.textContent = message;
+
+        // Remove existing type classes
+        toast.className = 'toast-notification';
+
+        // Add type class
+        if (type === 'info') {
+            toast.classList.add('info');
+        } else if (type === 'warning') {
+            toast.classList.add('warning');
+        }
+        // default is error (red)
+
+        toast.classList.add('show');
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            hideToast();
+        }, 5000);
+    }
+
+    function hideToast() {
+        const toast = document.getElementById('toastNotification');
+        toast.classList.add('hide');
+
+        // Remove from DOM after animation
+        setTimeout(() => {
+            toast.classList.remove('show', 'hide', 'info', 'warning');
+        }, 300);
+    }
+</script>
+
+</html>
