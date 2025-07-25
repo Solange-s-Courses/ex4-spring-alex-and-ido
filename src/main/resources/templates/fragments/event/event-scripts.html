@@ -13,6 +13,40 @@
         const eventId = /*[[${eventId}]]*/ 0;
         const userRole = /*[[${userRole}]]*/ 'user';
 
+        // Global variables for modal management
+        let currentEventId = null;
+        let isProcessing = false;
+
+        // Fast-click protection function
+        function preventFastClick(button, callback, duration = 1000) {
+            if (button.disabled || isProcessing) return;
+
+            button.disabled = true;
+            isProcessing = true;
+
+            callback();
+
+            setTimeout(() => {
+                button.disabled = false;
+                isProcessing = false;
+            }, duration);
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                toast.className = `toast toast-${type} show`;
+
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 3000);
+            }
+        }
+
         // Show Add Responsibility Modal
         function showAddResponsibilityModal() {
             const modal = document.getElementById('addResponsibilityModal');
@@ -73,7 +107,7 @@
             const modal = document.getElementById('addResponsibilityModal');
 
             if (!responsibilityId) {
-                alert('Please select a responsibility');
+                showToast('Please select a responsibility', 'error');
                 return;
             }
 
@@ -97,12 +131,12 @@
                         updateResponsibilitiesList(data.responsibilities);
                         hideAddResponsibilityModal();
                     } else {
-                        alert(data.message || 'Error adding responsibility');
+                        showToast(data.message || 'Error adding responsibility', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error adding responsibility:', error);
-                    alert('Error adding responsibility');
+                    showToast('Error adding responsibility', 'error');
                 })
                 .finally(() => {
                     modal.classList.remove('submitting');
@@ -152,72 +186,87 @@
                     if (data.success) {
                         updateResponsibilitiesList(data.responsibilities);
                         hideRemoveResponsibilityModal();
+                        showToast('Responsibility removed successfully!', 'success');
                     } else {
-                        alert(data.message || 'Error removing responsibility');
+                        showToast(data.message || 'Error removing responsibility', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error removing responsibility:', error);
-                    alert('Error removing responsibility');
+                    showToast('Error removing responsibility', 'error');
                 });
         }
 
-        // Update Responsibilities List
-        function updateResponsibilitiesList(responsibilities) {
-            const container = document.getElementById('responsibilitiesContainer');
+        // ======================
+        // ACTIVATE EVENT MODAL
+        // ======================
 
-            if (!responsibilities || responsibilities.length === 0) {
-                container.innerHTML = '<div class="no-responsibilities" id="emptyState">No responsibilities assigned yet</div>';
+        function showActivateEventModal(button) {
+            if (isProcessing) return;
+
+            const eventIdFromButton = button.getAttribute('data-event-id');
+            const eventName = button.getAttribute('data-event-name');
+
+            // Check if event has responsibilities before showing modal
+            const responsibilitiesContainer = document.getElementById('responsibilitiesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            // If empty state exists, it means no responsibilities
+            if (emptyState || !responsibilitiesContainer.querySelector('.responsibility-item')) {
+                showToast('Event must have at least one responsibility before activation', 'error');
                 return;
             }
 
-            let html = '';
-            responsibilities.forEach(resp => {
-                html += `
-                    <div class="responsibility-item">
-                        ${userRole === 'chief' ? `<button class="remove-responsibility-btn" onclick="removeResponsibility(${resp.id})">×</button>` : ''}
-                        <div class="responsibility-name">${resp.name}</div>
-                        <div class="responsibility-description ${!resp.description ? 'no-description' : ''}">
-                            ${resp.description || 'No description'}
-                        </div>
-                        <div class="responsibility-managers">
-                            ${resp.managers && resp.managers.length > 0 ? (function() {
-                                let managerHtml = '';
-                                // Show first 2 managers
-                                for (let i = 0; i < Math.min(2, resp.managers.length); i++) {
-                                    managerHtml += `<span class="manager-badge">${resp.managers[i]}</span>`;
-                                }
-                                // Add counter if more than 2 managers
-                                if (resp.managers.length > 2) {
-                                    managerHtml += `<span class="manager-badge manager-counter">+${resp.managers.length - 2} more</span>`;
-                                }
-                                return managerHtml;
-                                })() : '<div class="no-managers">No managers assigned</div>'
-                            }
-                        </div>
-                        <div class="responsibility-actions">
-                            <a href="/responsibility/view/${resp.id}" class="view-responsibility-btn">View Details</a>
-                        </div>
-                    </div>
-                `;
-            });
+            currentEventId = eventIdFromButton;
 
-            container.innerHTML = html;
+            document.getElementById('activateEventName').textContent = eventName;
+            document.getElementById('activateEventModal').classList.add('show');
         }
 
-        // Close modal when clicking outside
-        document.getElementById('addResponsibilityModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAddResponsibilityModal();
-            }
-        });
+        function closeActivateEventModal() {
+            document.getElementById('activateEventModal').classList.remove('show');
+            currentEventId = null;
+        }
 
-        // Close remove modal when clicking outside
-        document.getElementById('removeResponsibilityModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideRemoveResponsibilityModal();
-            }
-        });
+        function confirmActivateEvent() {
+            if (!currentEventId || isProcessing) return;
+
+            const confirmBtn = document.getElementById('confirmActivateBtn');
+            preventFastClick(confirmBtn, () => {
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = 'Activating...';
+
+                fetch(`/chief/events/${currentEventId}/activate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Event activated successfully!', 'success');
+                            closeActivateEventModal();
+                            // Reload page to update UI
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            showToast(data.message || 'Failed to activate event', 'error');
+                            confirmBtn.textContent = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while activating the event', 'error');
+                        confirmBtn.textContent = originalText;
+                    });
+            }, 2000);
+        }
+
+        // ======================
+        // EDIT EVENT MODAL
+        // ======================
 
         // Edit Event Modal Functions
         function showEditEventModalFromData(button) {
@@ -284,8 +333,12 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        showToast('Event updated successfully!', 'success');
+                        hideEditEventModal();
                         // Reload the page to show updated information
-                        window.location.reload();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         showEditError(data.message || 'Error updating event');
                     }
@@ -305,18 +358,75 @@
         function updateCharacterCount() {
             const textarea = document.getElementById('editDescription');
             const counter = document.getElementById('editDescriptionCount');
-            const currentLength = textarea.value.length;
-            counter.textContent = `${currentLength}/200 characters`;
+            if (textarea && counter) {
+                const currentLength = textarea.value.length;
+                counter.textContent = `${currentLength}/200 characters`;
 
-            // Change color when approaching limit
-            if (currentLength > 180) {
-                counter.style.color = '#dc3545';
-            } else if (currentLength > 160) {
-                counter.style.color = '#ffc107';
-            } else {
-                counter.style.color = '#6c757d';
+                // Change color when approaching limit
+                if (currentLength > 180) {
+                    counter.style.color = '#dc3545';
+                } else if (currentLength > 160) {
+                    counter.style.color = '#ffc107';
+                } else {
+                    counter.style.color = '#6c757d';
+                }
             }
         }
+
+        // Update Responsibilities List
+        function updateResponsibilitiesList(responsibilities) {
+            const container = document.getElementById('responsibilitiesContainer');
+
+            if (!responsibilities || responsibilities.length === 0) {
+                container.innerHTML = '<div class="no-responsibilities" id="emptyState">No responsibilities assigned yet</div>';
+                return;
+            }
+
+            let html = '';
+            responsibilities.forEach(resp => {
+                // Only show remove button for chiefs and not-active events
+                const removeButton = (userRole === 'chief') ?
+                    `<button class="remove-responsibility-btn" onclick="removeResponsibility(${resp.id})">×</button>` : '';
+
+                html += `
+                    <div class="responsibility-item">
+                        ${removeButton}
+                        <div class="responsibility-name">${resp.name}</div>
+                        <div class="responsibility-description ${!resp.description ? 'no-description' : ''}">
+                            ${resp.description || 'No description'}
+                        </div>
+                        <div class="responsibility-managers">
+                            ${resp.managers && resp.managers.length > 0 ? (function() {
+                    let managerHtml = '';
+                    // Show first 2 managers
+                    for (let i = 0; i < Math.min(2, resp.managers.length); i++) {
+                        managerHtml += `<span class="manager-badge">${resp.managers[i]}</span>`;
+                    }
+                    // Add counter if more than 2 managers
+                    if (resp.managers.length > 2) {
+                        managerHtml += `<span class="manager-badge manager-counter">+${resp.managers.length - 2} more</span>`;
+                    }
+                    return managerHtml;
+                })() : '<div class="no-managers">No managers assigned</div>'
+                }
+                        </div>
+                        <div class="responsibility-actions">
+                            <a href="/responsibility/view/${resp.id}" class="view-responsibility-btn">View Details</a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Initialize character counter on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const editDescTextarea = document.getElementById('editDescription');
+            if (editDescTextarea) {
+                editDescTextarea.addEventListener('input', updateCharacterCount);
+            }
+        });
     </script>
 
     <!-- Include Toast Scripts -->

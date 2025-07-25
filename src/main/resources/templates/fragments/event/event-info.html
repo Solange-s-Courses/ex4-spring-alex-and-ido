@@ -38,16 +38,24 @@
 
     <!-- Action Buttons (Chief Only) -->
     <div th:if="${userRole == 'chief'}" class="action-buttons">
-        <button th:if="${event.status == 'not-active'}"
-                class="edit-btn"
-                th:data-event-name="${event.eventName}"
-                th:data-event-description="${event.description}"
-                onclick="showEditEventModalFromData(this)">
-            Edit Event
-        </button>
-        <button class="add-responsibility-btn" onclick="showAddResponsibilityModal()">
-            Add Responsibility
-        </button>
+        <!-- Not-Active Event Buttons -->
+        <div th:if="${event.status == 'not-active'}" class="not-active-buttons">
+            <button class="edit-btn"
+                    th:data-event-name="${event.eventName}"
+                    th:data-event-description="${event.description}"
+                    onclick="showEditEventModalFromData(this)">
+                Edit Event
+            </button>
+            <button class="activate-btn"
+                    th:data-event-id="${event.eventId}"
+                    th:data-event-name="${event.eventName}"
+                    onclick="showActivateEventModal(this)">
+                Activate Event
+            </button>
+            <button class="add-responsibility-btn" onclick="showAddResponsibilityModal()">
+                Add Responsibility
+            </button>
+        </div>
     </div>
 </div>
 

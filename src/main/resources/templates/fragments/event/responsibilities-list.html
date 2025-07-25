@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <!-- Responsibilities List Fragment -->
-<div th:fragment="responsibilities-list(eventResponsibilities, userRole)" class="responsibilities-section">
+<div th:fragment="responsibilities-list(eventResponsibilities, userRole, event)" class="responsibilities-section">
     <h2 class="responsibilities-title">Event Responsibilities</h2>
 
     <!-- Responsibilities Container -->
@@ -10,8 +10,8 @@
         <!-- Dynamic Responsibilities List -->
         <div th:if="${eventResponsibilities != null and !eventResponsibilities.isEmpty()}">
             <div th:each="entry : ${eventResponsibilities}" class="responsibility-item">
-                <!-- Remove Button (Chief Only) -->
-                <button th:if="${userRole == 'chief'}"
+                <!-- Remove Button (Chief Only, Not-Active Events Only) -->
+                <button th:if="${userRole == 'chief' and event.status == 'not-active'}"
                         class="remove-responsibility-btn"
                         th:onclick="'removeResponsibility(' + ${entry.key.responsibilityId} + ')'">
                     ×

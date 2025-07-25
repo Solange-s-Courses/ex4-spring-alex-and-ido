@@ -647,8 +647,8 @@
     </div>
   </div>
 
-  <!-- Responsibilities Section -->
-  <div class="content-card">
+  <!-- Responsibilities Section (Chief and Admin Only) -->
+  <div th:if="${userRole == 'chief' or userRole == 'admin'}" class="content-card">
     <h2>Responsibilities</h2>
 
     <div th:if="${responsibilitiesWithManagers != null and !responsibilitiesWithManagers.isEmpty()}" class="responsibilities-grid">

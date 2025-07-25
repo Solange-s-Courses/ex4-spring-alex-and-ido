@@ -186,6 +186,40 @@ public class EventService {
     }
 
     /**
+     * Activate event (Chief only, not-active events only)
+     * Event must have at least one responsibility to be activated
+     */
+    @Transactional
+    public String activateEvent(Long eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in not-active status
+        if (!Event.STATUS_NOT_ACTIVE.equals(event.getStatus())) {
+            return "Only not-active events can be activated";
+        }
+
+        // Check if event has at least one responsibility
+        List<Responsibility> eventResponsibilities = getEventResponsibilities(eventId);
+        if (eventResponsibilities.isEmpty()) {
+            return "Event must have at least one responsibility before activation";
+        }
+
+        try {
+            event.setStatus(Event.STATUS_ACTIVE);
+            eventRepository.save(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to activate event: " + e.getMessage();
+        }
+    }
+
+    /**
      * Check if status is valid
      */
     private boolean isValidStatus(String status) {

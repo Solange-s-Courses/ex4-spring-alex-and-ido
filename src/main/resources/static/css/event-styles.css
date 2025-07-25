@@ -509,6 +509,193 @@ body {
     margin-top: 2rem;
 }
 
+/* ======================
+   ACTIVATE EVENT STYLES
+   ====================== */
+
+/* Activate Event Button */
+.activate-btn {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+.activate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4);
+    background: linear-gradient(135deg, #229954, #27ae60);
+}
+
+.activate-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+.activate-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Active Event Status Message */
+.active-event-info {
+    background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+    border: 2px solid #27ae60;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 16px;
+}
+
+.active-status-message {
+    color: #27ae60;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.status-icon {
+    font-size: 18px;
+}
+
+/* Not-Active Buttons Container */
+.not-active-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+/* ======================
+   ACTIVATION MODAL STYLES
+   ====================== */
+
+/* Activate Event Modal */
+#activateEventModal .modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+#activateEventModal .modal-body {
+    padding: 30px;
+    text-align: center;
+}
+
+#activateEventModal .modal-message {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+#activateEventModal .modal-warning {
+    font-size: 14px;
+    color: #e67e22;
+    background: #fef9e7;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #f39c12;
+    margin-bottom: 0;
+}
+
+#activateEventModal .modal-footer {
+    padding: 20px 30px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+#activateEventModal .cancel-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#activateEventModal .cancel-btn:hover {
+    background: #5a6268;
+}
+
+#activateEventModal .confirm-btn {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(46, 204, 113, 0.3);
+}
+
+#activateEventModal .confirm-btn:hover {
+    background: linear-gradient(135deg, #229954, #27ae60);
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+}
+
+#activateEventModal .confirm-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ======================
+   RESPONSIVE DESIGN
+   ====================== */
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .not-active-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .activate-btn,
+    .edit-btn,
+    .add-responsibility-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .active-status-message {
+        font-size: 14px;
+    }
+
+    #activateEventModal .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+
+    #activateEventModal .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #activateEventModal .cancel-btn,
+    #activateEventModal .confirm-btn {
+        width: 100%;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {

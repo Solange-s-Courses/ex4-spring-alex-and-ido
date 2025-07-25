@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="activate-event-modal" class="modal-overlay" id="activateEventModal">
+    <div class="modal-content">
+        <div class="modal-message">
+            <p>Are you sure you want to activate "<strong id="activateEventName"></strong>"?</p>
+            <p class="modal-warning">Once activated, the event cannot be edited or deleted, and no responsibilities can be added or removed.</p>
+        </div>
+
+        <div class="modal-buttons modal-buttons-centered">
+            <button type="button" class="modal-btn modal-btn-save" onclick="confirmActivateEvent()" id="confirmActivateBtn">
+                Activate Event
+            </button>
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeActivateEventModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>

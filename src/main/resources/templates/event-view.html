@@ -23,7 +23,7 @@
             <div th:replace="~{fragments/event/event-info :: event-info(${event}, ${userRole})}"></div>
 
             <!-- Responsibilities Fragment -->
-            <div th:replace="~{fragments/event/responsibilities-list :: responsibilities-list(${eventResponsibilities}, ${userRole})}"></div>
+            <div th:replace="~{fragments/event/responsibilities-list :: responsibilities-list(${eventResponsibilities}, ${userRole}, ${event})}"></div>
         </div>
     </div>
 
@@ -35,6 +35,7 @@
 <div th:replace="~{fragments/event/add-responsibility-modal :: modal}"></div>
 <div th:replace="~{fragments/event/remove-responsibility-modal :: modal}"></div>
 <div th:replace="~{fragments/event/edit-event-modal :: modal}"></div>
+<div th:replace="~{fragments/event/activate-event-modal :: activate-event-modal}"></div>
 
 <!-- Scripts Fragment -->
 <div th:replace="~{fragments/event/event-scripts :: event-scripts(${event.eventId}, ${userRole})}"></div>

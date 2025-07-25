@@ -442,6 +442,43 @@ public class UserController {
     }
 
     /**
+     * Activate event (Chief only, not-active events only)
+     */
+    @PostMapping("/chief/events/{eventId}/activate")
+    @ResponseBody
+    public Map<String, Object> activateEvent(@PathVariable Long eventId,
+                                             HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Not logged in");
+            return response;
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            response.put("success", false);
+            response.put("message", "Access denied");
+            return response;
+        }
+
+        // Activate event using service
+        String result = eventService.activateEvent(eventId);
+
+        if ("success".equals(result)) {
+            response.put("success", true);
+            response.put("message", "Event activated successfully");
+        } else {
+            response.put("success", false);
+            response.put("message", result);
+        }
+
+        return response;
+    }
+
+    /**
      * Display event details page for authorized users (UPDATED)
      */
     @GetMapping("/event/view/{eventId}")
