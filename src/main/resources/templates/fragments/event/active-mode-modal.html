@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Active Mode Modal Fragment -->
+<div th:fragment="active-mode-modal" class="modal-overlay" id="activeModeModal">
+    <div class="modal-content">
+        <div class="modal-message">
+            <p>Are you sure you want to switch "<strong id="activeModeEventName"></strong>" back to active mode?</p>
+            <p class="modal-warning">This will change the event status from equipment return to active.</p>
+        </div>
+
+        <div class="modal-buttons modal-buttons-centered">
+            <button type="button" class="modal-btn modal-btn-activate" onclick="confirmActiveMode()" id="confirmActiveModeBtn">
+                Switch to Active
+            </button>
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeActiveModeModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>

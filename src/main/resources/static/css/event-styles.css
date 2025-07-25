@@ -579,6 +579,225 @@ body {
 }
 
 /* ======================
+   RETURN MODE BUTTON STYLES
+   ====================== */
+
+/* Return Mode Button (Active → Equipment Return) */
+.return-mode-btn {
+    background: linear-gradient(135deg, #e67e22, #f39c12);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.return-mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(243, 156, 18, 0.4);
+    background: linear-gradient(135deg, #d35400, #e67e22);
+}
+
+.return-mode-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.return-mode-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Active Mode Button (Equipment Return → Active) */
+.active-mode-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.active-mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #2980b9, #21618c);
+}
+
+.active-mode-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.active-mode-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Button Containers */
+.active-buttons,
+.return-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+/* ======================
+   COMPLETE EVENT BUTTON STYLES
+   ====================== */
+
+/* Complete Event Button (Equipment Return → Not-Active) */
+.complete-event-btn {
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+}
+
+.complete-event-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(155, 89, 182, 0.4);
+    background: linear-gradient(135deg, #7d3c98, #8e44ad);
+}
+
+.complete-event-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+}
+
+.complete-event-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ======================
+   COMPLETE EVENT MODAL STYLES
+   ====================== */
+
+/* Complete Event Modal Button */
+.modal-btn-complete {
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    color: white;
+    box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3);
+}
+
+.modal-btn-complete:hover {
+    background: linear-gradient(135deg, #7d3c98, #8e44ad);
+    box-shadow: 0 4px 8px rgba(155, 89, 182, 0.4);
+}
+
+.modal-btn-complete:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ======================
+   RESPONSIVE DESIGN FOR COMPLETE BUTTON
+   ====================== */
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .return-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .complete-event-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ======================
+   RETURN MODE MODAL STYLES
+   ====================== */
+
+/* Return Mode Modal */
+.modal-btn-return {
+    background: linear-gradient(135deg, #e67e22, #f39c12);
+    color: white;
+    box-shadow: 0 2px 4px rgba(243, 156, 18, 0.3);
+}
+
+.modal-btn-return:hover {
+    background: linear-gradient(135deg, #d35400, #e67e22);
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.4);
+}
+
+.modal-btn-return:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Active Mode Modal */
+.modal-btn-activate {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.modal-btn-activate:hover {
+    background: linear-gradient(135deg, #2980b9, #21618c);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+.modal-btn-activate:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Modal Warning Text */
+.modal-warning {
+    font-size: 14px;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 8px;
+}
+
+/* ======================
+   RESPONSIVE DESIGN FOR NEW BUTTONS
+   ====================== */
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .active-buttons,
+    .return-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .return-mode-btn,
+    .active-mode-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ======================
    ACTIVATION MODAL STYLES
    ====================== */
 

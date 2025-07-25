@@ -220,6 +220,88 @@ public class EventService {
     }
 
     /**
+     * Switch event to return mode (Chief only, active events only)
+     */
+    @Transactional
+    public String switchToReturnMode(Long eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in active status
+        if (!Event.STATUS_ACTIVE.equals(event.getStatus())) {
+            return "Only active events can be switched to return mode";
+        }
+
+        try {
+            event.setStatus(Event.STATUS_EQUIPMENT_RETURN);
+            eventRepository.save(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to switch to return mode: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Switch event back to active mode (Chief only, equipment return events only)
+     */
+    @Transactional
+    public String switchToActiveMode(Long eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in equipment return status
+        if (!Event.STATUS_EQUIPMENT_RETURN.equals(event.getStatus())) {
+            return "Only events in equipment return mode can be switched back to active";
+        }
+
+        try {
+            event.setStatus(Event.STATUS_ACTIVE);
+            eventRepository.save(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to switch to active mode: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Complete event (Chief only, equipment return events only)
+     * Returns event to not-active status for potential reuse
+     */
+    @Transactional
+    public String completeEvent(Long eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in equipment return status
+        if (!Event.STATUS_EQUIPMENT_RETURN.equals(event.getStatus())) {
+            return "Only events in equipment return mode can be completed";
+        }
+
+        try {
+            event.setStatus(Event.STATUS_NOT_ACTIVE);
+            eventRepository.save(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to complete event: " + e.getMessage();
+        }
+    }
+
+    /**
      * Check if status is valid
      */
     private boolean isValidStatus(String status) {

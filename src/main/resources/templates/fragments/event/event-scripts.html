@@ -265,6 +265,177 @@
         }
 
         // ======================
+        // RETURN MODE MODAL
+        // ======================
+
+        function showReturnModeModal(button) {
+            if (isProcessing) return;
+
+            const eventIdFromButton = button.getAttribute('data-event-id');
+            const eventName = button.getAttribute('data-event-name');
+
+            currentEventId = eventIdFromButton;
+
+            document.getElementById('returnModeEventName').textContent = eventName;
+            document.getElementById('returnModeModal').classList.add('show');
+        }
+
+        function closeReturnModeModal() {
+            document.getElementById('returnModeModal').classList.remove('show');
+            currentEventId = null;
+        }
+
+        function confirmReturnMode() {
+            if (!currentEventId || isProcessing) return;
+
+            const confirmBtn = document.getElementById('confirmReturnModeBtn');
+            preventFastClick(confirmBtn, () => {
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = 'Switching...';
+
+                fetch(`/chief/events/${currentEventId}/switch-to-return`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // No success toast - silent update
+                            closeReturnModeModal();
+                            // Reload page to update UI
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else {
+                            showToast(data.message || 'Failed to switch to return mode', 'error');
+                            confirmBtn.textContent = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while switching to return mode', 'error');
+                        confirmBtn.textContent = originalText;
+                    });
+            }, 2000);
+        }
+
+        // ======================
+        // ACTIVE MODE MODAL
+        // ======================
+
+        function showActiveModeModal(button) {
+            if (isProcessing) return;
+
+            const eventIdFromButton = button.getAttribute('data-event-id');
+            const eventName = button.getAttribute('data-event-name');
+
+            currentEventId = eventIdFromButton;
+
+            document.getElementById('activeModeEventName').textContent = eventName;
+            document.getElementById('activeModeModal').classList.add('show');
+        }
+
+        function closeActiveModeModal() {
+            document.getElementById('activeModeModal').classList.remove('show');
+            currentEventId = null;
+        }
+
+        function confirmActiveMode() {
+            if (!currentEventId || isProcessing) return;
+
+            const confirmBtn = document.getElementById('confirmActiveModeBtn');
+            preventFastClick(confirmBtn, () => {
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = 'Switching...';
+
+                fetch(`/chief/events/${currentEventId}/switch-to-active`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // No success toast - silent update
+                            closeActiveModeModal();
+                            // Reload page to update UI
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else {
+                            showToast(data.message || 'Failed to switch to active mode', 'error');
+                            confirmBtn.textContent = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while switching to active mode', 'error');
+                        confirmBtn.textContent = originalText;
+                    });
+            }, 2000);
+        }
+
+        // ======================
+        // COMPLETE EVENT MODAL
+        // ======================
+
+        function showCompleteEventModal(button) {
+            if (isProcessing) return;
+
+            const eventIdFromButton = button.getAttribute('data-event-id');
+            const eventName = button.getAttribute('data-event-name');
+
+            currentEventId = eventIdFromButton;
+
+            document.getElementById('completeEventName').textContent = eventName;
+            document.getElementById('completeEventModal').classList.add('show');
+        }
+
+        function closeCompleteEventModal() {
+            document.getElementById('completeEventModal').classList.remove('show');
+            currentEventId = null;
+        }
+
+        function confirmCompleteEvent() {
+            if (!currentEventId || isProcessing) return;
+
+            const confirmBtn = document.getElementById('confirmCompleteBtn');
+            preventFastClick(confirmBtn, () => {
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = 'Completing...';
+
+                fetch(`/chief/events/${currentEventId}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // No success toast - silent update
+                            closeCompleteEventModal();
+                            // Reload page to update UI
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else {
+                            showToast(data.message || 'Failed to complete event', 'error');
+                            confirmBtn.textContent = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while completing the event', 'error');
+                        confirmBtn.textContent = originalText;
+                    });
+            }, 2000);
+        }
+
+        // ======================
         // EDIT EVENT MODAL
         // ======================
 

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Complete Event Modal Fragment -->
+<div th:fragment="complete-event-modal" class="modal-overlay" id="completeEventModal">
+    <div class="modal-content">
+        <div class="modal-message">
+            <p>Are you sure you want to complete "<strong id="completeEventName"></strong>"?</p>
+            <p class="modal-warning">By pressing agree you are submitting to the completion of the event.</p>
+        </div>
+
+        <div class="modal-buttons modal-buttons-centered">
+            <button type="button" class="modal-btn modal-btn-complete" onclick="confirmCompleteEvent()" id="confirmCompleteBtn">
+                Complete Event
+            </button>
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeCompleteEventModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>

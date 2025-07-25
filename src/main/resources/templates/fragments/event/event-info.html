@@ -56,6 +56,32 @@
                 Add Responsibility
             </button>
         </div>
+
+        <!-- Active Event Buttons -->
+        <div th:if="${event.status == 'active'}" class="active-buttons">
+            <button class="return-mode-btn"
+                    th:data-event-id="${event.eventId}"
+                    th:data-event-name="${event.eventName}"
+                    onclick="showReturnModeModal(this)">
+                Activate Return Mode
+            </button>
+        </div>
+
+        <!-- Equipment Return Event Buttons -->
+        <div th:if="${event.status == 'equipment return'}" class="return-buttons">
+            <button class="active-mode-btn"
+                    th:data-event-id="${event.eventId}"
+                    th:data-event-name="${event.eventName}"
+                    onclick="showActiveModeModal(this)">
+                Switch to Active
+            </button>
+            <button class="complete-event-btn"
+                    th:data-event-id="${event.eventId}"
+                    th:data-event-name="${event.eventName}"
+                    onclick="showCompleteEventModal(this)">
+                Complete Event
+            </button>
+        </div>
     </div>
 </div>
 

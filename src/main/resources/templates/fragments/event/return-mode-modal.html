@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Return Mode Modal Fragment -->
+<div th:fragment="return-mode-modal" class="modal-overlay" id="returnModeModal">
+    <div class="modal-content">
+        <div class="modal-message">
+            <p>Are you sure you want to activate return mode for "<strong id="returnModeEventName"></strong>"?</p>
+            <p class="modal-warning">This will change the event status to equipment return mode.</p>
+        </div>
+
+        <div class="modal-buttons modal-buttons-centered">
+            <button type="button" class="modal-btn modal-btn-return" onclick="confirmReturnMode()" id="confirmReturnModeBtn">
+                Activate Return Mode
+            </button>
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeReturnModeModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>
