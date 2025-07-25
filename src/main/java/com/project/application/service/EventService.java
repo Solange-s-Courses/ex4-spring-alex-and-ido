@@ -154,8 +154,10 @@ public class EventService {
         }
 
         try {
-            // With junction table, the EventResponsibility records will be automatically deleted
-            // due to foreign key CASCADE constraints when the event is deleted
+            // First, delete all event-responsibility relationships for this event
+            eventResponsibilityRepository.deleteByEventEventId(eventId);
+
+            // Then delete the event itself
             eventRepository.delete(event);
             return "success";
         } catch (Exception e) {

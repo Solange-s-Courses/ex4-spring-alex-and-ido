@@ -52,4 +52,10 @@ public interface EventResponsibilityRepository extends JpaRepository<EventRespon
      */
     @Query("SELECT er FROM EventResponsibility er WHERE er.event.eventId = :eventId")
     List<EventResponsibility> findByEventId(@Param("eventId") Long eventId);
+
+    /**
+     * Delete all event-responsibility assignments for a specific event
+     * Used when deleting an event to remove all its responsibility assignments
+     */
+    void deleteByEventEventId(Long eventId);
 }
