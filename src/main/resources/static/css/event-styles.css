@@ -52,6 +52,8 @@ body {
     background-color: #f8f9fa;
     border-radius: 6px;
     border-left: 4px solid #007bff;
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 .detail-label {
@@ -67,6 +69,11 @@ body {
     color: #555;
     font-size: 16px;
     line-height: 1.4;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
 }
 
 .detail-value.no-description {
@@ -337,6 +344,10 @@ body {
     justify-content: flex-end;
 }
 
+.modal-buttons-centered {
+    justify-content: center !important;
+}
+
 .modal-btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -367,6 +378,85 @@ body {
 
 .modal-btn-cancel:hover {
     background: #5a6268;
+}
+
+/* Edit Event Modal Styles */
+.modal-btn-save {
+    background: #28a745;
+    color: white;
+}
+
+.modal-btn-save:hover {
+    background: #218838;
+}
+
+/* Event form error styles for modal */
+.event-form-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 1.5rem;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Enhanced Form Controls for Edit Modal */
+.modal-content .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-content .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.modal-content .form-control {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.modal-content .form-control:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    background-color: #fafbfc;
+}
+
+.modal-content .form-control:hover {
+    border-color: #c6d0d8;
+}
+
+.modal-content textarea.form-control {
+    resize: none;
+    height: 80px;
+    line-height: 1.5;
+    max-height: 80px;
+    overflow-y: auto;
+}
+
+.modal-content .form-control::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+}
+
+.character-count {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6c757d;
+    font-size: 12px;
+    text-align: right;
 }
 
 /* Remove Responsibility Modal Styles */

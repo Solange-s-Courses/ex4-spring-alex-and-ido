@@ -300,6 +300,8 @@
       position: relative; /* Added for delete button positioning */
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      word-wrap: break-word;
     }
 
     .event-card:hover {
@@ -318,6 +320,11 @@
       font-size: 14px;
       margin-bottom: 1rem;
       line-height: 1.4;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      max-width: 100%;
     }
 
     .event-meta {

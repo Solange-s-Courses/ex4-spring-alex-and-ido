@@ -38,7 +38,11 @@
 
     <!-- Action Buttons (Chief Only) -->
     <div th:if="${userRole == 'chief'}" class="action-buttons">
-        <button class="edit-btn" onclick="alert('Edit functionality coming soon!')">
+        <button th:if="${event.status == 'not-active'}"
+                class="edit-btn"
+                th:data-event-name="${event.eventName}"
+                th:data-event-description="${event.description}"
+                onclick="showEditEventModalFromData(this)">
             Edit Event
         </button>
         <button class="add-responsibility-btn" onclick="showAddResponsibilityModal()">

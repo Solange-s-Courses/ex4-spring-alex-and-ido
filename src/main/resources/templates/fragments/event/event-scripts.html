@@ -218,6 +218,105 @@
                 hideRemoveResponsibilityModal();
             }
         });
+
+        // Edit Event Modal Functions
+        function showEditEventModalFromData(button) {
+            const eventName = button.getAttribute('data-event-name');
+            const eventDescription = button.getAttribute('data-event-description');
+            showEditEventModal(eventName, eventDescription);
+        }
+
+        function showEditEventModal(eventName, description) {
+            // Pre-fill the form with current values
+            document.getElementById('editEventName').value = eventName || '';
+            document.getElementById('editDescription').value = description || '';
+
+            // Update character counter for pre-filled content
+            updateCharacterCount();
+
+            // Hide any previous error messages
+            document.getElementById('editEventError').style.display = 'none';
+
+            // Show the modal
+            document.getElementById('editEventModal').classList.add('show');
+        }
+
+        function hideEditEventModal() {
+            document.getElementById('editEventModal').classList.remove('show');
+
+            // Clear form
+            document.getElementById('editEventName').value = '';
+            document.getElementById('editDescription').value = '';
+
+            // Hide error message
+            document.getElementById('editEventError').style.display = 'none';
+        }
+
+        function saveEventChanges() {
+            const eventName = document.getElementById('editEventName').value.trim();
+            const description = document.getElementById('editDescription').value.trim();
+
+            // Basic validation
+            if (!eventName) {
+                showEditError('Event name is required');
+                return;
+            }
+
+            if (eventName.length > 100) {
+                showEditError('Event name cannot exceed 100 characters');
+                return;
+            }
+
+            if (description.length > 200) {
+                showEditError('Description cannot exceed 200 characters');
+                return;
+            }
+
+            // Submit the form
+            const formData = new FormData();
+            formData.append('eventName', eventName);
+            formData.append('description', description || '');
+
+            fetch(`/chief/events/${eventId}/edit`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to show updated information
+                        window.location.reload();
+                    } else {
+                        showEditError(data.message || 'Error updating event');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating event:', error);
+                    showEditError('Error updating event');
+                });
+        }
+
+        function showEditError(message) {
+            const errorDiv = document.getElementById('editEventError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function updateCharacterCount() {
+            const textarea = document.getElementById('editDescription');
+            const counter = document.getElementById('editDescriptionCount');
+            const currentLength = textarea.value.length;
+            counter.textContent = `${currentLength}/200 characters`;
+
+            // Change color when approaching limit
+            if (currentLength > 180) {
+                counter.style.color = '#dc3545';
+            } else if (currentLength > 160) {
+                counter.style.color = '#ffc107';
+            } else {
+                counter.style.color = '#6c757d';
+            }
+        }
     </script>
 
     <!-- Include Toast Scripts -->

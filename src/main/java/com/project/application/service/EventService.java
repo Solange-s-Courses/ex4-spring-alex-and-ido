@@ -127,6 +127,65 @@ public class EventService {
     }
 
     /**
+     * Update event name and description (Chief only, not-active events only)
+     */
+    @Transactional
+    public String updateEvent(Long eventId, String eventName, String description) {
+        // Find the event
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+
+        if (!eventOptional.isPresent()) {
+            return "Event not found";
+        }
+
+        Event event = eventOptional.get();
+
+        // Check if event is in not-active status (only not-active events can be edited)
+        if (!Event.STATUS_NOT_ACTIVE.equals(event.getStatus())) {
+            return "Only not-active events can be edited";
+        }
+
+        // Validate input
+        if (eventName == null || eventName.trim().isEmpty()) {
+            return "Event name is required";
+        }
+
+        eventName = eventName.trim();
+
+        // Check length limits
+        if (eventName.length() > 100) {
+            return "Event name cannot exceed 100 characters";
+        }
+
+        if (description != null) {
+            description = description.trim();
+            if (description.length() > 200) {
+                return "Description cannot exceed 200 characters";
+            }
+            // If description is empty, set to null
+            if (description.isEmpty()) {
+                description = null;
+            }
+        }
+
+        // Check if new event name already exists (case insensitive) and it's not the same event
+        if (!event.getEventName().equalsIgnoreCase(eventName) &&
+                eventRepository.existsByEventNameIgnoreCase(eventName)) {
+            return "An event with this name already exists";
+        }
+
+        try {
+            // Update the event
+            event.setEventName(eventName);
+            event.setDescription(description);
+            eventRepository.save(event);
+            return "success";
+        } catch (Exception e) {
+            return "Failed to update event: " + e.getMessage();
+        }
+    }
+
+    /**
      * Check if status is valid
      */
     private boolean isValidStatus(String status) {

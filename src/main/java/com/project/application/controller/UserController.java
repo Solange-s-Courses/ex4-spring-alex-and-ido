@@ -403,6 +403,45 @@ public class UserController {
     }
 
     /**
+     * Edit event (Chief only, not-active events only)
+     */
+    @PostMapping("/chief/events/{eventId}/edit")
+    @ResponseBody
+    public Map<String, Object> editEvent(@PathVariable Long eventId,
+                                         @RequestParam String eventName,
+                                         @RequestParam(required = false) String description,
+                                         HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Check if user is logged in and is chief
+        User user = getLoggedInUser(session);
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Not logged in");
+            return response;
+        }
+
+        if (!"chief".equals(user.getRoleName())) {
+            response.put("success", false);
+            response.put("message", "Access denied");
+            return response;
+        }
+
+        // Update event using service
+        String result = eventService.updateEvent(eventId, eventName, description);
+
+        if ("success".equals(result)) {
+            response.put("success", true);
+            response.put("message", "Event updated successfully");
+        } else {
+            response.put("success", false);
+            response.put("message", result);
+        }
+
+        return response;
+    }
+
+    /**
      * Display event details page for authorized users (UPDATED)
      */
     @GetMapping("/event/view/{eventId}")
