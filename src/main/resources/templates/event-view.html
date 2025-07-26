@@ -40,7 +40,16 @@
 <div th:replace="~{fragments/event/active-mode-modal :: active-mode-modal}"></div>
 <div th:replace="~{fragments/event/complete-event-modal :: complete-event-modal}"></div>
 
-<!-- Scripts Fragment -->
-<div th:replace="~{fragments/event/event-scripts :: event-scripts(${event.eventId}, ${userRole})}"></div>
+<!-- Include Complete Toast System (CSS + HTML + JS) -->
+<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+
+<!-- Include Navbar Scripts -->
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+<!-- Include Event Scripts -->
+<script src="/js/event-scripts.js"
+        th:attr="data-event-id=${event.eventId}, data-user-role=${userRole}">
+</script>
+
 </body>
 </html>
