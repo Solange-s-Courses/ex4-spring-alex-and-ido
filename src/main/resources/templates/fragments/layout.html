@@ -25,6 +25,12 @@
             Manage Responsibility
         </a>
 
+        <!-- NEW: Manage Requests button (only for managers with assigned responsibility, hide on requests page) -->
+        <a th:href="@{/manager/requests}" class="nav-btn nav-btn-requests"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}">
+            Manage Requests
+        </a>
+
         <!-- Chief User List button (only for chief, hide on user list page) -->
         <a th:href="@{/chief/user-list}" class="nav-btn"
            th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
@@ -49,6 +55,12 @@
         <a th:href="@{/manager/items}" class="mobile-nav-btn"
            th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}">
             Manage Responsibility
+        </a>
+
+        <!-- NEW: Manage Requests button (only for managers with assigned responsibility, hide on requests page) -->
+        <a th:href="@{/manager/requests}" class="mobile-nav-btn mobile-nav-btn-requests"
+           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}">
+            Manage Requests
         </a>
 
         <!-- Chief User List button (only for chief, hide on user list page) -->
@@ -107,6 +119,15 @@
             background-color: #218838;
             text-decoration: none;
             color: white;
+        }
+
+        /* NEW: Special styling for Manage Requests button */
+        .nav-btn-requests {
+            background-color: #17a2b8 !important;
+        }
+
+        .nav-btn-requests:hover {
+            background-color: #138496 !important;
         }
 
         .logout-btn {
@@ -193,6 +214,11 @@
             background-color: rgba(255,255,255,0.1);
             text-decoration: none;
             color: white;
+        }
+
+        /* NEW: Special styling for mobile Manage Requests button */
+        .mobile-nav-btn-requests:hover {
+            background-color: rgba(23, 162, 184, 0.3) !important;
         }
 
         .mobile-logout-btn {

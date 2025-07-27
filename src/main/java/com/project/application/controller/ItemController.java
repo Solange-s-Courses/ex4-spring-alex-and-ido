@@ -2,6 +2,7 @@ package com.project.application.controller;
 
 import com.project.application.entity.Item;
 import com.project.application.entity.User;
+import com.project.application.entity.Request;
 import com.project.application.service.ItemService;
 import com.project.application.service.UserService;
 import com.project.application.service.ResponsibilityService;
@@ -23,7 +24,7 @@ public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
     private final ResponsibilityService responsibilityService;
-    private final RequestService requestService; // NEW: Add RequestService
+    private final RequestService requestService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -85,6 +86,169 @@ public class ItemController {
         model.addAttribute("itemCount", items.size());
 
         return "item-management";
+    }
+
+    // ======================
+    // NEW: MANAGER REQUEST MANAGEMENT
+    // ======================
+
+    /**
+     * Display manager requests page
+     */
+    @GetMapping("/manager/requests")
+    public String managerRequests(HttpSession session, Model model) {
+        // Check if user is logged in
+        if (!isUserLoggedIn(session)) {
+            return "redirect:/login";
+        }
+
+        User user = getLoggedInUser(session);
+
+        // Check if user is manager
+        if (!"manager".equals(user.getRoleName())) {
+            return "error/404";
+        }
+
+        // Get user's responsibility
+        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (responsibilityName == null) {
+            model.addAttribute("error", "You have no responsibility assigned. Contact your chief to get a responsibility.");
+            model.addAttribute("user", user);
+            return "manager-no-responsibility";
+        }
+
+        // Get responsibility details
+        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
+                responsibilityService.findByName(responsibilityName);
+
+        if (!responsibilityOptional.isPresent()) {
+            model.addAttribute("error", "Responsibility not found in system.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
+        com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
+
+        // Get all pending requests for this responsibility
+        List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibility.getResponsibilityId());
+
+        // Add data to model
+        model.addAttribute("user", user);
+        model.addAttribute("responsibility", responsibility);
+        model.addAttribute("requests", pendingRequests);
+        model.addAttribute("requestCount", pendingRequests.size());
+
+        return "manager-requests";
+    }
+
+    /**
+     * Approve a request
+     */
+    @PostMapping("/manager/approve-request")
+    @ResponseBody
+    public String approveRequest(@RequestParam Long requestId,
+                                 HttpSession session) {
+
+        // Check if user is logged in and is manager
+        if (!isUserLoggedIn(session)) {
+            return "error:Please log in to approve requests";
+        }
+
+        User user = getLoggedInUser(session);
+        if (!"manager".equals(user.getRoleName())) {
+            return "error:Access denied";
+        }
+
+        // Get user's responsibility to verify permission
+        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (responsibilityName == null) {
+            return "error:You have no responsibility assigned";
+        }
+
+        // Get responsibility details
+        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
+                responsibilityService.findByName(responsibilityName);
+
+        if (!responsibilityOptional.isPresent()) {
+            return "error:Responsibility not found";
+        }
+
+        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+
+        // Verify that this request belongs to the manager's responsibility
+        Optional<Request> requestOptional = requestService.findById(requestId);
+        if (!requestOptional.isPresent()) {
+            return "error:Request not found";
+        }
+
+        Request request = requestOptional.get();
+        if (!request.getResponsibilityId().equals(responsibilityId)) {
+            return "error:You don't have permission to manage this request";
+        }
+
+        // Approve the request
+        String result = requestService.approveRequest(requestId);
+
+        if ("success".equals(result)) {
+            return "success:Request approved successfully";
+        } else {
+            return "error:" + result;
+        }
+    }
+
+    /**
+     * Deny a request
+     */
+    @PostMapping("/manager/deny-request")
+    @ResponseBody
+    public String denyRequest(@RequestParam Long requestId,
+                              HttpSession session) {
+
+        // Check if user is logged in and is manager
+        if (!isUserLoggedIn(session)) {
+            return "error:Please log in to deny requests";
+        }
+
+        User user = getLoggedInUser(session);
+        if (!"manager".equals(user.getRoleName())) {
+            return "error:Access denied";
+        }
+
+        // Get user's responsibility to verify permission
+        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (responsibilityName == null) {
+            return "error:You have no responsibility assigned";
+        }
+
+        // Get responsibility details
+        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
+                responsibilityService.findByName(responsibilityName);
+
+        if (!responsibilityOptional.isPresent()) {
+            return "error:Responsibility not found";
+        }
+
+        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+
+        // Verify that this request belongs to the manager's responsibility
+        Optional<Request> requestOptional = requestService.findById(requestId);
+        if (!requestOptional.isPresent()) {
+            return "error:Request not found";
+        }
+
+        Request request = requestOptional.get();
+        if (!request.getResponsibilityId().equals(responsibilityId)) {
+            return "error:You don't have permission to manage this request";
+        }
+
+        // Deny the request
+        String result = requestService.denyRequest(requestId);
+
+        if ("success".equals(result)) {
+            return "success:Request denied successfully";
+        } else {
+            return "error:" + result;
+        }
     }
 
     /**
@@ -360,7 +524,7 @@ public class ItemController {
     }
 
     // ======================
-    // NEW: USER REQUEST ENDPOINTS
+    // USER REQUEST ENDPOINTS
     // ======================
 
     /**

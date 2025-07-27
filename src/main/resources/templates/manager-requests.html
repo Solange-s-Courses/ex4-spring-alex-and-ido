@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests - Event Management System</title>
+    <!-- Load admin styles for consistent styling -->
+    <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
+
+    <!-- Include Navbar Styles -->
+    <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Requests Section Styling */
+        .requests-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .requests-title {
+            color: #007bff;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .request-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Requests Table */
+        .requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .requests-table th,
+        .requests-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .requests-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .requests-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+
+        .btn-approve:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-deny {
+            background-color: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-deny:hover {
+            background-color: #c82333;
+        }
+
+        .btn-deny:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .request-type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .type-request {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .type-return {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .request-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #007bff;
+        }
+
+        .no-requests {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .modal-title {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .modal-message {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-confirm {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #218838;
+        }
+
+        .modal-btn-deny {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-deny:hover {
+            background: #c82333;
+        }
+
+        .modal-btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .requests-table {
+                font-size: 0.9rem;
+            }
+
+            .requests-table th,
+            .requests-table td {
+                padding: 8px;
+            }
+
+            .request-actions {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 1.5rem;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar with Dashboard button -->
+<div th:with="showDashboardBtn=true">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="content-card">
+        <h1>Manage Requests - <strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong></h1>
+        <p class="text-muted">Review and approve or deny item requests from users</p>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Requests Section -->
+        <div class="requests-header">
+            <h2 class="requests-title">Pending Requests</h2>
+        </div>
+
+        <div class="request-count" th:if="${requestCount != null}">
+            Total Pending Requests: <span th:text="${requestCount}">0</span>
+        </div>
+
+        <!-- Requests Table -->
+        <div th:if="${requests != null and not #lists.isEmpty(requests)}">
+            <table class="requests-table">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Date Requested</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="request : ${requests}">
+                    <td>
+                        <span class="user-name"
+                              th:text="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}">User Name</span>
+                    </td>
+                    <td>
+                        <span class="item-name" th:text="${request.item.itemName}">Item Name</span>
+                    </td>
+                    <td>
+                        <span class="request-type-badge"
+                              th:classappend="${request.requestType == 'request' ? 'type-request' : 'type-return'}"
+                              th:text="${#strings.capitalize(request.requestType)}">Type</span>
+                    </td>
+                    <td>
+                        <span class="request-date"
+                              th:text="${#temporals.format(request.dateOfIssue, 'MMM dd, yyyy HH:mm')}">Date</span>
+                    </td>
+                    <td>
+                        <div class="request-actions">
+                            <button class="btn-approve"
+                                    th:data-request-id="${request.requestId}"
+                                    th:data-user-name="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}"
+                                    th:data-item-name="${request.item.itemName}"
+                                    th:data-request-type="${request.requestType}"
+                                    onclick="showApproveModal(this.dataset.requestId, this.dataset.userName, this.dataset.itemName, this.dataset.requestType)">
+                                Approve
+                            </button>
+                            <button class="btn-deny"
+                                    th:data-request-id="${request.requestId}"
+                                    th:data-user-name="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}"
+                                    th:data-item-name="${request.item.itemName}"
+                                    th:data-request-type="${request.requestType}"
+                                    onclick="showDenyModal(this.dataset.requestId, this.dataset.userName, this.dataset.itemName, this.dataset.requestType)">
+                                Deny
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Requests Message -->
+        <div th:if="${requests == null or #lists.isEmpty(requests)}" class="no-requests">
+            <p>No pending requests at this time.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Request Modal -->
+<div id="approveModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Approve Request</h3>
+        <p class="modal-message" id="approveMessage">Are you sure you want to approve this request?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closeApproveModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmApproveBtn" onclick="confirmApproveRequest()">Approve</button>
+        </div>
+    </div>
+</div>
+
+<!-- Deny Request Modal -->
+<div id="denyModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Deny Request</h3>
+        <p class="modal-message" id="denyMessage">Are you sure you want to deny this request?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closeDenyModal()">Cancel</button>
+            <button class="modal-btn modal-btn-deny" id="confirmDenyBtn" onclick="confirmDenyRequest()">Deny</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include Toast System -->
+<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+
+<!-- Include Navbar Scripts -->
+<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+<!-- Include Toast JavaScript -->
+<script th:src="@{/js/toast.js}"></script>
+
+<!-- Request Management JavaScript -->
+<script>
+    // Global variables for request management
+    let currentRequestId = null;
+    let currentRequestType = null;
+
+    /**
+     * Show approve confirmation modal
+     */
+    function showApproveModal(requestId, userName, itemName, requestType) {
+        currentRequestId = requestId;
+        currentRequestType = requestType;
+
+        const actionText = requestType === 'request' ? 'give' : 'accept return of';
+        document.getElementById('approveMessage').textContent =
+            `Are you sure you want to approve ${userName}'s request to ${actionText} "${itemName}"?`;
+        document.getElementById('approveModal').style.display = 'block';
+    }
+
+    /**
+     * Close approve modal
+     */
+    function closeApproveModal() {
+        document.getElementById('approveModal').style.display = 'none';
+        currentRequestId = null;
+        currentRequestType = null;
+    }
+
+    /**
+     * Confirm approve request
+     */
+    function confirmApproveRequest() {
+        if (!currentRequestId) {
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirmApproveBtn');
+        const originalText = confirmBtn.textContent;
+
+        // Disable button and show loading
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Approving...';
+
+        // Send AJAX request
+        fetch('/manager/approve-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `requestId=${currentRequestId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                const [status, message] = result.split(':', 2);
+
+                if (status === 'success') {
+                    Toast.success(message);
+                    closeApproveModal();
+                    // Refresh the page to update the requests list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    Toast.error(message);
+                    // Re-enable button
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Toast.error('An error occurred while processing the request');
+                // Re-enable button
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            });
+    }
+
+    /**
+     * Show deny confirmation modal
+     */
+    function showDenyModal(requestId, userName, itemName, requestType) {
+        currentRequestId = requestId;
+        currentRequestType = requestType;
+
+        const actionText = requestType === 'request' ? 'request for' : 'return request for';
+        document.getElementById('denyMessage').textContent =
+            `Are you sure you want to deny ${userName}'s ${actionText} "${itemName}"?`;
+        document.getElementById('denyModal').style.display = 'block';
+    }
+
+    /**
+     * Close deny modal
+     */
+    function closeDenyModal() {
+        document.getElementById('denyModal').style.display = 'none';
+        currentRequestId = null;
+        currentRequestType = null;
+    }
+
+    /**
+     * Confirm deny request
+     */
+    function confirmDenyRequest() {
+        if (!currentRequestId) {
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirmDenyBtn');
+        const originalText = confirmBtn.textContent;
+
+        // Disable button and show loading
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Denying...';
+
+        // Send AJAX request
+        fetch('/manager/deny-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `requestId=${currentRequestId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                const [status, message] = result.split(':', 2);
+
+                if (status === 'success') {
+                    Toast.success(message);
+                    closeDenyModal();
+                    // Refresh the page to update the requests list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    Toast.error(message);
+                    // Re-enable button
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Toast.error('An error occurred while processing the request');
+                // Re-enable button
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            });
+    }
+
+    /**
+     * Close modal when clicking outside
+     */
+    window.onclick = function(event) {
+        const approveModal = document.getElementById('approveModal');
+        const denyModal = document.getElementById('denyModal');
+
+        if (event.target === approveModal) {
+            closeApproveModal();
+        }
+        if (event.target === denyModal) {
+            closeDenyModal();
+        }
+    }
+
+    /**
+     * Close modal with Escape key
+     */
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeApproveModal();
+            closeDenyModal();
+        }
+    });
+</script>
+
+</body>
+</html>
