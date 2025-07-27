@@ -413,4 +413,54 @@ public class EventService {
     public long getTotalEventCount() {
         return eventRepository.count();
     }
+
+    /**
+     * Check if any active events allow item requests
+     * Returns true if there are events in "active" status
+     */
+    public boolean areItemRequestsAllowed() {
+        List<Event> activeEvents = getEventsByStatus(Event.STATUS_ACTIVE);
+        return !activeEvents.isEmpty();
+    }
+
+    /**
+     * Check if any events allow item returns
+     * Returns true if there are events in "equipment return" status
+     */
+    public boolean areItemReturnsAllowed() {
+        List<Event> returnEvents = getEventsByStatus(Event.STATUS_EQUIPMENT_RETURN);
+        return !returnEvents.isEmpty();
+    }
+
+    /**
+     * Check if a specific responsibility is part of any active event (for requests)
+     */
+    public boolean isResponsibilityInActiveEvent(Long responsibilityId) {
+        List<Event> activeEvents = getEventsByStatus(Event.STATUS_ACTIVE);
+        for (Event event : activeEvents) {
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(event.getEventId());
+            for (Responsibility responsibility : eventResponsibilities) {
+                if (responsibility.getResponsibilityId().equals(responsibilityId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a specific responsibility is part of any return-mode event (for returns)
+     */
+    public boolean isResponsibilityInReturnEvent(Long responsibilityId) {
+        List<Event> returnEvents = getEventsByStatus(Event.STATUS_EQUIPMENT_RETURN);
+        for (Event event : returnEvents) {
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(event.getEventId());
+            for (Responsibility responsibility : eventResponsibilities) {
+                if (responsibility.getResponsibilityId().equals(responsibilityId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

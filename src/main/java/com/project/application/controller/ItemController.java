@@ -3,10 +3,7 @@ package com.project.application.controller;
 import com.project.application.entity.Item;
 import com.project.application.entity.User;
 import com.project.application.entity.Request;
-import com.project.application.service.ItemService;
-import com.project.application.service.UserService;
-import com.project.application.service.ResponsibilityService;
-import com.project.application.service.RequestService;
+import com.project.application.service.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -25,6 +22,7 @@ public class ItemController {
     private final UserService userService;
     private final ResponsibilityService responsibilityService;
     private final RequestService requestService;
+    private final EventService eventService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -475,7 +473,7 @@ public class ItemController {
 
     /**
      * Display responsibility details with item list for all users
-     * ENHANCED: Now includes request functionality
+     * ENHANCED: Now includes request functionality and event status
      */
     @GetMapping("/responsibility/view/{id}")
     public String viewResponsibility(@PathVariable Long id,
@@ -506,19 +504,25 @@ public class ItemController {
         // Get managers for this responsibility
         List<com.project.application.entity.User> managers = userService.getResponsibilityManagers(id);
 
-        // NEW: Add request-related data for users
+        // Add request-related data for users
         // Check which items the current user has already requested
         List<Long> userRequestedItemIds = requestService.getRequestsByUserId(user.getUserId())
                 .stream()
                 .map(request -> request.getItem().getItemId())
                 .toList();
 
+        // NEW: Add event status data
+        boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
+        boolean canReturnItems = eventService.isResponsibilityInReturnEvent(id);
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("responsibility", responsibility);
         model.addAttribute("items", items);
         model.addAttribute("responsibilityManagers", managers);
-        model.addAttribute("userRequestedItemIds", userRequestedItemIds); // NEW: For button states
+        model.addAttribute("userRequestedItemIds", userRequestedItemIds);
+        model.addAttribute("canRequestItems", canRequestItems); // NEW: Event status for requests
+        model.addAttribute("canReturnItems", canReturnItems);   // NEW: Event status for returns
 
         return "responsibility-view";
     }
@@ -587,7 +591,7 @@ public class ItemController {
     // ======================
 
     /**
-     * Display user's owned items page
+     * Display user's owned items page with event status integration
      */
     @GetMapping("/user/my-items")
     public String myItems(HttpSession session, Model model) {
@@ -606,10 +610,14 @@ public class ItemController {
         // Get all items owned by this user
         List<Item> userItems = itemService.getItemsByUserId(user.getUserId());
 
+        // NEW: Check if any events allow returns
+        boolean canReturnItems = eventService.areItemReturnsAllowed();
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("userItems", userItems);
         model.addAttribute("itemCount", userItems.size());
+        model.addAttribute("canReturnItems", canReturnItems); // NEW: Global return status
 
         return "user-items";
     }

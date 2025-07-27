@@ -18,9 +18,10 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
     private final ItemService itemService;
+    private final EventService eventService;
 
     /**
-     * Create a new request (request or return)
+     * Create a new request (request or return) with event status validation
      */
     @Transactional
     public String createRequest(Long userId, Long itemId, String requestType) {
@@ -54,8 +55,15 @@ public class RequestService {
                 return "You already have a pending request for this item";
             }
 
-            // Validate based on request type
+            // NEW: Event status validation
+            Long responsibilityId = item.getResponsibilityId();
+
             if ("request".equals(requestType)) {
+                // For item requests: check if responsibility is in active event
+                if (!eventService.isResponsibilityInActiveEvent(responsibilityId)) {
+                    return "Item requests are not allowed at this time. No active events for this responsibility.";
+                }
+
                 // For item requests, item must be available
                 if (!"Available".equals(item.getStatus())) {
                     return "Item is not available for request";
@@ -64,6 +72,11 @@ public class RequestService {
                     return "Item is already owned by another user";
                 }
             } else if ("return".equals(requestType)) {
+                // For return requests: check if responsibility is in return-mode event
+                if (!eventService.isResponsibilityInReturnEvent(responsibilityId)) {
+                    return "Item returns are not allowed at this time. No events in return mode for this responsibility.";
+                }
+
                 // For return requests, user must own the item
                 if (!"In Use".equals(item.getStatus())) {
                     return "Item is not currently in use";

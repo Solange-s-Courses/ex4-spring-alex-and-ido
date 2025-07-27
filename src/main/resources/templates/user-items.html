@@ -228,6 +228,13 @@
             background: #5a6268;
         }
 
+        .return-disabled {
+            color: #6c757d;
+            font-size: 0.8rem;
+            font-style: italic;
+            cursor: not-allowed;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-content {
@@ -304,12 +311,20 @@
                         <span class="date-taken">Coming Soon</span>
                     </td>
                     <td>
-                        <button class="btn-return"
+                        <!-- Show return button only if events allow returns -->
+                        <button th:if="${canReturnItems}"
+                                class="btn-return"
                                 th:data-item-id="${item.itemId}"
                                 th:data-item-name="${item.itemName}"
                                 onclick="showReturnModal(this.dataset.itemId, this.dataset.itemName)">
                             Return
                         </button>
+                        <!-- Show disabled message if returns not allowed -->
+                        <span th:if="${!canReturnItems}"
+                              class="return-disabled"
+                              title="Returns not available - no events in return mode">
+                            Return Unavailable
+                        </span>
                     </td>
                 </tr>
                 </tbody>

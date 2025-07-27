@@ -279,6 +279,17 @@
             background: #5a6268;
         }
 
+        .request-disabled {
+            color: #6c757d;
+            font-size: 0.8rem;
+            font-style: italic;
+            cursor: not-allowed;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-content {
@@ -384,20 +395,30 @@
                         <div class="item-actions">
                             <!-- NEW: Request button for available items (only for users and managers, not admins/chiefs) -->
                             <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager')}">
-                                <!-- Show "Request" button if user hasn't requested this item -->
-                                <button th:if="${!userRequestedItemIds.contains(item.itemId)}"
-                                        class="request-btn"
-                                        th:data-item-id="${item.itemId}"
-                                        th:data-item-name="${item.itemName}"
-                                        onclick="showRequestModal(this.dataset.itemId, this.dataset.itemName)">
-                                    Request
-                                </button>
-                                <!-- Show "Requested" button if user has already requested this item -->
-                                <button th:if="${userRequestedItemIds.contains(item.itemId)}"
-                                        class="request-btn requested"
-                                        disabled>
-                                    Requested
-                                </button>
+                                <!-- Show request buttons only if events allow requests -->
+                                <div th:if="${canRequestItems}">
+                                    <!-- Show "Request" button if user hasn't requested this item -->
+                                    <button th:if="${!userRequestedItemIds.contains(item.itemId)}"
+                                            class="request-btn"
+                                            th:data-item-id="${item.itemId}"
+                                            th:data-item-name="${item.itemName}"
+                                            onclick="showRequestModal(this.dataset.itemId, this.dataset.itemName)">
+                                        Request
+                                    </button>
+                                    <!-- Show "Requested" button if user has already requested this item -->
+                                    <button th:if="${userRequestedItemIds.contains(item.itemId)}"
+                                            class="request-btn requested"
+                                            disabled>
+                                        Requested
+                                    </button>
+                                </div>
+                                <!-- Show disabled message if requests not allowed -->
+                                <div th:if="${!canRequestItems}">
+        <span class="request-disabled"
+              title="Requests not available - no active events for this responsibility">
+            Request Unavailable
+        </span>
+                                </div>
                             </div>
 
                             <!-- Item Status -->
