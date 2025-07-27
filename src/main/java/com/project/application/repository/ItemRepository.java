@@ -33,4 +33,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     // Find items by status within a responsibility
     @Query("SELECT i FROM Item i WHERE i.responsibility.responsibilityId = :responsibilityId AND i.status = :status ORDER BY i.itemName")
     List<Item> findByResponsibilityIdAndStatus(@Param("responsibilityId") Long responsibilityId, @Param("status") String status);
+
+    // Find all items owned by a specific user
+    @Query("SELECT i FROM Item i WHERE i.user.userId = :userId ORDER BY i.itemName")
+    List<Item> findByUser_UserId(@Param("userId") Long userId);
+
+    // Count items owned by a specific user
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.user.userId = :userId")
+    long countByUser_UserId(@Param("userId") Long userId);
 }

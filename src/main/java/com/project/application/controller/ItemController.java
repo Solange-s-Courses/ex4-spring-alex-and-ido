@@ -581,4 +581,36 @@ public class ItemController {
             return "error:" + result;
         }
     }
+
+    // ======================
+    // NEW: USER ITEMS LIST (MY ITEMS)
+    // ======================
+
+    /**
+     * Display user's owned items page
+     */
+    @GetMapping("/user/my-items")
+    public String myItems(HttpSession session, Model model) {
+        // Check if user is logged in
+        if (!isUserLoggedIn(session)) {
+            return "redirect:/login";
+        }
+
+        User user = getLoggedInUser(session);
+
+        // Users and managers can view their items, but not admins/chiefs
+        if ("admin".equals(user.getRoleName()) || "chief".equals(user.getRoleName())) {
+            return "error/404";
+        }
+
+        // Get all items owned by this user
+        List<Item> userItems = itemService.getItemsByUserId(user.getUserId());
+
+        // Add data to model
+        model.addAttribute("user", user);
+        model.addAttribute("userItems", userItems);
+        model.addAttribute("itemCount", userItems.size());
+
+        return "user-items";
+    }
 }

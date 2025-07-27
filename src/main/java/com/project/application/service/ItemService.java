@@ -209,4 +209,18 @@ public class ItemService {
             return false;
         }
     }
+
+    /**
+     * Get all items owned by a specific user
+     */
+    public List<Item> getItemsByUserId(Long userId) {
+        return itemRepository.findByUser_UserId(userId);
+    }
+
+    /**
+     * Get count of items owned by a specific user
+     */
+    public long countItemsByUserId(Long userId) {
+        return itemRepository.countByUser_UserId(userId);
+    }
 }

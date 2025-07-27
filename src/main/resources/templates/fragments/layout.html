@@ -31,6 +31,12 @@
             Manage Requests
         </a>
 
+        <!-- NEW: My Items button (only for users and managers, hide on my-items page) -->
+        <a th:href="@{/user/my-items}" class="nav-btn nav-btn-items"
+           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+            My Items
+        </a>
+
         <!-- Chief User List button (only for chief, hide on user list page) -->
         <a th:href="@{/chief/user-list}" class="nav-btn"
            th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
@@ -61,6 +67,12 @@
         <a th:href="@{/manager/requests}" class="mobile-nav-btn mobile-nav-btn-requests"
            th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}">
             Manage Requests
+        </a>
+
+        <!-- NEW: My Items button (only for users and managers, hide on my-items page) -->
+        <a th:href="@{/user/my-items}" class="mobile-nav-btn mobile-nav-btn-items"
+           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+            My Items
         </a>
 
         <!-- Chief User List button (only for chief, hide on user list page) -->
@@ -128,6 +140,20 @@
 
         .nav-btn-requests:hover {
             background-color: #138496 !important;
+        }
+
+        /* NEW: Special styling for My Items button */
+        .nav-btn-items {
+            background-color: #6f42c1 !important;
+        }
+
+        .nav-btn-items:hover {
+            background-color: #5a32a3 !important;
+        }
+
+        /* NEW: Special styling for mobile My Items button */
+        .mobile-nav-btn-items:hover {
+            background-color: rgba(111, 66, 193, 0.3) !important;
         }
 
         .logout-btn {
