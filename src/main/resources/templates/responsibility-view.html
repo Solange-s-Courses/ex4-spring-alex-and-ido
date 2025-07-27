@@ -115,10 +115,30 @@
             border-left: 4px solid #007bff;
         }
 
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
         .item-name {
             font-weight: 500;
             color: #333;
             font-size: 1rem;
+        }
+
+        /* NEW: Item owner display */
+        .item-owner {
+            font-size: 0.8rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .item-status {
@@ -143,6 +163,38 @@
             color: #721c24;
         }
 
+        /* NEW: Request Button Styles */
+        .request-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .request-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .request-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .request-btn.requested {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
         .no-items {
             text-align: center;
             color: #6c757d;
@@ -150,6 +202,81 @@
             padding: 2rem;
             background-color: #f8f9fa;
             border-radius: 6px;
+        }
+
+        /* NEW: Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .modal-title {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .modal-message {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-confirm {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #218838;
+        }
+
+        .modal-btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #5a6268;
         }
 
         /* Responsive Design */
@@ -182,8 +309,18 @@
                 gap: 0.5rem;
             }
 
-            .item-status {
+            .item-actions {
                 align-self: flex-end;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 1.5rem;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
     </style>
@@ -236,11 +373,39 @@
             <div th:if="${items != null and !items.isEmpty()}">
                 <ul class="items-list">
                     <li th:each="item : ${items}" class="item-entry">
-                        <span class="item-name" th:text="${item.itemName}">Item Name</span>
-                        <span class="item-status"
-                              th:class="'item-status ' + ${item.status == 'Available' ? 'status-available' :
-                            item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
-                              th:text="${item.status}">Status</span>
+                        <div class="item-info">
+                            <span class="item-name" th:text="${item.itemName}">Item Name</span>
+                            <!-- NEW: Show item owner for "In Use" items -->
+                            <div th:if="${item.status == 'In Use' and item.user != null}" class="item-owner">
+                                Held by: <span th:text="${#strings.capitalize(item.user.firstName) + ' ' + #strings.capitalize(item.user.lastName)}">User Name</span>
+                            </div>
+                        </div>
+
+                        <div class="item-actions">
+                            <!-- NEW: Request button for available items (only for users and managers, not admins/chiefs) -->
+                            <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager')}">
+                                <!-- Show "Request" button if user hasn't requested this item -->
+                                <button th:if="${!userRequestedItemIds.contains(item.itemId)}"
+                                        class="request-btn"
+                                        th:data-item-id="${item.itemId}"
+                                        th:data-item-name="${item.itemName}"
+                                        onclick="showRequestModal(this.dataset.itemId, this.dataset.itemName)">
+                                    Request
+                                </button>
+                                <!-- Show "Requested" button if user has already requested this item -->
+                                <button th:if="${userRequestedItemIds.contains(item.itemId)}"
+                                        class="request-btn requested"
+                                        disabled>
+                                    Requested
+                                </button>
+                            </div>
+
+                            <!-- Item Status -->
+                            <span class="item-status"
+                                  th:class="'item-status ' + ${item.status == 'Available' ? 'status-available' :
+                                item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
+                                  th:text="${item.status}">Status</span>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -253,7 +418,123 @@
     </div>
 </div>
 
+<!-- NEW: Request Confirmation Modal -->
+<div id="requestModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Request Item</h3>
+        <p class="modal-message" id="requestMessage">Are you sure you want to request this item?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closeRequestModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmRequestBtn" onclick="confirmItemRequest()">Request Item</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include Toast System -->
+<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+
 <!-- Include Navbar Scripts -->
 <div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+
+<!-- Include Toast JavaScript -->
+<script th:src="@{/js/toast.js}"></script>
+
+<!-- NEW: Request functionality JavaScript -->
+<script>
+    // Global variables for request functionality
+    let currentItemId = null;
+    let currentItemName = null;
+
+    /**
+     * Show request confirmation modal
+     */
+    function showRequestModal(itemId, itemName) {
+        currentItemId = itemId;
+        currentItemName = itemName;
+
+        document.getElementById('requestMessage').textContent =
+            `Are you sure you want to request "${itemName}"?`;
+        document.getElementById('requestModal').style.display = 'block';
+    }
+
+    /**
+     * Close request modal
+     */
+    function closeRequestModal() {
+        document.getElementById('requestModal').style.display = 'none';
+        currentItemId = null;
+        currentItemName = null;
+    }
+
+    /**
+     * Confirm item request
+     */
+    function confirmItemRequest() {
+        if (!currentItemId) {
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirmRequestBtn');
+        const originalText = confirmBtn.textContent;
+
+        // Disable button and show loading
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Requesting...';
+
+        // Send AJAX request
+        fetch('/user/request-item', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `itemId=${currentItemId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                const [status, message] = result.split(':', 2);
+
+                if (status === 'success') {
+                    Toast.success(message);
+                    closeRequestModal();
+                    // Refresh the page to update button states
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    Toast.error(message);
+                    // Re-enable button
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Toast.error('An error occurred while processing your request');
+                // Re-enable button
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            });
+    }
+
+    /**
+     * Close modal when clicking outside
+     */
+    window.onclick = function(event) {
+        const modal = document.getElementById('requestModal');
+        if (event.target === modal) {
+            closeRequestModal();
+        }
+    }
+
+    /**
+     * Close modal with Escape key
+     */
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeRequestModal();
+        }
+    });
+</script>
+
 </body>
 </html>

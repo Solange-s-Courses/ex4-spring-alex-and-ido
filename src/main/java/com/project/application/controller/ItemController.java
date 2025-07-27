@@ -5,14 +5,12 @@ import com.project.application.entity.User;
 import com.project.application.service.ItemService;
 import com.project.application.service.UserService;
 import com.project.application.service.ResponsibilityService;
+import com.project.application.service.RequestService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -25,6 +23,7 @@ public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
     private final ResponsibilityService responsibilityService;
+    private final RequestService requestService; // NEW: Add RequestService
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -312,6 +311,7 @@ public class ItemController {
 
     /**
      * Display responsibility details with item list for all users
+     * ENHANCED: Now includes request functionality
      */
     @GetMapping("/responsibility/view/{id}")
     public String viewResponsibility(@PathVariable Long id,
@@ -342,12 +342,79 @@ public class ItemController {
         // Get managers for this responsibility
         List<com.project.application.entity.User> managers = userService.getResponsibilityManagers(id);
 
+        // NEW: Add request-related data for users
+        // Check which items the current user has already requested
+        List<Long> userRequestedItemIds = requestService.getRequestsByUserId(user.getUserId())
+                .stream()
+                .map(request -> request.getItem().getItemId())
+                .toList();
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("responsibility", responsibility);
         model.addAttribute("items", items);
         model.addAttribute("responsibilityManagers", managers);
+        model.addAttribute("userRequestedItemIds", userRequestedItemIds); // NEW: For button states
 
         return "responsibility-view";
+    }
+
+    // ======================
+    // NEW: USER REQUEST ENDPOINTS
+    // ======================
+
+    /**
+     * Handle user item request via AJAX
+     */
+    @PostMapping("/user/request-item")
+    @ResponseBody
+    public String requestItem(@RequestParam Long itemId,
+                              HttpSession session) {
+
+        // Check if user is logged in
+        if (!isUserLoggedIn(session)) {
+            return "error:Please log in to request items";
+        }
+
+        User user = getLoggedInUser(session);
+
+        // Users and managers can request items, but not admins/chiefs
+        if ("admin".equals(user.getRoleName()) || "chief".equals(user.getRoleName())) {
+            return "error:Your role cannot request items";
+        }
+
+        // Create the request
+        String result = requestService.createRequest(user.getUserId(), itemId, "request");
+
+        if ("success".equals(result)) {
+            return "success:Item request submitted successfully";
+        } else {
+            return "error:" + result;
+        }
+    }
+
+    /**
+     * Handle user item return request via AJAX
+     */
+    @PostMapping("/user/return-item")
+    @ResponseBody
+    public String returnItem(@RequestParam Long itemId,
+                             HttpSession session) {
+
+        // Check if user is logged in
+        if (!isUserLoggedIn(session)) {
+            return "error:Please log in to return items";
+        }
+
+        User user = getLoggedInUser(session);
+
+        // Create the return request
+        String result = requestService.createRequest(user.getUserId(), itemId, "return");
+
+        if ("success".equals(result)) {
+            return "success:Item return request submitted successfully";
+        } else {
+            return "error:" + result;
+        }
     }
 }
