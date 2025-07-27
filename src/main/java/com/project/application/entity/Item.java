@@ -32,11 +32,25 @@ public class Item {
     @JoinColumn(name = "responsibility_id", nullable = false, foreignKey = @ForeignKey(name = "FK_item_responsibility"))
     private Responsibility responsibility;
 
-    // Constructor for creating items with name and status
+    // NEW: Add userId to track item ownership
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true, foreignKey = @ForeignKey(name = "FK_item_user"))
+    private User user;
+
+    // Constructor for creating items with name and status (original)
     public Item(String itemName, String status, Responsibility responsibility) {
         this.itemName = itemName;
         this.status = status;
         this.responsibility = responsibility;
+        this.user = null; // No owner initially
+    }
+
+    // NEW: Constructor for creating items with owner
+    public Item(String itemName, String status, Responsibility responsibility, User user) {
+        this.itemName = itemName;
+        this.status = status;
+        this.responsibility = responsibility;
+        this.user = user;
     }
 
     // Convenience method to get responsibility ID
@@ -47,5 +61,33 @@ public class Item {
     // Convenience method to get responsibility name
     public String getResponsibilityName() {
         return responsibility != null ? responsibility.getResponsibilityName() : null;
+    }
+
+    // NEW: Convenience method to get user ID
+    public Long getUserId() {
+        return user != null ? user.getUserId() : null;
+    }
+
+    // NEW: Convenience method to get user's full name
+    public String getUserFullName() {
+        if (user != null) {
+            return user.getFirstName() + " " + user.getLastName();
+        }
+        return null;
+    }
+
+    // NEW: Check if item is owned by specific user
+    public boolean isOwnedBy(Long userId) {
+        return user != null && user.getUserId().equals(userId);
+    }
+
+    // NEW: Check if item is available (no owner)
+    public boolean isAvailable() {
+        return "Available".equals(status) && user == null;
+    }
+
+    // NEW: Check if item is in use (has owner)
+    public boolean isInUse() {
+        return "In Use".equals(status) && user != null;
     }
 }
