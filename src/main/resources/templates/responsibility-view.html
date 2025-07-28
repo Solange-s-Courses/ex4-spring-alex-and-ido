@@ -146,6 +146,11 @@
             border-radius: 12px;
             font-size: 0.9rem;
             font-weight: 500;
+            display: inline-block;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .status-available {
@@ -386,10 +391,6 @@
                     <li th:each="item : ${items}" class="item-entry">
                         <div class="item-info">
                             <span class="item-name" th:text="${item.itemName}">Item Name</span>
-                            <!-- NEW: Show item owner for "In Use" items -->
-                            <div th:if="${item.status == 'In Use' and item.user != null}" class="item-owner">
-                                Held by: <span th:text="${#strings.capitalize(item.user.firstName) + ' ' + #strings.capitalize(item.user.lastName)}">User Name</span>
-                            </div>
                         </div>
 
                         <div class="item-actions">
@@ -424,8 +425,10 @@
                             <!-- Item Status -->
                             <span class="item-status"
                                   th:class="'item-status ' + ${item.status == 'Available' ? 'status-available' :
-                                item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
-                                  th:text="${item.status}">Status</span>
+                                    item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
+                                  th:text="${item.status == 'In Use' && item.user != null ?
+                                    'In Use by ' + #strings.capitalizeWords(item.user.firstName + ' ' + item.user.lastName) : item.status}">Status
+                            </span>
                         </div>
                     </li>
                 </ul>

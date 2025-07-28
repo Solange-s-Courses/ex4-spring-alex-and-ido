@@ -317,8 +317,8 @@
                         <span class="status-badge"
                             th:classappend="${item.status == 'Available' ? 'status-available' :
                             (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
-                            th:text="${item.status == 'In Use' && item.userFullName != null ?
-                            'In Use by ' + item.userFullName : item.status}">
+                              th:text="${item.status == 'In Use' && item.userFullName != null ?
+                            'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
                             Status
                         </span>
                     </td>
