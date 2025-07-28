@@ -316,19 +316,21 @@
                     </td>
                     <td>
                         <div class="item-actions">
-                            <button class="btn-edit-item"
-                                    th:data-item-id="${item.itemId}"
-                                    th:data-item-name="${item.itemName}"
-                                    th:data-item-status="${item.status}"
-                                    onclick="showEditItemModal(this.dataset.itemId, this.dataset.itemName, this.dataset.itemStatus)">
-                                Edit
-                            </button>
-                            <button class="btn-delete-item"
-                                    th:data-item-id="${item.itemId}"
-                                    th:data-item-name="${item.itemName}"
-                                    onclick="showDeleteItemModal(this.dataset.itemId, this.dataset.itemName)">
-                                Delete
-                            </button>
+                            <div th:if="${!item.isInUse()}">
+                                <button class="btn-edit-item"
+                                        th:data-item-id="${item.itemId}"
+                                        th:data-item-name="${item.itemName}"
+                                        th:data-item-status="${item.status}"
+                                        onclick="showEditItemModal(this.dataset.itemId, this.dataset.itemName, this.dataset.itemStatus)">
+                                    Edit
+                                </button>
+                                <button class="btn-delete-item"
+                                        th:data-item-id="${item.itemId}"
+                                        th:data-item-name="${item.itemName}"
+                                        onclick="showDeleteItemModal(this.dataset.itemId, this.dataset.itemName)">
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </td>
                 </tr>

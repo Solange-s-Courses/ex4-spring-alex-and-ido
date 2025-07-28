@@ -405,6 +405,19 @@ public class ItemController {
             return "redirect:/manager/items";
         }
 
+        // NEW: Check if item is in use before updating
+        Optional<Item> itemOptional = itemService.findById(itemId);
+        if (!itemOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Item not found.");
+            return "redirect:/manager/items";
+        }
+
+        Item item = itemOptional.get();
+        if (item.isInUse()) {
+            redirectAttributes.addFlashAttribute("error", "Cannot edit item that is currently in use.");
+            return "redirect:/manager/items";
+        }
+
         // Update item
         String result = itemService.updateItem(itemId, itemName, status);
 
@@ -456,6 +469,19 @@ public class ItemController {
         // Verify user can manage this item
         if (!itemService.canUserManageItems(user.getUserId(), responsibilityId, userService)) {
             redirectAttributes.addFlashAttribute("error", "You don't have permission to delete this item.");
+            return "redirect:/manager/items";
+        }
+
+        // NEW: Check if item is in use before deleting
+        Optional<Item> itemOptional = itemService.findById(itemId);
+        if (!itemOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Item not found.");
+            return "redirect:/manager/items";
+        }
+
+        Item item = itemOptional.get();
+        if (item.isInUse()) {
+            redirectAttributes.addFlashAttribute("error", "Cannot delete item that is currently in use.");
             return "redirect:/manager/items";
         }
 
