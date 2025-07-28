@@ -249,10 +249,216 @@
             color: #721c24;
         }
 
-        /* Responsive */
+        /* Enhanced Mobile Responsive Design */
         @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .content-card {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                line-height: 1.3;
+            }
+
+            /* Description section mobile */
             .description-section {
                 margin-bottom: 1.5rem;
+            }
+
+            .description-text {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .edit-description-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+                touch-action: manipulation;
+            }
+
+            /* Items header mobile */
+            .items-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .items-title {
+                font-size: 1.25rem;
+                margin: 0;
+            }
+
+            .add-item-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+                touch-action: manipulation;
+                align-self: stretch;
+                text-align: center;
+            }
+
+            /* Mobile-friendly table - card layout */
+            .items-table {
+                font-size: 0.85rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .items-table thead,
+            .items-table tbody,
+            .items-table th,
+            .items-table td,
+            .items-table tr {
+                display: block;
+            }
+
+            .items-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .items-table tr {
+                border: 1px solid #e9ecef;
+                margin-bottom: 12px;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #fff;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+
+            .items-table td {
+                border: none;
+                position: relative;
+                padding: 8px 8px 8px 35%;
+                text-align: left;
+                white-space: normal;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+            }
+
+            .items-table td:before {
+                content: attr(data-label) ": ";
+                position: absolute;
+                left: 8px;
+                width: 30%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: bold;
+                color: #333;
+                display: flex;
+                align-items: center;
+            }
+
+            /* Mobile button styling */
+            .item-actions {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+                margin-top: 8px;
+            }
+
+            .btn-edit-item, .btn-delete-item {
+                padding: 10px 16px;
+                font-size: 14px;
+                min-height: 44px;
+                touch-action: manipulation;
+                width: 100%;
+            }
+
+            /* Status badge mobile */
+            .status-badge {
+                font-size: 11px;
+                padding: 6px 10px;
+                max-width: 150px;
+            }
+
+            /* Mobile modal improvements */
+            .modal-content {
+                margin: 5% auto;
+                padding: 1.5rem;
+                width: 95%;
+                max-width: 400px;
+            }
+
+            .modal-header h3 {
+                font-size: 1.2rem;
+            }
+
+            .modal-footer {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .modal-footer .btn {
+                padding: 12px 24px;
+                font-size: 16px;
+                touch-action: manipulation;
+                width: 100%;
+            }
+
+            /* Form elements mobile */
+            .form-input {
+                padding: 12px;
+                font-size: 16px;
+                touch-action: manipulation;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group label {
+                font-size: 14px;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            /* Remove hover animations on mobile */
+            .edit-description-btn:hover,
+            .add-item-btn:hover,
+            .btn-edit-item:hover,
+            .btn-delete-item:hover {
+                transform: none;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .content-card {
+                padding: 0.75rem;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .items-title {
+                font-size: 1.1rem;
+            }
+
+            .modal-content {
+                margin: 2% auto;
+                padding: 1rem;
+            }
+
+            .items-table td {
+                padding: 6px 6px 6px 40%;
+            }
+
+            .items-table td:before {
+                left: 6px;
+                width: 35%;
+                font-size: 12px;
             }
         }
     </style>
@@ -312,17 +518,17 @@
                 </thead>
                 <tbody>
                 <tr th:each="item : ${items}">
-                    <td th:text="${item.itemName}">Item Name</td>
-                    <td>
-                        <span class="status-badge"
-                            th:classappend="${item.status == 'Available' ? 'status-available' :
-                            (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
-                              th:text="${item.status == 'In Use' && item.userFullName != null ?
-                            'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
-                            Status
-                        </span>
+                    <td data-label="Item Name" th:text="${item.itemName}">Item Name</td>
+                    <td data-label="Status">
+        <span class="status-badge"
+              th:classappend="${item.status == 'Available' ? 'status-available' :
+            (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
+              th:text="${item.status == 'In Use' && item.userFullName != null ?
+            'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
+            Status
+        </span>
                     </td>
-                    <td>
+                    <td data-label="Actions">
                         <div class="item-actions">
                             <div th:if="${!item.isInUse()}">
                                 <button class="btn-edit-item"
