@@ -12,196 +12,375 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+            opacity: 0.8;
         }
 
         /* Main Content */
         .main-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
 
-        .content-card {
+        /* Page Header */
+        .page-header {
             background: white;
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .text-muted {
-            color: #6c757d;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #1a202c;
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* Alert Messages */
         .alert {
-            padding: 1rem;
-            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
             margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
         }
 
         .alert-success {
             background-color: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
         }
 
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
+        }
+
+        /* Two Column Layout */
+        .management-layout {
+            display: grid;
+            grid-template-columns: 35% 1fr;
+            gap: 2rem;
+            min-height: 600px;
+        }
+
+        /* Left Sidebar */
+        .responsibility-sidebar {
+            background: linear-gradient(145deg, #f8f9fb 0%, #f1f3f7 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        .sidebar-content {
+            padding: 2rem;
+        }
+
+        .info-title {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title {
+            color: #4a5568;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
         }
 
         /* Description Section */
         .description-section {
             margin-bottom: 2rem;
-        }
-
-        .description-content {
-            margin-bottom: 1rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
         .description-text {
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 1rem;
-            border-radius: 4px;
-            color: #555;
+            background: white;
+            border-left: 4px solid #4299e1;
+            padding: 1.25rem;
+            border-radius: 8px;
+            color: #4a5568;
             font-style: italic;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .no-description {
-            color: #999;
+            color: #a0aec0;
             font-style: italic;
         }
 
         .edit-description-btn {
-            background-color: #17a2b8;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .edit-description-btn:hover {
-            background-color: #138496;
-        }
-
-        /* Items Section Styling */
-        .items-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #007bff;
-        }
-
-        .items-title {
-            color: #007bff;
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .add-item-btn {
-            background-color: #007bff;
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
-        .add-item-btn:hover {
-            background-color: #0056b3;
+        .edit-description-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.3);
         }
 
-        .item-count {
-            color: #6c757d;
-            font-size: 0.9rem;
+        /* Managers Section */
+        .managers-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .managers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .manager-badge {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .manager-badge:hover {
+            transform: translateY(-1px);
+        }
+
+        .no-managers {
+            color: #a0aec0;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed #e2e8f0;
+        }
+
+        /* Stats Section */
+        .stats-section {
             margin-bottom: 1rem;
         }
 
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Right Main Area */
+        .items-main {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .items-content {
+            padding: 2rem;
+        }
+
+        /* Items Header */
+        .items-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .items-title {
+            color: #2d3748;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .item-count {
+            color: #718096;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .add-item-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .add-item-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
         /* Items Table */
+        .items-table-container {
+            overflow-x: auto;
+        }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .items-table th,
-        .items-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
+            border-spacing: 0;
         }
 
         .items-table th {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 1rem 1.5rem;
+            text-align: left;
             font-weight: 600;
-            color: #495057;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
         }
 
         .items-table tr:hover {
-            background-color: #f8f9fa;
+            background-color: #f7fafc;
         }
 
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Action Buttons */
         .item-actions {
             display: flex;
             gap: 8px;
         }
 
         .btn-edit-item {
-            background-color: #28a745;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             color: white;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-edit-item:hover {
-            background-color: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
         }
 
         .btn-delete-item {
-            background-color: #dc3545;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
             color: white;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-delete-item:hover {
-            background-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
         }
 
+        /* Status Badges */
         .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             display: inline-block;
             max-width: 200px;
             white-space: nowrap;
@@ -210,104 +389,273 @@
         }
 
         .status-available {
-            background-color: #d4edda;
-            color: #155724;
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #276749;
         }
 
         .status-in-use {
-            background-color: #fff3cd;
-            color: #856404;
+            background: linear-gradient(135deg, #fefcbf 0%, #faf089 100%);
+            color: #744210;
         }
 
         .status-unavailable {
-            background-color: #f8d7da;
-            color: #721c24;
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #742a2a;
         }
 
+        /* No Items State */
         .no-items {
             text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 3rem;
-            background-color: #f8f9fa;
-            border-radius: 6px;
+            padding: 4rem 2rem;
+            color: #718096;
+        }
+
+        .no-items-content {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .no-items-content .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .no-items-content h3 {
+            color: #4a5568;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-items-content p {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .add-item-btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-item-btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            background: #f7fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-assign {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-assign:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-remove {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .btn-remove:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
         }
 
         /* Character counter */
         .char-counter {
             font-size: 12px;
-            color: #6c757d;
+            color: #718096;
             text-align: right;
             margin-top: 5px;
         }
 
         .char-counter.warning {
-            color: #856404;
+            color: #d69e2e;
         }
 
         .char-counter.danger {
-            color: #721c24;
+            color: #e53e3e;
         }
 
-        /* Enhanced Mobile Responsive Design */
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .management-layout {
+                grid-template-columns: 40% 1fr;
+                gap: 1.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 padding: 0 1rem;
                 margin: 1rem auto;
             }
 
-            .content-card {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-                line-height: 1.3;
-            }
-
-            /* Description section mobile */
-            .description-section {
+            .page-header {
+                padding: 1.5rem;
                 margin-bottom: 1.5rem;
             }
 
-            .description-text {
-                padding: 0.75rem;
-                font-size: 0.9rem;
+            .page-header h1 {
+                font-size: 1.75rem;
             }
 
-            .edit-description-btn {
-                padding: 10px 16px;
-                font-size: 14px;
-                touch-action: manipulation;
+            /* Stack layout on mobile */
+            .management-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .responsibility-sidebar {
+                position: static;
+                max-height: none;
+            }
+
+            .sidebar-content,
+            .items-content {
+                padding: 1.5rem;
             }
 
             /* Items header mobile */
             .items-header {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
                 gap: 1rem;
-                margin-bottom: 1rem;
-            }
-
-            .items-title {
-                font-size: 1.25rem;
-                margin: 0;
             }
 
             .add-item-btn {
-                padding: 12px 20px;
-                font-size: 16px;
-                touch-action: manipulation;
                 align-self: stretch;
-                text-align: center;
+                justify-content: center;
+                padding: 14px 24px;
+                font-size: 16px;
             }
 
-            /* Mobile-friendly table - card layout */
+            /* Mobile table - card layout */
             .items-table {
-                font-size: 0.85rem;
                 display: block;
                 overflow-x: auto;
-                white-space: nowrap;
                 -webkit-overflow-scrolling: touch;
             }
 
@@ -326,12 +674,11 @@
             }
 
             .items-table tr {
-                border: 1px solid #e9ecef;
+                border: 1px solid #e2e8f0;
                 margin-bottom: 12px;
-                padding: 12px;
-                border-radius: 8px;
-                background-color: #fff;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                padding: 1rem;
+                border-radius: 12px;
+                background: #f7fafc;
             }
 
             .items-table td {
@@ -340,7 +687,7 @@
                 padding: 8px 8px 8px 35%;
                 text-align: left;
                 white-space: normal;
-                min-height: 40px;
+                min-height: 44px;
                 display: flex;
                 align-items: center;
             }
@@ -353,101 +700,60 @@
                 padding-right: 10px;
                 white-space: nowrap;
                 font-weight: bold;
-                color: #333;
+                color: #4a5568;
                 display: flex;
                 align-items: center;
             }
 
-            /* Mobile button styling */
+            /* Mobile buttons */
             .item-actions {
                 flex-direction: column;
                 gap: 8px;
-                align-items: stretch;
-                margin-top: 8px;
-            }
-
-            .btn-edit-item, .btn-delete-item {
-                padding: 10px 16px;
-                font-size: 14px;
-                min-height: 44px;
-                touch-action: manipulation;
                 width: 100%;
             }
 
-            /* Status badge mobile */
-            .status-badge {
-                font-size: 11px;
-                padding: 6px 10px;
-                max-width: 150px;
+            .btn-edit-item, .btn-delete-item {
+                padding: 12px 16px;
+                font-size: 14px;
+                width: 100%;
+                justify-content: center;
             }
 
-            /* Mobile modal improvements */
+            /* Mobile modals */
             .modal-content {
-                margin: 5% auto;
-                padding: 1.5rem;
+                margin: 2% auto;
                 width: 95%;
                 max-width: 400px;
             }
 
-            .modal-header h3 {
-                font-size: 1.2rem;
-            }
-
             .modal-footer {
-                display: flex;
                 flex-direction: column;
                 gap: 0.75rem;
             }
 
             .modal-footer .btn {
+                width: 100%;
                 padding: 12px 24px;
                 font-size: 16px;
-                touch-action: manipulation;
-                width: 100%;
             }
 
-            /* Form elements mobile */
             .form-input {
-                padding: 12px;
+                padding: 14px 16px;
                 font-size: 16px;
-                touch-action: manipulation;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-
-            .form-group label {
-                font-size: 14px;
-                margin-bottom: 8px;
-                display: block;
-            }
-
-            /* Remove hover animations on mobile */
-            .edit-description-btn:hover,
-            .add-item-btn:hover,
-            .btn-edit-item:hover,
-            .btn-delete-item:hover {
-                transform: none;
             }
         }
 
-        /* Extra small devices */
         @media (max-width: 480px) {
-            .content-card {
-                padding: 0.75rem;
+            .page-header {
+                padding: 1rem;
             }
 
-            h1 {
-                font-size: 1.3rem;
+            .page-header h1 {
+                font-size: 1.5rem;
             }
 
-            .items-title {
-                font-size: 1.1rem;
-            }
-
-            .modal-content {
-                margin: 2% auto;
+            .sidebar-content,
+            .items-content {
                 padding: 1rem;
             }
 
@@ -471,90 +777,153 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <div class="content-card">
-        <h1><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong>'s Management</h1>
+    <!-- Page Title -->
+    <div class="page-header">
+        <h1><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong> Management</h1>
 
         <!-- Alert Messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    </div>
 
-        <!-- Description Section -->
-        <div class="description-section">
-            <div class="description-content">
-                <div th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
-                     class="description-text"
-                     th:text="${responsibility.description}">
-                    Description text here
-                </div>
-                <div th:if="${responsibility.description == null or #strings.isEmpty(responsibility.description)}"
-                     class="description-text no-description">
-                    No description set for this responsibility
-                </div>
-            </div>
-            <button class="edit-description-btn" onclick="showEditDescriptionModal()">
-                Edit Description
-            </button>
-        </div>
+    <!-- Two Column Layout -->
+    <div class="management-layout">
+        <!-- Left Sidebar - Responsibility Info -->
+        <div class="responsibility-sidebar">
+            <div class="sidebar-content">
+                <!-- Responsibility Info -->
+                <div class="responsibility-info">
+                    <h2 class="info-title">Responsibility Details</h2>
 
-        <!-- Items Section -->
-        <div class="items-header">
-            <h2 class="items-title">Items List</h2>
-            <button class="add-item-btn" onclick="showAddItemModal()">Add New Item</button>
-        </div>
-
-        <div class="item-count" th:if="${itemCount != null}">
-            Total Items: <span th:text="${itemCount}">0</span>
-        </div>
-
-        <!-- Items Table -->
-        <div th:if="${items != null and not #lists.isEmpty(items)}">
-            <table class="items-table">
-                <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${items}">
-                    <td data-label="Item Name" th:text="${item.itemName}">Item Name</td>
-                    <td data-label="Status">
-        <span class="status-badge"
-              th:classappend="${item.status == 'Available' ? 'status-available' :
-            (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
-              th:text="${item.status == 'In Use' && item.userFullName != null ?
-            'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
-            Status
-        </span>
-                    </td>
-                    <td data-label="Actions">
-                        <div class="item-actions">
-                            <div th:if="${!item.isInUse()}">
-                                <button class="btn-edit-item"
-                                        th:data-item-id="${item.itemId}"
-                                        th:data-item-name="${item.itemName}"
-                                        th:data-item-status="${item.status}"
-                                        onclick="showEditItemModal(this.dataset.itemId, this.dataset.itemName, this.dataset.itemStatus)">
-                                    Edit
-                                </button>
-                                <button class="btn-delete-item"
-                                        th:data-item-id="${item.itemId}"
-                                        th:data-item-name="${item.itemName}"
-                                        onclick="showDeleteItemModal(this.dataset.itemId, this.dataset.itemName)">
-                                    Delete
-                                </button>
+                    <!-- Description Section -->
+                    <div class="description-section">
+                        <h3 class="section-title">Description</h3>
+                        <div class="description-content">
+                            <div th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+                                 class="description-text"
+                                 th:text="${responsibility.description}">
+                                Description text here
+                            </div>
+                            <div th:if="${responsibility.description == null or #strings.isEmpty(responsibility.description)}"
+                                 class="description-text no-description">
+                                No description set for this responsibility
                             </div>
                         </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        <button class="edit-description-btn" onclick="showEditDescriptionModal()">
+                            <i class="icon">✏️</i> Edit Description
+                        </button>
+                    </div>
+
+                    <!-- Managers Section -->
+                    <div class="managers-section">
+                        <h3 class="section-title">Assigned Managers</h3>
+                        <div class="managers-content">
+                            <div th:if="${responsibilityManagers != null and !responsibilityManagers.isEmpty()}">
+                                <div class="managers-list">
+                                    <span th:each="manager, iterStat : ${responsibilityManagers}"
+                                          class="manager-badge"
+                                          th:text="${#strings.capitalize(manager.firstName) + ' ' + #strings.capitalize(manager.lastName)}">Manager Name</span>
+                                </div>
+                            </div>
+                            <div th:if="${responsibilityManagers == null or responsibilityManagers.isEmpty()}"
+                                 class="no-managers">
+                                <i class="icon">👥</i> No managers currently assigned
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="stats-section">
+                        <h3 class="section-title">Quick Stats</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" th:text="${itemCount ?: 0}">0</div>
+                                <div class="stat-label">Total Items</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- No Items Message -->
-        <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
-            <p>this responsibility list is empty.</p>
+        <!-- Right Main Area - Items Management -->
+        <div class="items-main">
+            <div class="items-content">
+                <!-- Items Header -->
+                <div class="items-header">
+                    <div class="header-content">
+                        <h2 class="items-title">
+                            <i class="icon">📦</i> Items Management
+                        </h2>
+                        <div class="item-count" th:if="${itemCount != null}">
+                            <span th:text="${itemCount}">0</span> items total
+                        </div>
+                    </div>
+                    <button class="add-item-btn" onclick="showAddItemModal()">
+                        <i class="icon">➕</i> Add New Item
+                    </button>
+                </div>
+
+                <!-- Items Table -->
+                <div class="items-table-container">
+                    <div th:if="${items != null and not #lists.isEmpty(items)}">
+                        <table class="items-table">
+                            <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${items}">
+                                <td data-label="Item Name" th:text="${item.itemName}">Item Name</td>
+                                <td data-label="Status">
+                                    <span class="status-badge"
+                                          th:classappend="${item.status == 'Available' ? 'status-available' :
+                                        (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
+                                          th:text="${item.status == 'In Use' && item.userFullName != null ?
+                                        'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
+                                        Status
+                                    </span>
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="item-actions">
+                                        <div th:if="${!item.isInUse()}">
+                                            <button class="btn-edit-item"
+                                                    th:data-item-id="${item.itemId}"
+                                                    th:data-item-name="${item.itemName}"
+                                                    th:data-item-status="${item.status}"
+                                                    onclick="showEditItemModal(this.dataset.itemId, this.dataset.itemName, this.dataset.itemStatus)">
+                                                Edit
+                                            </button>
+                                            <button class="btn-delete-item"
+                                                    th:data-item-id="${item.itemId}"
+                                                    th:data-item-name="${item.itemName}"
+                                                    onclick="showDeleteItemModal(this.dataset.itemId, this.dataset.itemName)">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Items Message -->
+                    <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
+                        <div class="no-items-content">
+                            <i class="icon">📦</i>
+                            <h3>No Items Yet</h3>
+                            <p>This responsibility list is empty. Add your first item to get started!</p>
+                            <button class="add-item-btn-secondary" onclick="showAddItemModal()">
+                                Add First Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
