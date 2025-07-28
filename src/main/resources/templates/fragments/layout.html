@@ -19,19 +19,21 @@
         <!-- Dashboard button (only for responsibility view page and chief user list) -->
         <a th:href="@{/dashboard}" class="nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
 
-        <!-- Manage Responsibility button (only for managers with assigned responsibility, hide on item management page) -->
-        <a th:href="@{/manager/items}" class="nav-btn"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}">
+        <!-- UPDATED: Manage Responsibility button with dynamic responsibilityId -->
+        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}"
+           th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
+           class="nav-btn">
             Manage Responsibility
         </a>
 
-        <!-- NEW: Manage Requests button (only for managers with assigned responsibility, hide on requests page) -->
-        <a th:href="@{/manager/requests}" class="nav-btn nav-btn-requests"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}">
+        <!-- UPDATED: Manage Requests button with dynamic responsibilityId -->
+        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}"
+           th:href="@{/responsibility-manage/{responsibilityId}/requests(responsibilityId=${session.userResponsibilityId})}"
+           class="nav-btn nav-btn-requests">
             Manage Requests
         </a>
 
-        <!-- NEW: My Items button (only for users, managers, and chiefs, hide on my-items page) -->
+        <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
         <a th:href="@{/user/my-items}" class="nav-btn nav-btn-items"
            th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
             My Items
@@ -57,19 +59,21 @@
         <!-- Dashboard button (only for responsibility view page and chief user list) -->
         <a th:href="@{/dashboard}" class="mobile-nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
 
-        <!-- Manage Responsibility button (only for managers with assigned responsibility, hide on item management page) -->
-        <a th:href="@{/manager/items}" class="mobile-nav-btn"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}">
+        <!-- UPDATED: Mobile Manage Responsibility button with dynamic responsibilityId -->
+        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}"
+           th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
+           class="mobile-nav-btn">
             Manage Responsibility
         </a>
 
-        <!-- NEW: Manage Requests button (only for managers with assigned responsibility, hide on requests page) -->
-        <a th:href="@{/manager/requests}" class="mobile-nav-btn mobile-nav-btn-requests"
-           th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}">
+        <!-- UPDATED: Mobile Manage Requests button with dynamic responsibilityId -->
+        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}"
+           th:href="@{/responsibility-manage/{responsibilityId}/requests(responsibilityId=${session.userResponsibilityId})}"
+           class="mobile-nav-btn mobile-nav-btn-requests">
             Manage Requests
         </a>
 
-        <!-- NEW: My Items button (only for users, managers, and chiefs, hide on my-items page) -->
+        <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
         <a th:href="@{/user/my-items}" class="mobile-nav-btn mobile-nav-btn-items"
            th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
             My Items
@@ -133,7 +137,7 @@
             color: white;
         }
 
-        /* NEW: Special styling for Manage Requests button */
+        /* Special styling for Manage Requests button */
         .nav-btn-requests {
             background-color: #17a2b8 !important;
         }
@@ -142,7 +146,7 @@
             background-color: #138496 !important;
         }
 
-        /* NEW: Special styling for My Items button */
+        /* Special styling for My Items button */
         .nav-btn-items {
             background-color: #6f42c1 !important;
         }
@@ -151,7 +155,7 @@
             background-color: #5a32a3 !important;
         }
 
-        /* NEW: Special styling for mobile My Items button */
+        /* Special styling for mobile My Items button */
         .mobile-nav-btn-items:hover {
             background-color: rgba(111, 66, 193, 0.3) !important;
         }
@@ -242,7 +246,7 @@
             color: white;
         }
 
-        /* NEW: Special styling for mobile Manage Requests button */
+        /* Special styling for mobile Manage Requests button */
         .mobile-nav-btn-requests:hover {
             background-color: rgba(23, 162, 184, 0.3) !important;
         }

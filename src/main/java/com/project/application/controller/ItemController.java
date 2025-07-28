@@ -37,10 +37,13 @@ public class ItemController {
     }
 
     /**
-     * Display item management page for managers
+     * Display responsibility management page for managers
+     * UPDATED: Now accepts responsibilityId parameter and fetches managers
      */
-    @GetMapping("/manager/items")
-    public String itemManagement(HttpSession session, Model model) {
+    @GetMapping("/responsibility-manage/{responsibilityId}")
+    public String responsibilityManagement(@PathVariable Long responsibilityId,
+                                           HttpSession session,
+                                           Model model) {
         // Check if user is logged in
         if (!isUserLoggedIn(session)) {
             return "redirect:/login";
@@ -53,18 +56,9 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            // Manager has no responsibility assigned
-            model.addAttribute("error", "You have no responsibility assigned. Contact your chief to get a responsibility.");
-            model.addAttribute("user", user);
-            return "manager-no-responsibility";
-        }
-
         // Get responsibility details
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             model.addAttribute("error", "Responsibility not found in system.");
@@ -74,27 +68,42 @@ public class ItemController {
 
         com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
 
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibility.getResponsibilityName().equals(userResponsibilityName)) {
+            model.addAttribute("error", "You don't have permission to manage this responsibility.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
         // Get all items for this responsibility
-        List<Item> items = itemService.getItemsByResponsibilityId(responsibility.getResponsibilityId());
+        List<Item> items = itemService.getItemsByResponsibilityId(responsibilityId);
+
+        // FIXED: Get managers for this responsibility
+        List<User> responsibilityManagers = userService.getResponsibilityManagers(responsibilityId);
 
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("responsibility", responsibility);
         model.addAttribute("items", items);
         model.addAttribute("itemCount", items.size());
+        model.addAttribute("responsibilityManagers", responsibilityManagers); // ADDED THIS LINE
 
-        return "item-management";
+        return "responsibility-manage"; // UPDATED: New template name
     }
 
     // ======================
-    // NEW: MANAGER REQUEST MANAGEMENT
+    // MANAGER REQUEST MANAGEMENT
     // ======================
 
     /**
      * Display manager requests page
+     * UPDATED: Now uses responsibilityId parameter
      */
-    @GetMapping("/manager/requests")
-    public String managerRequests(HttpSession session, Model model) {
+    @GetMapping("/responsibility-manage/{responsibilityId}/requests")
+    public String managerRequests(@PathVariable Long responsibilityId,
+                                  HttpSession session,
+                                  Model model) {
         // Check if user is logged in
         if (!isUserLoggedIn(session)) {
             return "redirect:/login";
@@ -107,17 +116,9 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            model.addAttribute("error", "You have no responsibility assigned. Contact your chief to get a responsibility.");
-            model.addAttribute("user", user);
-            return "manager-no-responsibility";
-        }
-
         // Get responsibility details
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             model.addAttribute("error", "Responsibility not found in system.");
@@ -127,8 +128,16 @@ public class ItemController {
 
         com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
 
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibility.getResponsibilityName().equals(userResponsibilityName)) {
+            model.addAttribute("error", "You don't have permission to manage this responsibility.");
+            model.addAttribute("user", user);
+            return "error/404";
+        }
+
         // Get all pending requests for this responsibility
-        List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibility.getResponsibilityId());
+        List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibilityId);
 
         // Add data to model
         model.addAttribute("user", user);
@@ -141,10 +150,12 @@ public class ItemController {
 
     /**
      * Approve a request
+     * UPDATED: Now includes responsibilityId in URL for consistency
      */
-    @PostMapping("/manager/approve-request")
+    @PostMapping("/responsibility-manage/{responsibilityId}/approve-request")
     @ResponseBody
-    public String approveRequest(@RequestParam Long requestId,
+    public String approveRequest(@PathVariable Long responsibilityId,
+                                 @RequestParam Long requestId,
                                  HttpSession session) {
 
         // Check if user is logged in and is manager
@@ -157,21 +168,19 @@ public class ItemController {
             return "error:Access denied";
         }
 
-        // Get user's responsibility to verify permission
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            return "error:You have no responsibility assigned";
-        }
-
-        // Get responsibility details
+        // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             return "error:Responsibility not found";
         }
 
-        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
+            return "error:You don't have permission to manage this responsibility";
+        }
 
         // Verify that this request belongs to the manager's responsibility
         Optional<Request> requestOptional = requestService.findById(requestId);
@@ -196,10 +205,12 @@ public class ItemController {
 
     /**
      * Deny a request
+     * UPDATED: Now includes responsibilityId in URL for consistency
      */
-    @PostMapping("/manager/deny-request")
+    @PostMapping("/responsibility-manage/{responsibilityId}/deny-request")
     @ResponseBody
-    public String denyRequest(@RequestParam Long requestId,
+    public String denyRequest(@PathVariable Long responsibilityId,
+                              @RequestParam Long requestId,
                               HttpSession session) {
 
         // Check if user is logged in and is manager
@@ -212,21 +223,19 @@ public class ItemController {
             return "error:Access denied";
         }
 
-        // Get user's responsibility to verify permission
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            return "error:You have no responsibility assigned";
-        }
-
-        // Get responsibility details
+        // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             return "error:Responsibility not found";
         }
 
-        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
+            return "error:You don't have permission to manage this responsibility";
+        }
 
         // Verify that this request belongs to the manager's responsibility
         Optional<Request> requestOptional = requestService.findById(requestId);
@@ -251,9 +260,11 @@ public class ItemController {
 
     /**
      * Update responsibility description
+     * UPDATED: Now includes responsibilityId in URL and redirect
      */
-    @PostMapping("/manager/items/update-description")
-    public String updateDescription(@RequestParam String description,
+    @PostMapping("/responsibility-manage/{responsibilityId}/update-description")
+    public String updateDescription(@PathVariable Long responsibilityId,
+                                    @RequestParam String description,
                                     HttpSession session,
                                     RedirectAttributes redirectAttributes) {
 
@@ -267,23 +278,23 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            redirectAttributes.addFlashAttribute("error", "You have no responsibility assigned.");
-            return "redirect:/manager/items";
-        }
-
         // Get responsibility
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
         com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
+
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibility.getResponsibilityName().equals(userResponsibilityName)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            return "redirect:/responsibility-manage/" + responsibilityId;
+        }
 
         // Validate description
         if (description != null) {
@@ -291,7 +302,7 @@ public class ItemController {
 
             if (description.length() > 200) {
                 redirectAttributes.addFlashAttribute("error", "Description cannot exceed 200 characters.");
-                return "redirect:/manager/items";
+                return "redirect:/responsibility-manage/" + responsibilityId;
             }
 
             // If description is empty, set to null
@@ -301,7 +312,7 @@ public class ItemController {
         }
 
         // Update description using service
-        String result = responsibilityService.updateDescription(responsibility.getResponsibilityId(), description);
+        String result = responsibilityService.updateDescription(responsibilityId, description);
 
         if ("success".equals(result)) {
             redirectAttributes.addFlashAttribute("success", "Description updated successfully!");
@@ -309,14 +320,16 @@ public class ItemController {
             redirectAttributes.addFlashAttribute("error", result);
         }
 
-        return "redirect:/manager/items";
+        return "redirect:/responsibility-manage/" + responsibilityId;
     }
 
     /**
      * Add new item
+     * UPDATED: Now includes responsibilityId in URL and redirect
      */
-    @PostMapping("/manager/items/add")
-    public String addItem(@RequestParam String itemName,
+    @PostMapping("/responsibility-manage/{responsibilityId}/add-item")
+    public String addItem(@PathVariable Long responsibilityId,
+                          @RequestParam String itemName,
                           @RequestParam String status,
                           HttpSession session,
                           RedirectAttributes redirectAttributes) {
@@ -331,23 +344,21 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            redirectAttributes.addFlashAttribute("error", "You have no responsibility assigned.");
-            return "redirect:/manager/items";
-        }
-
-        // Get responsibility ID
+        // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            return "redirect:/responsibility-manage/" + responsibilityId;
+        }
 
         // Create item
         String result = itemService.createItem(responsibilityId, itemName, status);
@@ -358,14 +369,16 @@ public class ItemController {
             redirectAttributes.addFlashAttribute("error", result);
         }
 
-        return "redirect:/manager/items";
+        return "redirect:/responsibility-manage/" + responsibilityId;
     }
 
     /**
      * Update existing item
+     * UPDATED: Now includes responsibilityId in URL and redirect
      */
-    @PostMapping("/manager/items/update")
-    public String updateItem(@RequestParam Long itemId,
+    @PostMapping("/responsibility-manage/{responsibilityId}/update-item")
+    public String updateItem(@PathVariable Long responsibilityId,
+                             @RequestParam Long itemId,
                              @RequestParam String itemName,
                              @RequestParam String status,
                              HttpSession session,
@@ -381,41 +394,39 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            redirectAttributes.addFlashAttribute("error", "You have no responsibility assigned.");
-            return "redirect:/manager/items";
-        }
-
-        // Get responsibility ID for permission check
+        // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            return "redirect:/responsibility-manage/" + responsibilityId;
+        }
 
         // Verify user can manage this item
         if (!itemService.canUserManageItems(user.getUserId(), responsibilityId, userService)) {
             redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this item.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        // NEW: Check if item is in use before updating
+        // Check if item is in use before updating
         Optional<Item> itemOptional = itemService.findById(itemId);
         if (!itemOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Item not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
         Item item = itemOptional.get();
         if (item.isInUse()) {
             redirectAttributes.addFlashAttribute("error", "Cannot edit item that is currently in use.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
         // Update item
@@ -427,14 +438,16 @@ public class ItemController {
             redirectAttributes.addFlashAttribute("error", result);
         }
 
-        return "redirect:/manager/items";
+        return "redirect:/responsibility-manage/" + responsibilityId;
     }
 
     /**
      * Delete item
+     * UPDATED: Now includes responsibilityId in URL and redirect
      */
-    @PostMapping("/manager/items/delete")
-    public String deleteItem(@RequestParam Long itemId,
+    @PostMapping("/responsibility-manage/{responsibilityId}/delete-item")
+    public String deleteItem(@PathVariable Long responsibilityId,
+                             @RequestParam Long itemId,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
 
@@ -448,41 +461,39 @@ public class ItemController {
             return "error/404";
         }
 
-        // Get user's responsibility for permission check
-        String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (responsibilityName == null) {
-            redirectAttributes.addFlashAttribute("error", "You have no responsibility assigned.");
-            return "redirect:/manager/items";
-        }
-
-        // Get responsibility ID
+        // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findByName(responsibilityName);
+                responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        Long responsibilityId = responsibilityOptional.get().getResponsibilityId();
+        // Check if the current manager is assigned to this responsibility
+        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
+        if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            return "redirect:/responsibility-manage/" + responsibilityId;
+        }
 
         // Verify user can manage this item
         if (!itemService.canUserManageItems(user.getUserId(), responsibilityId, userService)) {
             redirectAttributes.addFlashAttribute("error", "You don't have permission to delete this item.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        // NEW: Check if item is in use before deleting
+        // Check if item is in use before deleting
         Optional<Item> itemOptional = itemService.findById(itemId);
         if (!itemOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Item not found.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
         Item item = itemOptional.get();
         if (item.isInUse()) {
             redirectAttributes.addFlashAttribute("error", "Cannot delete item that is currently in use.");
-            return "redirect:/manager/items";
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
         // Delete item
@@ -494,7 +505,7 @@ public class ItemController {
             redirectAttributes.addFlashAttribute("error", result);
         }
 
-        return "redirect:/manager/items";
+        return "redirect:/responsibility-manage/" + responsibilityId;
     }
 
     /**
@@ -537,7 +548,7 @@ public class ItemController {
                 .map(request -> request.getItem().getItemId())
                 .toList();
 
-        // NEW: Add event status data
+        // Add event status data
         boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
         boolean canReturnItems = eventService.isResponsibilityInReturnEvent(id);
 
@@ -547,8 +558,8 @@ public class ItemController {
         model.addAttribute("items", items);
         model.addAttribute("responsibilityManagers", managers);
         model.addAttribute("userRequestedItemIds", userRequestedItemIds);
-        model.addAttribute("canRequestItems", canRequestItems); // NEW: Event status for requests
-        model.addAttribute("canReturnItems", canReturnItems);   // NEW: Event status for returns
+        model.addAttribute("canRequestItems", canRequestItems);
+        model.addAttribute("canReturnItems", canReturnItems);
 
         return "responsibility-view";
     }
@@ -613,7 +624,7 @@ public class ItemController {
     }
 
     // ======================
-    // NEW: USER ITEMS LIST (MY ITEMS)
+    // USER ITEMS LIST (MY ITEMS)
     // ======================
 
     /**
@@ -636,14 +647,14 @@ public class ItemController {
         // Get all items owned by this user
         List<Item> userItems = itemService.getItemsByUserId(user.getUserId());
 
-        // NEW: Check if any events allow returns
+        // Check if any events allow returns
         boolean canReturnItems = eventService.areItemReturnsAllowed();
 
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("userItems", userItems);
         model.addAttribute("itemCount", userItems.size());
-        model.addAttribute("canReturnItems", canReturnItems); // NEW: Global return status
+        model.addAttribute("canReturnItems", canReturnItems);
 
         return "user-items";
     }

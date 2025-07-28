@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Management - Event Management System</title>
+    <title>Responsibility Management - Event Management System</title>
 
     <!-- Load admin styles for consistent styling -->
     <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
@@ -22,15 +22,6 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <!-- Page Title -->
-    <div class="page-header">
-        <h1><strong th:text="${responsibility.responsibilityName.toUpperCase()}"></strong> Management</h1>
-
-        <!-- Alert Messages -->
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-    </div>
-
     <!-- Two Column Layout -->
     <div class="management-layout">
         <!-- Left Sidebar Fragment -->
@@ -43,13 +34,37 @@
 
 <!-- Modal Fragments -->
 <div th:replace="~{fragments/responsibility-manage/edit-description-modal :: modal(${responsibility})}"></div>
-<div th:replace="~{fragments/responsibility-manage/add-item-modal :: modal}"></div>
-<div th:replace="~{fragments/responsibility-manage/edit-item-modal :: modal}"></div>
-<div th:replace="~{fragments/responsibility-manage/delete-item-modal :: modal}"></div>
+<div th:replace="~{fragments/responsibility-manage/add-item-modal :: modal(${responsibility})}"></div>
+<div th:replace="~{fragments/responsibility-manage/edit-item-modal :: modal(${responsibility})}"></div>
+<div th:replace="~{fragments/responsibility-manage/delete-item-modal :: modal(${responsibility})}"></div>
+
+<!-- Include Complete Toast System (CSS + HTML + JS) -->
+<div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
 <!-- Scripts -->
 <script th:src="@{/js/admin-scripts.js}"></script>
 <script th:src="@{/js/responsibility-manage-scripts.js}"></script>
+
+<!-- Toast Trigger Script for Flash Messages -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for success message
+        /*[+ var successMessage = ${success}; +]*/
+        if (successMessage) {
+            if (typeof showToast === 'function') {
+                showToast(successMessage, 'success');
+            }
+        }
+
+        // Check for error message
+        /*[+ var errorMessage = ${error}; +]*/
+        if (errorMessage) {
+            if (typeof showToast === 'function') {
+                showToast(errorMessage, 'error');
+            }
+        }
+    });
+</script>
 
 <!-- Include Navbar Scripts -->
 <div th:replace="~{fragments/layout :: navbar-scripts}"></div>

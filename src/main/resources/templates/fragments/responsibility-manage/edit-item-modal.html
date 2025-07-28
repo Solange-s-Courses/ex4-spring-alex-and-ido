@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <!-- Edit Item Modal Fragment -->
-<div th:fragment="modal" id="editItemModal" class="modal">
+<div th:fragment="modal(responsibility)" id="editItemModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Edit Item</h3>
             <span class="close" onclick="closeEditItemModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="editItemForm" th:action="@{/manager/items/update}" method="post">
+            <form id="editItemForm" th:action="@{/responsibility-manage/{responsibilityId}/update-item(responsibilityId=${responsibility.responsibilityId})}" method="post">
                 <input type="hidden" id="editItemId" name="itemId">
                 <div class="form-group">
                     <label for="editItemName">Item Name:</label>

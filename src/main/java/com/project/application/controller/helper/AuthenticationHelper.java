@@ -41,10 +41,20 @@ public class AuthenticationHelper {
     }
 
     /**
-     * Set responsibility name for managers
+     * Set responsibility information for managers
+     * UPDATED: Now stores both name and ID
      */
-    public void setResponsibilitySession(HttpSession session, String responsibilityName) {
+    public void setResponsibilitySession(HttpSession session, String responsibilityName, Long responsibilityId) {
         session.setAttribute("userResponsibilityName", responsibilityName);
+        session.setAttribute("userResponsibilityId", responsibilityId);
+    }
+
+    /**
+     * Clear responsibility information from session
+     */
+    public void clearResponsibilitySession(HttpSession session) {
+        session.removeAttribute("userResponsibilityName");
+        session.removeAttribute("userResponsibilityId");
     }
 
     /**

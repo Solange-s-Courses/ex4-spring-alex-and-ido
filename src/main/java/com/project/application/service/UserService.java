@@ -504,4 +504,18 @@ public class UserService {
 
         return users;
     }
+
+    /**
+     * Get user's current responsibility ID (for URL generation)
+     */
+    public Long getUserResponsibilityId(Long userId) {
+        Optional<UserResponsibility> userResponsibilityOptional =
+                userResponsibilityRepository.findByUserId(userId);
+
+        if (userResponsibilityOptional.isPresent()) {
+            return userResponsibilityOptional.get().getResponsibility().getResponsibilityId();
+        }
+
+        return null; // User has no responsibility
+    }
 }

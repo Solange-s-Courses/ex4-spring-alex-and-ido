@@ -90,6 +90,7 @@ public class AuthController {
 
     /**
      * Process user login
+     * UPDATED: Now stores both responsibility name and ID for managers
      */
     @PostMapping("/login")
     public String login(@RequestParam String email,
@@ -103,12 +104,13 @@ public class AuthController {
             // Store user information in session using helper
             authHelper.setUserSession(session, user);
 
-            // Store responsibility name in session for managers
+            // Store responsibility information in session for managers
             if ("manager".equals(user.getRoleName())) {
                 String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-                authHelper.setResponsibilitySession(session, responsibilityName);
+                Long responsibilityId = userService.getUserResponsibilityId(user.getUserId());
+                authHelper.setResponsibilitySession(session, responsibilityName, responsibilityId);
             } else {
-                authHelper.setResponsibilitySession(session, null);
+                authHelper.clearResponsibilitySession(session);
             }
 
             return "redirect:/dashboard";

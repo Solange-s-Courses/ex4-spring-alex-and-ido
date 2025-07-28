@@ -9,7 +9,7 @@
             <span class="close" onclick="closeEditDescriptionModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="editDescriptionForm" th:action="@{/manager/items/update-description}" method="post">
+            <form id="editDescriptionForm" th:action="@{/responsibility-manage/{responsibilityId}/update-description(responsibilityId=${responsibility.responsibilityId})}" method="post">
                 <div class="form-group">
                     <label for="descriptionText">Description:</label>
                     <textarea id="descriptionText" name="description"

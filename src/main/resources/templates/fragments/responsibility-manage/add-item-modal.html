@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <!-- Add Item Modal Fragment -->
-<div th:fragment="modal" id="addItemModal" class="modal">
+<div th:fragment="modal(responsibility)" id="addItemModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Add New Item</h3>
             <span class="close" onclick="closeAddItemModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="addItemForm" th:action="@{/manager/items/add}" method="post">
+            <form id="addItemForm" th:action="@{/responsibility-manage/{responsibilityId}/add-item(responsibilityId=${responsibility.responsibilityId})}" method="post">
                 <div class="form-group">
                     <label for="addItemName">Item Name:</label>
                     <input type="text" id="addItemName" name="itemName"
