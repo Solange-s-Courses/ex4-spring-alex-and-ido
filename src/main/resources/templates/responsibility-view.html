@@ -394,8 +394,8 @@
                         </div>
 
                         <div class="item-actions">
-                            <!-- NEW: Request button for available items (only for users and managers, not admins/chiefs) -->
-                            <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager')}">
+                            <!-- NEW: Request button for available items (only for users, managers, and chiefs, not admins) -->
+                            <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager' or user.roleName == 'chief')}">
                                 <!-- Show request buttons only if events allow requests -->
                                 <div th:if="${canRequestItems}">
                                     <!-- Show "Request" button if user hasn't requested this item -->

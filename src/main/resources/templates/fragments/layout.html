@@ -31,9 +31,9 @@
             Manage Requests
         </a>
 
-        <!-- NEW: My Items button (only for users and managers, hide on my-items page) -->
+        <!-- NEW: My Items button (only for users, managers, and chiefs, hide on my-items page) -->
         <a th:href="@{/user/my-items}" class="nav-btn nav-btn-items"
-           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
             My Items
         </a>
 
@@ -69,9 +69,9 @@
             Manage Requests
         </a>
 
-        <!-- NEW: My Items button (only for users and managers, hide on my-items page) -->
+        <!-- NEW: My Items button (only for users, managers, and chiefs, hide on my-items page) -->
         <a th:href="@{/user/my-items}" class="mobile-nav-btn mobile-nav-btn-items"
-           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+           th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
             My Items
         </a>
 

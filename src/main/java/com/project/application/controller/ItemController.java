@@ -572,8 +572,8 @@ public class ItemController {
 
         User user = getLoggedInUser(session);
 
-        // Users and managers can request items, but not admins/chiefs
-        if ("admin".equals(user.getRoleName()) || "chief".equals(user.getRoleName())) {
+        // Users, managers, and chiefs can request items, but not admins
+        if ("admin".equals(user.getRoleName())) {
             return "error:Your role cannot request items";
         }
 
@@ -628,8 +628,8 @@ public class ItemController {
 
         User user = getLoggedInUser(session);
 
-        // Users and managers can view their items, but not admins/chiefs
-        if ("admin".equals(user.getRoleName()) || "chief".equals(user.getRoleName())) {
+        // Users, managers, and chiefs can view their items, but not admins
+        if ("admin".equals(user.getRoleName())) {
             return "error/404";
         }
 
