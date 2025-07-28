@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Edit Description Modal Fragment -->
+<div th:fragment="modal(responsibility)" id="editDescriptionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Responsibility Description</h3>
+            <span class="close" onclick="closeEditDescriptionModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editDescriptionForm" th:action="@{/manager/items/update-description}" method="post">
+                <div class="form-group">
+                    <label for="descriptionText">Description:</label>
+                    <textarea id="descriptionText" name="description"
+                              class="form-input"
+                              rows="4"
+                              maxlength="200"
+                              placeholder="Enter a description for your responsibility..."
+                              th:text="${responsibility.description}"></textarea>
+                    <div id="charCounter" class="char-counter">0/200 characters</div>
+                </div>
+                <!-- Modal Error Display -->
+                <div id="editDescriptionError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeEditDescriptionModal()">Cancel</button>
+            <button type="button" class="btn btn-assign" onclick="confirmEditDescription()">Update Description</button>
+        </div>
+    </div>
+</div>
+
+</html>

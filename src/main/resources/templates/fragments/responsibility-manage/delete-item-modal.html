@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Delete Item Modal Fragment -->
+<div th:fragment="modal" id="deleteItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Delete Item</h3>
+            <span class="close" onclick="closeDeleteItemModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="deleteItemMessage">Are you sure you want to delete this item?</p>
+            <form id="deleteItemForm" th:action="@{/manager/items/delete}" method="post">
+                <input type="hidden" id="deleteItemId" name="itemId">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeDeleteItemModal()">Cancel</button>
+            <button type="button" class="btn btn-remove" onclick="confirmDeleteItem()">Delete</button>
+        </div>
+    </div>
+</div>
+
+</html>

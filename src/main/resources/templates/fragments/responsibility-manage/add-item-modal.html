@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Add Item Modal Fragment -->
+<div th:fragment="modal" id="addItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Item</h3>
+            <span class="close" onclick="closeAddItemModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="addItemForm" th:action="@{/manager/items/add}" method="post">
+                <div class="form-group">
+                    <label for="addItemName">Item Name:</label>
+                    <input type="text" id="addItemName" name="itemName"
+                           class="form-input" maxlength="32" required>
+                </div>
+                <div class="form-group">
+                    <label for="addItemStatus">Status:</label>
+                    <select id="addItemStatus" name="status" class="form-input" required>
+                        <option value="Available">Available</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                </div>
+                <!-- Modal Error Display -->
+                <div id="addItemError" class="alert alert-error" style="display: none; margin-bottom: 1rem;"></div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeAddItemModal()">Cancel</button>
+            <button type="button" class="btn btn-assign" onclick="confirmAddItem()">Add Item</button>
+        </div>
+    </div>
+</div>
+
+</html>

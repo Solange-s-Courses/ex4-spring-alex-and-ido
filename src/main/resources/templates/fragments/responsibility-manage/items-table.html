@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Items Table Fragment -->
+<div th:fragment="table(items, itemCount)" class="items-main">
+    <div class="items-content">
+        <!-- Items Header -->
+        <div class="items-header">
+            <div class="header-content">
+                <h2 class="items-title">
+                    <i class="icon">📦</i> Items Management
+                </h2>
+                <div class="item-count" th:if="${itemCount != null}">
+                    <span th:text="${itemCount}">0</span> items total
+                </div>
+            </div>
+            <button class="add-item-btn" onclick="showAddItemModal()">
+                <i class="icon">➕</i> Add New Item
+            </button>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-table-container">
+            <div th:if="${items != null and not #lists.isEmpty(items)}">
+                <table class="items-table">
+                    <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${items}">
+                        <td data-label="Item Name" th:text="${item.itemName}">Item Name</td>
+                        <td data-label="Status">
+                            <span class="status-badge"
+                                  th:classappend="${item.status == 'Available' ? 'status-available' :
+                                (item.status == 'In Use' ? 'status-in-use' : 'status-unavailable')}"
+                                  th:text="${item.status == 'In Use' && item.userFullName != null ?
+                                'In Use by ' + #strings.capitalizeWords(item.userFullName) : item.status}">
+                                Status
+                            </span>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="item-actions">
+                                <div th:if="${!item.isInUse()}">
+                                    <button class="btn-edit-item"
+                                            th:data-item-id="${item.itemId}"
+                                            th:data-item-name="${item.itemName}"
+                                            th:data-item-status="${item.status}"
+                                            onclick="showEditItemModal(this.dataset.itemId, this.dataset.itemName, this.dataset.itemStatus)">
+                                        Edit
+                                    </button>
+                                    <button class="btn-delete-item"
+                                            th:data-item-id="${item.itemId}"
+                                            th:data-item-name="${item.itemName}"
+                                            onclick="showDeleteItemModal(this.dataset.itemId, this.dataset.itemName)">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Items Message -->
+            <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
+                <div class="no-items-content">
+                    <i class="icon">📦</i>
+                    <h3>No Items Yet</h3>
+                    <p>This responsibility list is empty. Add your first item to get started!</p>
+                    <button class="add-item-btn-secondary" onclick="showAddItemModal()">
+                        Add First Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
