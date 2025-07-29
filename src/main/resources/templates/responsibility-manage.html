@@ -48,21 +48,26 @@
 <!-- Toast Trigger Script for Flash Messages -->
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
-        // Check for success message
-        /*[+ var successMessage = ${success}; +]*/
-        if (successMessage) {
-            if (typeof showToast === 'function') {
-                showToast(successMessage, 'success');
-            }
-        }
+        // Add a small delay to ensure everything is loaded
+        setTimeout(function() {
+            // Use th:inline="javascript" for proper variable injection
+            var successMessage = /*[[${success}]]*/ '';
+            var errorMessage = /*[[${error}]]*/ '';
 
-        // Check for error message
-        /*[+ var errorMessage = ${error}; +]*/
-        if (errorMessage) {
-            if (typeof showToast === 'function') {
-                showToast(errorMessage, 'error');
+            // Show success toast
+            if (successMessage && successMessage.length > 0) {
+                if (typeof showToast === 'function') {
+                    showToast(successMessage, 'success');
+                }
             }
-        }
+
+            // Show error toast
+            if (errorMessage && errorMessage.length > 0) {
+                if (typeof showToast === 'function') {
+                    showToast(errorMessage, 'error');
+                }
+            }
+        }, 300);
     });
 </script>
 

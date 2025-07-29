@@ -38,7 +38,7 @@ public class ItemController {
 
     /**
      * Display responsibility management page for managers
-     * UPDATED: Now accepts responsibilityId parameter and fetches managers
+     * UPDATED: Now accepts responsibilityId parameter and fetches managers + handles flash messages
      */
     @GetMapping("/responsibility-manage/{responsibilityId}")
     public String responsibilityManagement(@PathVariable Long responsibilityId,
@@ -87,11 +87,10 @@ public class ItemController {
         model.addAttribute("responsibility", responsibility);
         model.addAttribute("items", items);
         model.addAttribute("itemCount", items.size());
-        model.addAttribute("responsibilityManagers", responsibilityManagers); // ADDED THIS LINE
+        model.addAttribute("responsibilityManagers", responsibilityManagers);
 
-        return "responsibility-manage"; // UPDATED: New template name
+        return "responsibility-manage";
     }
-
     // ======================
     // MANAGER REQUEST MANAGEMENT
     // ======================
