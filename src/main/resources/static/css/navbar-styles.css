@@ -1,0 +1,178 @@
+/* Desktop Navbar Styles */
+.navbar {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.navbar-left {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.nav-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+
+.nav-btn:hover {
+    background-color: #218838;
+    text-decoration: none;
+    color: white;
+}
+
+/* Special styling for My Items button */
+.nav-btn-items {
+    background-color: #6f42c1 !important;
+}
+
+.nav-btn-items:hover {
+    background-color: #5a32a3 !important;
+}
+
+/* Special styling for mobile My Items button */
+.mobile-nav-btn-items:hover {
+    background-color: rgba(111, 66, 193, 0.3) !important;
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+    text-decoration: none;
+    color: white;
+}
+
+/* Hamburger Button (hidden on desktop) */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1001;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+/* Hamburger Animation */
+.hamburger.active span:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Mobile Menu (hidden by default) */
+.mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.mobile-menu.show {
+    max-height: 400px;
+}
+
+.mobile-nav-btn, .mobile-logout-btn {
+    display: block;
+    padding: 12px 2rem;
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+.mobile-nav-btn:hover, .mobile-logout-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    text-decoration: none;
+    color: white;
+}
+
+.mobile-logout-btn {
+    background-color: #dc3545;
+    border-bottom: none;
+}
+
+.mobile-logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 1rem;
+    }
+
+    .navbar-left {
+        font-size: 16px;
+    }
+
+    /* Hide desktop menu on mobile */
+    .navbar-right {
+        display: none;
+    }
+
+    /* Show hamburger on mobile */
+    .hamburger {
+        display: flex;
+    }
+
+    /* Show mobile menu on mobile */
+    .mobile-menu {
+        display: block;
+    }
+}
+
+/* Prevent body scroll when mobile menu is open */
+body.mobile-menu-open {
+    overflow: hidden;
+}

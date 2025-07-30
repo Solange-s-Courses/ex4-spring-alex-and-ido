@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Info - Event Management System</title>
   <!-- Include Navbar Styles -->
-  <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+  <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -350,6 +350,7 @@
 </script>
 
 <!-- Include Navbar Scripts -->
-<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+<script th:src="@{/js/navbar-scripts.js}"></script>
+
 </body>
 </html>

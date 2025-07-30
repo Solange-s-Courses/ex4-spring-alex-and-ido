@@ -8,7 +8,7 @@
     <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
 
     <!-- Include Navbar Styles -->
-    <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+    <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
 
     <style>
         body {
@@ -345,7 +345,7 @@
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
 <!-- Include Navbar Scripts -->
-<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+<script th:src="@{/js/navbar-scripts.js}"></script>
 
 <!-- Include Toast JavaScript -->
 <script th:src="@{/js/toast.js}"></script>

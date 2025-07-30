@@ -6,7 +6,8 @@
     <title th:text="${event.eventName + ' - Event Management System'}">Event - Event Management System</title>
 
     <!-- Include Navbar Styles -->
-    <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+    <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
+
     <link rel="stylesheet" th:href="@{/css/event-styles.css}">
 </head>
 <body>
@@ -44,7 +45,7 @@
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
 <!-- Include Navbar Scripts -->
-<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+<script th:src="@{/js/navbar-scripts.js}"></script>
 
 <!-- Include Event Scripts -->
 <script src="/js/event-scripts.js"

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- Refactored Navbar Fragment - Now uses external CSS/JS and modular fragments -->
+<!-- Main Navbar Container Fragment -->
 <nav th:fragment="navbar" class="navbar">
+    <!-- Left side: Welcome message -->
     <div th:replace="~{fragments/navbar/navbar-brand :: brand}"></div>
 
     <!-- Hamburger Button (mobile only) -->
@@ -12,13 +13,11 @@
         <span></span>
     </button>
 
+    <!-- Desktop Navigation -->
     <div th:replace="~{fragments/navbar/navbar-navigation :: desktop-nav}"></div>
+
+    <!-- Mobile Menu -->
     <div th:replace="~{fragments/navbar/navbar-mobile :: mobile-menu}"></div>
 </nav>
-
-<!-- Footer Scripts Fragment -->
-<div th:fragment="scripts">
-    <script th:src="@{/js/admin-scripts.js}"></script>
-</div>
 
 </html>

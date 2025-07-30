@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Mobile Menu Fragment -->
+<div th:fragment="mobile-menu" class="mobile-menu" id="mobileMenu">
+    <!-- Dashboard button (only for responsibility view page and chief user list) -->
+    <a th:href="@{/dashboard}" class="mobile-nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
+
+    <!-- Mobile Manage Responsibility button with dynamic responsibilityId -->
+    <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}"
+       th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
+       class="mobile-nav-btn">
+        Manage Responsibility
+    </a>
+
+    <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
+    <a th:href="@{/user/my-items}" class="mobile-nav-btn mobile-nav-btn-items"
+       th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+        My Items
+    </a>
+
+    <!-- Chief User List button (only for chief, hide on user list page) -->
+    <a th:href="@{/chief/user-list}" class="mobile-nav-btn"
+       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
+
+    <!-- Admin Page button (only for admin, hide on admin page) -->
+    <a th:href="@{/admin}" class="mobile-nav-btn"
+       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin' and (hideAdminPageBtn == null or !hideAdminPageBtn)}">Admin Page</a>
+
+    <!-- User Info button (hide only on user-info page) -->
+    <a th:href="@{/user-info}" class="mobile-nav-btn" th:if="${hideUserInfoBtn == null or !hideUserInfoBtn}">User Info</a>
+
+    <!-- Logout button -->
+    <a th:href="@{/logout}" class="mobile-logout-btn">Logout</a>
+</div>
+
+</html>

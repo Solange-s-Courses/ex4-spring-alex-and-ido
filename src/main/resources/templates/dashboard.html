@@ -6,7 +6,7 @@
   <title>Dashboard - Event Management System</title>
 
   <!-- Include Navbar Styles -->
-  <div th:replace="~{fragments/layout :: navbar-styles}"></div>
+  <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
 
   <style>
     body {
@@ -708,7 +708,7 @@
 </form>
 
 <!-- Include Navbar Scripts -->
-<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+<script th:src="@{/js/navbar-scripts.js}"></script>
 
 <!-- Event Form Toggle Scripts -->
 <script>

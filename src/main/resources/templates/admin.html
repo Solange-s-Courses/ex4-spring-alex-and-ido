@@ -4,7 +4,7 @@
 
 <body>
 <!-- Include Navbar Styles -->
-<div th:replace="~{fragments/layout :: navbar-styles}"></div>
+<link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
 
 <!-- Navigation -->
 <div th:with="showDashboardBtn=true, hideAdminPageBtn=true">
@@ -32,6 +32,7 @@
 <div th:replace="~{fragments/layout :: scripts}"></div>
 
 <!-- Include Navbar Scripts -->
-<div th:replace="~{fragments/layout :: navbar-scripts}"></div>
+<script th:src="@{/js/navbar-scripts.js}"></script>
+
 </body>
 </html>
