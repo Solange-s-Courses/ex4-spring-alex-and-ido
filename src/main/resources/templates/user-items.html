@@ -117,11 +117,6 @@
             font-size: 0.9rem;
         }
 
-        .date-taken {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
         .btn-return {
             background-color: #ffc107;
             color: #212529;
@@ -295,7 +290,6 @@
                 <tr>
                     <th>Item Name</th>
                     <th>Responsibility</th>
-                    <th>Date Taken</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -306,9 +300,6 @@
                     </td>
                     <td>
                         <span class="responsibility-name" th:text="${item.responsibilityName}">Responsibility Name</span>
-                    </td>
-                    <td>
-                        <span class="date-taken">Coming Soon</span>
                     </td>
                     <td>
                         <!-- Show return button only if events allow returns -->
