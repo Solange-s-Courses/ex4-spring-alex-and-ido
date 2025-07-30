@@ -302,6 +302,7 @@
       flex-direction: column;
       overflow: hidden;
       word-wrap: break-word;
+      z-index: 1; /* Lower than navbar z-index */
     }
 
     .event-card:hover {
@@ -544,6 +545,7 @@
   </style>
 </head>
 <body>
+
 <!-- Include Navbar Fragment -->
 <div th:replace="~{fragments/layout :: navbar}"></div>
 
