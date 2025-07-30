@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Requests Section Fragment -->
+<div th:fragment="section(requests, requestCount, responsibility)"
+     class="requests-section"
+     th:data-responsibility-id="${responsibility.responsibilityId}">
+    <!-- Requests Header -->
+    <div class="requests-header">
+        <div class="header-content">
+            <h2 class="requests-title">
+                <i class="icon">📋</i> Pending Requests
+            </h2>
+            <div class="request-count" th:if="${requestCount != null}">
+                <span th:text="${requestCount}">0</span> requests pending
+            </div>
+        </div>
+    </div>
+
+    <!-- Requests Table -->
+    <div class="requests-table-container">
+        <div th:if="${requests != null and not #lists.isEmpty(requests)}">
+            <table class="requests-table">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="request : ${requests}">
+                    <td data-label="User">
+                        <span class="user-name"
+                              th:text="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}">User Name</span>
+                    </td>
+                    <td data-label="Item">
+                        <span class="item-name" th:text="${request.item.itemName}">Item Name</span>
+                    </td>
+                    <td data-label="Type">
+                        <span class="request-type-badge"
+                              th:classappend="${request.requestType == 'request' ? 'type-request' : 'type-return'}"
+                              th:text="${#strings.capitalize(request.requestType)}">Type</span>
+                    </td>
+                    <td data-label="Date">
+                        <span class="request-date"
+                              th:text="${#temporals.format(request.dateOfIssue, 'MMM dd, yyyy HH:mm')}">Date</span>
+                    </td>
+                    <td data-label="Actions">
+                        <div class="request-actions">
+                            <button class="btn-approve"
+                                    th:data-request-id="${request.requestId}"
+                                    th:data-user-name="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}"
+                                    th:data-item-name="${request.item.itemName}"
+                                    th:data-request-type="${request.requestType}"
+                                    onclick="showApproveRequestModal(this.dataset.requestId, this.dataset.userName, this.dataset.itemName, this.dataset.requestType)">
+                                Approve
+                            </button>
+                            <button class="btn-deny"
+                                    th:data-request-id="${request.requestId}"
+                                    th:data-user-name="${#strings.capitalize(request.user.firstName) + ' ' + #strings.capitalize(request.user.lastName)}"
+                                    th:data-item-name="${request.item.itemName}"
+                                    th:data-request-type="${request.requestType}"
+                                    onclick="showDenyRequestModal(this.dataset.requestId, this.dataset.userName, this.dataset.itemName, this.dataset.requestType)">
+                                Deny
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Requests Message -->
+        <div th:if="${requests == null or #lists.isEmpty(requests)}" class="no-requests">
+            <div class="no-requests-content">
+                <i class="icon">📋</i>
+                <h3>No Pending Requests</h3>
+                <p>There are currently no pending requests for this responsibility.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

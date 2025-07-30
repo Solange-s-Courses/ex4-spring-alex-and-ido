@@ -698,3 +698,344 @@ body {
         font-size: 12px;
     }
 }
+
+/* Tab System Styles */
+.tab-navigation {
+    display: flex;
+    border-bottom: 3px solid #e2e8f0;
+    margin-bottom: 2rem;
+    background: #f7fafc;
+    border-radius: 12px 12px 0 0;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #718096;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    margin-right: 0.25rem;
+}
+
+.tab-btn:hover {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #2d3748;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    border-bottom: 3px solid #4299e1;
+}
+
+.tab-count {
+    background: #e2e8f0;
+    color: #4a5568;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}
+
+.tab-btn.active .tab-count {
+    background: #4299e1;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Requests Section Styles */
+.requests-section {
+    padding: 0;
+}
+
+.requests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.requests-title {
+    color: #2d3748;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.request-count {
+    color: #718096;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.requests-table-container {
+    overflow-x: auto;
+}
+
+.requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.requests-table th {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.requests-table td {
+    padding: 1.5rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.requests-table tr:hover {
+    background-color: #f7fafc;
+}
+
+.requests-table tr:last-child td {
+    border-bottom: none;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.item-name {
+    font-weight: 500;
+    color: #4299e1;
+}
+
+.request-type-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+.type-request {
+    background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+    color: #2c5282;
+}
+
+.type-return {
+    background: linear-gradient(135deg, #fefcbf 0%, #faf089 100%);
+    color: #744210;
+}
+
+.request-date {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.request-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    white-space: nowrap;
+}
+
+.btn-approve:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(72, 187, 120, 0.3);
+}
+
+.btn-deny {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    white-space: nowrap;
+}
+
+.btn-deny:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(245, 101, 101, 0.3);
+}
+
+/* No Requests State */
+.no-requests {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #718096;
+}
+
+.no-requests-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.no-requests-content .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.6;
+}
+
+.no-requests-content h3 {
+    color: #4a5568;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.no-requests-content p {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Mobile Responsive for Tabs */
+@media (max-width: 768px) {
+    .tab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 13px;
+    }
+
+    .requests-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .requests-table thead,
+    .requests-table tbody,
+    .requests-table th,
+    .requests-table td,
+    .requests-table tr {
+        display: block;
+    }
+
+    .requests-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .requests-table tr {
+        border: 1px solid #e2e8f0;
+        margin-bottom: 12px;
+        padding: 1rem;
+        border-radius: 12px;
+        background: #f7fafc;
+    }
+
+    .requests-table td {
+        border: none;
+        position: relative;
+        padding: 8px 8px 8px 35%;
+        text-align: left;
+        white-space: normal;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    .requests-table td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 8px;
+        width: 30%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        color: #4a5568;
+        display: flex;
+        align-items: center;
+    }
+
+    .request-actions {
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .btn-approve, .btn-deny {
+        padding: 10px 16px;
+        font-size: 13px;
+        width: 100%;
+        justify-content: center;
+        min-width: unset;
+    }
+}
+
+/* Request Status Message Styles */
+.request-status-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    color: #9a3412;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #f97316;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* Mobile responsive for status message */
+@media (max-width: 768px) {
+    .status-pending {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: unset;
+        text-align: center;
+    }
+}

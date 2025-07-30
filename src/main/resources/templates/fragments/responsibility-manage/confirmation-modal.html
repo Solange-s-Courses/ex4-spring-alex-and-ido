@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Reusable Confirmation Modal Fragment -->
+<div th:fragment="modal" id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="confirmationTitle">Confirm Action</h3>
+            <span class="close" onclick="closeConfirmationModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="confirmationMessage">Are you sure you want to perform this action?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeConfirmationModal()">Cancel</button>
+            <button type="button" class="btn" id="confirmationButton" onclick="executeConfirmationAction()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Forms for Actions -->
+<form id="hiddenActionForm" method="post" style="display: none;">
+    <input type="hidden" id="hiddenActionInput" name="actionParam">
+</form>
+
+</html>

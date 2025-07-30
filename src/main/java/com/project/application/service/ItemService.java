@@ -223,4 +223,36 @@ public class ItemService {
     public long countItemsByUserId(Long userId) {
         return itemRepository.countByUser_UserId(userId);
     }
+
+    /**
+     * Check if an item has pending requests and return appropriate message
+     */
+    public String getItemRequestStatus(Long itemId, List<com.project.application.entity.Request> allRequests) {
+        if (allRequests == null || allRequests.isEmpty()) {
+            return null; // No requests
+        }
+
+        // Check if this item has any pending requests
+        boolean hasRequestRequests = false;
+        boolean hasReturnRequests = false;
+
+        for (com.project.application.entity.Request request : allRequests) {
+            if (request.getItemId().equals(itemId)) {
+                if ("request".equals(request.getRequestType())) {
+                    hasRequestRequests = true;
+                } else if ("return".equals(request.getRequestType())) {
+                    hasReturnRequests = true;
+                }
+            }
+        }
+
+        // Return appropriate message
+        if (hasReturnRequests) {
+            return "Return pending";
+        } else if (hasRequestRequests) {
+            return "Item being requested";
+        }
+
+        return null; // No requests for this item
+    }
 }

@@ -26,13 +26,6 @@
             Manage Responsibility
         </a>
 
-        <!-- UPDATED: Manage Requests button with dynamic responsibilityId -->
-        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}"
-           th:href="@{/responsibility-manage/{responsibilityId}/requests(responsibilityId=${session.userResponsibilityId})}"
-           class="nav-btn nav-btn-requests">
-            Manage Requests
-        </a>
-
         <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
         <a th:href="@{/user/my-items}" class="nav-btn nav-btn-items"
            th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
@@ -64,13 +57,6 @@
            th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
            class="mobile-nav-btn">
             Manage Responsibility
-        </a>
-
-        <!-- UPDATED: Mobile Manage Requests button with dynamic responsibilityId -->
-        <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageRequestsBtn == null or !hideManageRequestsBtn)}"
-           th:href="@{/responsibility-manage/{responsibilityId}/requests(responsibilityId=${session.userResponsibilityId})}"
-           class="mobile-nav-btn mobile-nav-btn-requests">
-            Manage Requests
         </a>
 
         <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
@@ -135,15 +121,6 @@
             background-color: #218838;
             text-decoration: none;
             color: white;
-        }
-
-        /* Special styling for Manage Requests button */
-        .nav-btn-requests {
-            background-color: #17a2b8 !important;
-        }
-
-        .nav-btn-requests:hover {
-            background-color: #138496 !important;
         }
 
         /* Special styling for My Items button */
@@ -247,9 +224,6 @@
         }
 
         /* Special styling for mobile Manage Requests button */
-        .mobile-nav-btn-requests:hover {
-            background-color: rgba(23, 162, 184, 0.3) !important;
-        }
 
         .mobile-logout-btn {
             background-color: #dc3545;

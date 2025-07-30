@@ -5,6 +5,7 @@ import com.project.application.entity.User;
 import com.project.application.entity.Request;
 import com.project.application.service.*;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -82,12 +83,17 @@ public class ItemController {
         // FIXED: Get managers for this responsibility
         List<User> responsibilityManagers = userService.getResponsibilityManagers(responsibilityId);
 
+        // NEW: Get all pending requests for this responsibility
+        List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibilityId);
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("responsibility", responsibility);
         model.addAttribute("items", items);
         model.addAttribute("itemCount", items.size());
         model.addAttribute("responsibilityManagers", responsibilityManagers);
+        model.addAttribute("requests", pendingRequests);
+        model.addAttribute("requestCount", pendingRequests.size());
 
         return "responsibility-manage";
     }
@@ -96,75 +102,24 @@ public class ItemController {
     // ======================
 
     /**
-     * Display manager requests page
-     * UPDATED: Now uses responsibilityId parameter
+     * Approve a request
+     * UPDATED: Now uses redirect with flash attributes instead of AJAX response and handles tab parameter
      */
-    @GetMapping("/responsibility-manage/{responsibilityId}/requests")
-    public String managerRequests(@PathVariable Long responsibilityId,
-                                  HttpSession session,
-                                  Model model) {
-        // Check if user is logged in
+    @PostMapping("/responsibility-manage/{responsibilityId}/approve-request")
+    public String approveRequest(@PathVariable Long responsibilityId,
+                                 @RequestParam Long requestId,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes,
+                                 HttpServletRequest request) {
+
+        // Check if user is logged in and is manager
         if (!isUserLoggedIn(session)) {
             return "redirect:/login";
         }
 
         User user = getLoggedInUser(session);
-
-        // Check if user is manager
         if (!"manager".equals(user.getRoleName())) {
             return "error/404";
-        }
-
-        // Get responsibility details
-        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findById(responsibilityId);
-
-        if (!responsibilityOptional.isPresent()) {
-            model.addAttribute("error", "Responsibility not found in system.");
-            model.addAttribute("user", user);
-            return "error/404";
-        }
-
-        com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
-
-        // Check if the current manager is assigned to this responsibility
-        String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
-        if (!responsibility.getResponsibilityName().equals(userResponsibilityName)) {
-            model.addAttribute("error", "You don't have permission to manage this responsibility.");
-            model.addAttribute("user", user);
-            return "error/404";
-        }
-
-        // Get all pending requests for this responsibility
-        List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibilityId);
-
-        // Add data to model
-        model.addAttribute("user", user);
-        model.addAttribute("responsibility", responsibility);
-        model.addAttribute("requests", pendingRequests);
-        model.addAttribute("requestCount", pendingRequests.size());
-
-        return "manager-requests";
-    }
-
-    /**
-     * Approve a request
-     * UPDATED: Now includes responsibilityId in URL for consistency
-     */
-    @PostMapping("/responsibility-manage/{responsibilityId}/approve-request")
-    @ResponseBody
-    public String approveRequest(@PathVariable Long responsibilityId,
-                                 @RequestParam Long requestId,
-                                 HttpSession session) {
-
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "error:Please log in to approve requests";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error:Access denied";
         }
 
         // Verify responsibility exists and user has permission
@@ -172,54 +127,87 @@ public class ItemController {
                 responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
-            return "error:Responsibility not found";
+            redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Check if the current manager is assigned to this responsibility
         String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
         if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
-            return "error:You don't have permission to manage this responsibility";
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Verify that this request belongs to the manager's responsibility
         Optional<Request> requestOptional = requestService.findById(requestId);
         if (!requestOptional.isPresent()) {
-            return "error:Request not found";
+            redirectAttributes.addFlashAttribute("error", "Request not found.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
-        Request request = requestOptional.get();
-        if (!request.getResponsibilityId().equals(responsibilityId)) {
-            return "error:You don't have permission to manage this request";
+        Request requestEntity = requestOptional.get();
+        if (!requestEntity.getResponsibilityId().equals(responsibilityId)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this request.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Approve the request
         String result = requestService.approveRequest(requestId);
 
         if ("success".equals(result)) {
-            return "success:Request approved successfully";
+            redirectAttributes.addFlashAttribute("success", "Request approved successfully!");
         } else {
-            return "error:" + result;
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        // Handle tab parameter for redirect
+        String activeTab = request.getParameter("activeTab");
+        if ("requests".equals(activeTab)) {
+            return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+        } else {
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
     }
 
     /**
      * Deny a request
-     * UPDATED: Now includes responsibilityId in URL for consistency
+     * UPDATED: Now uses redirect with flash attributes instead of AJAX response and handles tab parameter
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/deny-request")
-    @ResponseBody
     public String denyRequest(@PathVariable Long responsibilityId,
                               @RequestParam Long requestId,
-                              HttpSession session) {
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes,
+                              HttpServletRequest request) {
 
         // Check if user is logged in and is manager
         if (!isUserLoggedIn(session)) {
-            return "error:Please log in to deny requests";
+            return "redirect:/login";
         }
 
         User user = getLoggedInUser(session);
         if (!"manager".equals(user.getRoleName())) {
-            return "error:Access denied";
+            return "error/404";
         }
 
         // Verify responsibility exists and user has permission
@@ -227,33 +215,65 @@ public class ItemController {
                 responsibilityService.findById(responsibilityId);
 
         if (!responsibilityOptional.isPresent()) {
-            return "error:Responsibility not found";
+            redirectAttributes.addFlashAttribute("error", "Responsibility not found.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Check if the current manager is assigned to this responsibility
         String userResponsibilityName = userService.getUserResponsibilityName(user.getUserId());
         if (!responsibilityOptional.get().getResponsibilityName().equals(userResponsibilityName)) {
-            return "error:You don't have permission to manage this responsibility";
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this responsibility.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Verify that this request belongs to the manager's responsibility
         Optional<Request> requestOptional = requestService.findById(requestId);
         if (!requestOptional.isPresent()) {
-            return "error:Request not found";
+            redirectAttributes.addFlashAttribute("error", "Request not found.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
-        Request request = requestOptional.get();
-        if (!request.getResponsibilityId().equals(responsibilityId)) {
-            return "error:You don't have permission to manage this request";
+        Request requestEntity = requestOptional.get();
+        if (!requestEntity.getResponsibilityId().equals(responsibilityId)) {
+            redirectAttributes.addFlashAttribute("error", "You don't have permission to manage this request.");
+            String activeTab = request.getParameter("activeTab");
+            if ("requests".equals(activeTab)) {
+                return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+            } else {
+                return "redirect:/responsibility-manage/" + responsibilityId;
+            }
         }
 
         // Deny the request
         String result = requestService.denyRequest(requestId);
 
         if ("success".equals(result)) {
-            return "success:Request denied successfully";
+            redirectAttributes.addFlashAttribute("success", "Request denied successfully!");
         } else {
-            return "error:" + result;
+            redirectAttributes.addFlashAttribute("error", result);
+        }
+
+        // Handle tab parameter for redirect
+        String activeTab = request.getParameter("activeTab");
+        if ("requests".equals(activeTab)) {
+            return "redirect:/responsibility-manage/" + responsibilityId + "?tab=requests";
+        } else {
+            return "redirect:/responsibility-manage/" + responsibilityId;
         }
     }
 
@@ -495,7 +515,10 @@ public class ItemController {
             return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        // Delete item
+        // NEW: Delete all pending requests for this item first
+        requestService.deleteRequestsByItemId(itemId);
+
+        // Then delete the item
         String result = itemService.deleteItem(itemId);
 
         if ("success".equals(result)) {

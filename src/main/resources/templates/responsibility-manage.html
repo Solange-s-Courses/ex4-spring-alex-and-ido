@@ -28,7 +28,7 @@
         <div th:replace="~{fragments/responsibility-manage/responsibility-sidebar :: sidebar(${responsibility}, ${responsibilityManagers}, ${itemCount})}"></div>
 
         <!-- Right Main Area Fragment -->
-        <div th:replace="~{fragments/responsibility-manage/items-table :: table(${items}, ${itemCount})}"></div>
+        <div th:replace="~{fragments/responsibility-manage/items-table :: table(${items}, ${itemCount}, ${requests}, ${requestCount})}"></div>
     </div>
 </div>
 
@@ -36,7 +36,17 @@
 <div th:replace="~{fragments/responsibility-manage/edit-description-modal :: modal(${responsibility})}"></div>
 <div th:replace="~{fragments/responsibility-manage/add-item-modal :: modal(${responsibility})}"></div>
 <div th:replace="~{fragments/responsibility-manage/edit-item-modal :: modal(${responsibility})}"></div>
-<div th:replace="~{fragments/responsibility-manage/delete-item-modal :: modal(${responsibility})}"></div>
+<div th:replace="~{fragments/responsibility-manage/confirmation-modal :: modal}"></div>
+
+<!-- Hidden Delete Form (since we removed delete modal but still need the form) -->
+<form id="deleteItemForm" th:action="@{/responsibility-manage/{responsibilityId}/delete-item(responsibilityId=${responsibility.responsibilityId})}" method="post" style="display: none;">
+    <input type="hidden" id="deleteItemId" name="itemId">
+</form>
+
+<!-- Hidden Action Form for Approve/Deny Requests -->
+<form id="hiddenActionForm" method="post" style="display: none;">
+    <input type="hidden" id="hiddenActionInput" name="actionParam">
+</form>
 
 <!-- Include Complete Toast System (CSS + HTML + JS) -->
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
