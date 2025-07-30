@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsibility Management - Event Management System</title>
 
-    <!-- Load admin styles for consistent styling -->
-    <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
-
     <!-- Load responsibility management specific styles -->
     <link th:href="@{/css/responsibility-manage-styles.css}" rel="stylesheet">
 
@@ -15,10 +12,8 @@
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
 </head>
 <body>
-<!-- Navigation Bar with Dashboard button and hide Manage Responsibility button -->
-<div th:with="showDashboardBtn=true, hideManageResponsibilityBtn=true">
-    <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
+<!-- Navigation Bar - Updated to use new navbar system -->
+<div th:replace="~{fragments/navbar/navbar-main :: navbar}"></div>
 
 <!-- Main Content -->
 <div class="main-content">

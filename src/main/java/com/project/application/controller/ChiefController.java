@@ -60,6 +60,8 @@ public class ChiefController {
         model.addAttribute("user", user);
         model.addAttribute("users", users);
         model.addAttribute("roles", roles);
+        model.addAttribute("activeNavButton", "userlist");
+
         return "chief-user-list";
     }
 

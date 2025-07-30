@@ -94,6 +94,7 @@ public class ItemController {
         model.addAttribute("responsibilityManagers", responsibilityManagers);
         model.addAttribute("requests", pendingRequests);
         model.addAttribute("requestCount", pendingRequests.size());
+        model.addAttribute("activeNavButton", "responsibility");
 
         return "responsibility-manage";
     }
@@ -677,6 +678,7 @@ public class ItemController {
         model.addAttribute("userItems", userItems);
         model.addAttribute("itemCount", userItems.size());
         model.addAttribute("canReturnItems", canReturnItems);
+        model.addAttribute("activeNavButton", "myitems");
 
         return "user-items";
     }

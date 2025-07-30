@@ -60,6 +60,8 @@ public class AdminController {
         model.addAttribute("user", user);
         model.addAttribute("users", users);
         model.addAttribute("roles", roles);
+        model.addAttribute("activeNavButton", "admin");
+
         return "admin";
     }
 

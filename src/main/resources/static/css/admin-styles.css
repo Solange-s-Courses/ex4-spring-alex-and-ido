@@ -1,52 +1,14 @@
+/* Cleaned admin-styles.css - Navbar conflicts removed */
+
+/* Keep box-sizing but remove margin/padding reset that conflicts with navbar */
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
+/* Keep body styles but make them more specific to avoid navbar conflicts */
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
-}
-
-/* Navigation */
-.navbar {
-    background-color: #343a40;
-    padding: 1rem 0;
-}
-
-.navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.navbar-brand {
-    color: white;
-    text-decoration: none;
-    font-size: 1.25rem;
-    font-weight: bold;
-}
-
-.navbar-nav {
-    display: flex;
-    gap: 20px;
-}
-
-.nav-link {
-    color: rgba(255,255,255,0.75);
-    text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: color 0.3s;
-}
-
-.nav-link:hover {
-    color: white;
-    background-color: rgba(255,255,255,0.1);
 }
 
 /* Main Content */
@@ -123,7 +85,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex: 0 0 auto; /* Don't grow/shrink */
+    flex: 0 0 auto;
 }
 
 .filter-label {
@@ -160,7 +122,7 @@ h1 {
 .search-section {
     display: flex;
     align-items: center;
-    flex: 0 0 auto; /* Take up available space */
+    flex: 0 0 auto;
     justify-content: flex-end;
 }
 
@@ -197,7 +159,7 @@ h1 {
     font-size: 0.9rem;
     margin: 0;
     font-weight: 500;
-    flex: 1; /* Don't grow/shrink */
+    flex: 1;
     text-align: center;
     white-space: nowrap;
 }

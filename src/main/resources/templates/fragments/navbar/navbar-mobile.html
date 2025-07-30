@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- Mobile Menu Fragment -->
+<!-- Mobile Menu Fragment - With Controller-Based Active States -->
 <div th:fragment="mobile-menu" class="mobile-menu" id="mobileMenu">
-    <!-- Dashboard button (only for responsibility view page and chief user list) -->
-    <a th:href="@{/dashboard}" class="mobile-nav-btn" th:if="${showDashboardBtn != null and showDashboardBtn}">Dashboard</a>
+    <!-- Dashboard button -->
+    <a th:href="@{/dashboard}"
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'dashboard' ? ' active' : '')">Dashboard</a>
 
-    <!-- Mobile Manage Responsibility button with dynamic responsibilityId -->
-    <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null and (hideManageResponsibilityBtn == null or !hideManageResponsibilityBtn)}"
+    <!-- Mobile Manage Responsibility button (only for managers) -->
+    <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null}"
        th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
-       class="mobile-nav-btn">
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'responsibility' ? ' active' : '')">
         Manage Responsibility
     </a>
 
-    <!-- My Items button (only for users, managers, and chiefs, hide on my-items page) -->
-    <a th:href="@{/user/my-items}" class="mobile-nav-btn mobile-nav-btn-items"
-       th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief') and (hideMyItemsBtn == null or !hideMyItemsBtn)}">
+    <!-- My Items button (for users, managers, and chiefs) -->
+    <a th:href="@{/user/my-items}"
+       th:class="'mobile-nav-btn mobile-nav-btn-items' + (${activeNavButton} == 'myitems' ? ' active' : '')"
+       th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief')}">
         My Items
     </a>
 
-    <!-- Chief User List button (only for chief, hide on user list page) -->
-    <a th:href="@{/chief/user-list}" class="mobile-nav-btn"
-       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief' and (hideUserListBtn == null or !hideUserListBtn)}">User List</a>
+    <!-- Chief User List button (only for chief) -->
+    <a th:href="@{/chief/user-list}"
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'userlist' ? ' active' : '')"
+       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
 
-    <!-- Admin Page button (only for admin, hide on admin page) -->
-    <a th:href="@{/admin}" class="mobile-nav-btn"
-       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin' and (hideAdminPageBtn == null or !hideAdminPageBtn)}">Admin Page</a>
+    <!-- Admin Page button (only for admin) -->
+    <a th:href="@{/admin}"
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'admin' ? ' active' : '')"
+       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
 
-    <!-- User Info button (hide only on user-info page) -->
-    <a th:href="@{/user-info}" class="mobile-nav-btn" th:if="${hideUserInfoBtn == null or !hideUserInfoBtn}">User Info</a>
+    <!-- User Info button -->
+    <a th:href="@{/user-info}"
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'userinfo' ? ' active' : '')">User Info</a>
 
     <!-- Logout button -->
     <a th:href="@{/logout}" class="mobile-logout-btn">Logout</a>

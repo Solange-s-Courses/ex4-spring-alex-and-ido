@@ -63,6 +63,7 @@ public class DashboardController {
         model.addAttribute("userRole", authHelper.getUserRole(session));
         model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
         model.addAttribute("events", events);
+        model.addAttribute("activeNavButton", "dashboard");
 
         return "dashboard";
     }

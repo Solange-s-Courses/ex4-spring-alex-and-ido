@@ -145,11 +145,13 @@ public class AuthController {
 
         model.addAttribute("user", loggedInUser);
         model.addAttribute("userRole", authHelper.getUserRole(session));
+        model.addAttribute("activeNavButton", "userinfo");
+
         return "user-info";
     }
 
     /**
-     * Change user name
+     * Change username
      */
     @PostMapping("/change-name")
     public String changeName(@RequestParam String firstName,
