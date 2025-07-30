@@ -1039,3 +1039,13 @@ body {
         text-align: center;
     }
 }
+
+/* Light Modal Title Override */
+.modal-header h3 {
+    color: #ffffff !important;
+}
+
+/* Also update the confirmation modal title specifically */
+#confirmationTitle {
+    color: #ffffff !important;
+}
