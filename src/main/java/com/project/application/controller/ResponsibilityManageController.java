@@ -17,13 +17,12 @@ import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
-public class ItemController {
+public class ResponsibilityManageController {
 
     private final ItemService itemService;
     private final UserService userService;
     private final ResponsibilityService responsibilityService;
     private final RequestService requestService;
-    private final EventService eventService;
 
     private static final String LOGGED_IN_USER = "loggedInUser";
 
@@ -80,10 +79,10 @@ public class ItemController {
         // Get all items for this responsibility
         List<Item> items = itemService.getItemsByResponsibilityId(responsibilityId);
 
-        // FIXED: Get managers for this responsibility
+        // Get managers for this responsibility
         List<User> responsibilityManagers = userService.getResponsibilityManagers(responsibilityId);
 
-        // NEW: Get all pending requests for this responsibility
+        // Get all pending requests for this responsibility
         List<Request> pendingRequests = requestService.getRequestsByResponsibilityId(responsibilityId);
 
         // Add data to model
@@ -98,9 +97,6 @@ public class ItemController {
 
         return "responsibility-manage";
     }
-    // ======================
-    // MANAGER REQUEST MANAGEMENT
-    // ======================
 
     /**
      * Approve a request
@@ -516,7 +512,7 @@ public class ItemController {
             return "redirect:/responsibility-manage/" + responsibilityId;
         }
 
-        // NEW: Delete all pending requests for this item first
+        // Delete all pending requests for this item first
         requestService.deleteRequestsByItemId(itemId);
 
         // Then delete the item
@@ -529,165 +525,5 @@ public class ItemController {
         }
 
         return "redirect:/responsibility-manage/" + responsibilityId;
-    }
-
-    /**
-     * Display responsibility details with item list for all users
-     * ENHANCED: Now includes request functionality, event status, and available items count
-     */
-    @GetMapping("/responsibility/view/{id}")
-    public String viewResponsibility(@PathVariable Long id,
-                                     HttpSession session,
-                                     Model model) {
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Get responsibility details
-        Optional<com.project.application.entity.Responsibility> responsibilityOptional =
-                responsibilityService.findById(id);
-
-        if (!responsibilityOptional.isPresent()) {
-            model.addAttribute("error", "Responsibility not found.");
-            model.addAttribute("user", user);
-            return "error/404";
-        }
-
-        com.project.application.entity.Responsibility responsibility = responsibilityOptional.get();
-
-        // Get all items for this responsibility
-        List<Item> items = itemService.getItemsByResponsibilityId(id);
-
-        // Get managers for this responsibility
-        List<com.project.application.entity.User> managers = userService.getResponsibilityManagers(id);
-
-        // Add request-related data for users
-        // Check which items the current user has already requested
-        List<Long> userRequestedItemIds = requestService.getRequestsByUserId(user.getUserId())
-                .stream()
-                .map(request -> request.getItem().getItemId())
-                .toList();
-
-        // Add event status data
-        boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
-        boolean canReturnItems = eventService.isResponsibilityInReturnEvent(id);
-
-        // Calculate available items count and total items count
-        long availableItemsCount = items.stream()
-                .filter(item -> "Available".equals(item.getStatus()))
-                .count();
-        int totalItemsCount = items.size();
-
-        // Add data to model
-        model.addAttribute("user", user);
-        model.addAttribute("responsibility", responsibility);
-        model.addAttribute("items", items);
-        model.addAttribute("responsibilityManagers", managers);
-        model.addAttribute("userRequestedItemIds", userRequestedItemIds);
-        model.addAttribute("canRequestItems", canRequestItems);
-        model.addAttribute("canReturnItems", canReturnItems);
-        model.addAttribute("availableItemsCount", availableItemsCount);
-        model.addAttribute("totalItemsCount", totalItemsCount);
-
-        return "responsibility-view";
-    }
-
-    // ======================
-    // USER REQUEST ENDPOINTS
-    // ======================
-
-    /**
-     * Handle user item request via AJAX
-     */
-    @PostMapping("/user/request-item")
-    @ResponseBody
-    public String requestItem(@RequestParam Long itemId,
-                              HttpSession session) {
-
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "error:Please log in to request items";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Users, managers, and chiefs can request items, but not admins
-        if ("admin".equals(user.getRoleName())) {
-            return "error:Your role cannot request items";
-        }
-
-        // Create the request
-        String result = requestService.createRequest(user.getUserId(), itemId, "request");
-
-        if ("success".equals(result)) {
-            return "success:Item request submitted successfully";
-        } else {
-            return "error:" + result;
-        }
-    }
-
-    /**
-     * Handle user item return request via AJAX
-     */
-    @PostMapping("/user/return-item")
-    @ResponseBody
-    public String returnItem(@RequestParam Long itemId,
-                             HttpSession session) {
-
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "error:Please log in to return items";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Create the return request
-        String result = requestService.createRequest(user.getUserId(), itemId, "return");
-
-        if ("success".equals(result)) {
-            return "success:Item return request submitted successfully";
-        } else {
-            return "error:" + result;
-        }
-    }
-
-    // ======================
-    // USER ITEMS LIST (MY ITEMS)
-    // ======================
-
-    /**
-     * Display user's owned items page with event status integration
-     */
-    @GetMapping("/user/my-items")
-    public String myItems(HttpSession session, Model model) {
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Users, managers, and chiefs can view their items, but not admins
-        if ("admin".equals(user.getRoleName())) {
-            return "error/404";
-        }
-
-        // Get all items owned by this user
-        List<Item> userItems = itemService.getItemsByUserId(user.getUserId());
-
-        // Check if any events allow returns
-        boolean canReturnItems = eventService.areItemReturnsAllowed();
-
-        // Add data to model
-        model.addAttribute("user", user);
-        model.addAttribute("userItems", userItems);
-        model.addAttribute("itemCount", userItems.size());
-        model.addAttribute("canReturnItems", canReturnItems);
-        model.addAttribute("activeNavButton", "myitems");
-
-        return "user-items";
     }
 }
