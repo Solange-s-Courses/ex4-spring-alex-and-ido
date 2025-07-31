@@ -31,9 +31,9 @@ function validateItemName(itemName) {
     }
 
     // Allow letters, numbers, and spaces
-    const pattern = /^[A-Za-z0-9 ]+$/;
+    const pattern = /^[A-Za-z0-9 .#()-]+$/;
     if (!pattern.test(itemName)) {
-        return "Item name can only contain letters, numbers, and spaces";
+        return "Item name can only contain letters, numbers, spaces and the .#()- symbols";
     }
 
     return null; // No error
