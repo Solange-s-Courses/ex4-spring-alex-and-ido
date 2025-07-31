@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Request Confirmation Modal Fragment -->
+<div th:fragment="modal" id="requestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Request Item</h3>
+            <span class="close" onclick="closeRequestModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message" id="requestMessage">Are you sure you want to request this item?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeRequestModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmRequestBtn" onclick="confirmItemRequest()">Request Item</button>
+        </div>
+    </div>
+</div>
+
+</html>

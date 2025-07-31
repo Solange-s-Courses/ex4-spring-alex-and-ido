@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Responsibility Sidebar Fragment for View Page -->
+<div th:fragment="sidebar(responsibility, responsibilityManagers, availableItemsCount, totalItemsCount)" class="responsibility-sidebar">
+    <div class="sidebar-content">
+        <!-- Responsibility Info -->
+        <div class="responsibility-info">
+            <h2 class="info-title" th:text="${#strings.capitalizeWords(responsibility.responsibilityName)}">Responsibility Name</h2>
+
+            <!-- Description Section -->
+            <div class="description-section">
+                <h3 class="section-title">Description</h3>
+                <div class="description-content">
+                    <div th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+                         class="description-text"
+                         th:text="${responsibility.description}">
+                        Description text here
+                    </div>
+                    <div th:if="${responsibility.description == null or #strings.isEmpty(responsibility.description)}"
+                         class="description-text no-description">
+                        No description available for this responsibility
+                    </div>
+                </div>
+            </div>
+
+            <!-- Managers Section -->
+            <div class="managers-section">
+                <h3 class="section-title">Assigned Managers</h3>
+                <div class="managers-content">
+                    <div th:if="${responsibilityManagers != null and !responsibilityManagers.isEmpty()}">
+                        <div class="managers-list">
+                            <span th:each="manager, iterStat : ${responsibilityManagers}"
+                                  class="manager-badge"
+                                  th:text="${#strings.capitalize(manager.firstName) + ' ' + #strings.capitalize(manager.lastName)}">Manager Name</span>
+                        </div>
+                    </div>
+                    <div th:if="${responsibilityManagers == null or responsibilityManagers.isEmpty()}"
+                         class="no-managers">
+                        <i class="icon">👥</i> No managers currently assigned
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="stats-section">
+                <h3 class="section-title">Quick Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${availableItemsCount ?: 0} + '/' + ${totalItemsCount ?: 0}">0/0</div>
+                        <div class="stat-label">Available Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

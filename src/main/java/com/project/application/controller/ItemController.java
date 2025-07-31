@@ -533,7 +533,7 @@ public class ItemController {
 
     /**
      * Display responsibility details with item list for all users
-     * ENHANCED: Now includes request functionality and event status
+     * ENHANCED: Now includes request functionality, event status, and available items count
      */
     @GetMapping("/responsibility/view/{id}")
     public String viewResponsibility(@PathVariable Long id,
@@ -575,6 +575,12 @@ public class ItemController {
         boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
         boolean canReturnItems = eventService.isResponsibilityInReturnEvent(id);
 
+        // Calculate available items count and total items count
+        long availableItemsCount = items.stream()
+                .filter(item -> "Available".equals(item.getStatus()))
+                .count();
+        int totalItemsCount = items.size();
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("responsibility", responsibility);
@@ -583,6 +589,8 @@ public class ItemController {
         model.addAttribute("userRequestedItemIds", userRequestedItemIds);
         model.addAttribute("canRequestItems", canRequestItems);
         model.addAttribute("canReturnItems", canReturnItems);
+        model.addAttribute("availableItemsCount", availableItemsCount);
+        model.addAttribute("totalItemsCount", totalItemsCount);
 
         return "responsibility-view";
     }

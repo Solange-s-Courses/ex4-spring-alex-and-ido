@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Items Section Fragment for View Page -->
+<div th:fragment="section(items, user, userRequestedItemIds, canRequestItems)" class="items-main">
+    <div class="items-content">
+        <!-- Items Header -->
+        <div class="items-header">
+            <div class="header-content">
+                <h2 class="items-title">
+                    <i class="icon">📦</i> Responsibility Items
+                </h2>
+                <div class="item-count" th:if="${items != null}">
+                    <span th:text="${#lists.size(items)}">0</span> items in total
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-table-container">
+            <div th:if="${items != null and not #lists.isEmpty(items)}">
+                <table class="items-table">
+                    <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${items}">
+                        <td data-label="Item Name">
+                            <div class="item-info">
+                                <span class="item-name" th:text="${item.itemName}">Item Name</span>
+                            </div>
+                        </td>
+                        <td data-label="Status">
+                            <span class="item-status"
+                                  th:class="'item-status ' + ${item.status == 'Available' ? 'status-available' :
+                                    item.status == 'In Use' ? 'status-in-use' : 'status-unavailable'}"
+                                  th:text="${item.status == 'In Use' && item.user != null ?
+                                    'In Use by ' + #strings.capitalizeWords(item.user.firstName + ' ' + item.user.lastName) : item.status}">Status
+                            </span>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="item-actions">
+                                <!-- Request button for available items (only for users, managers, and chiefs, not admins) -->
+                                <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager' or user.roleName == 'chief')}">
+                                    <!-- Show request buttons only if events allow requests -->
+                                    <div th:if="${canRequestItems}">
+                                        <!-- Show "Request" button if user hasn't requested this item -->
+                                        <button th:if="${!userRequestedItemIds.contains(item.itemId)}"
+                                                class="request-btn"
+                                                th:data-item-id="${item.itemId}"
+                                                th:data-item-name="${item.itemName}"
+                                                onclick="showRequestModal(this.dataset.itemId, this.dataset.itemName)">
+                                            Request
+                                        </button>
+                                        <!-- Show "Requested" button if user has already requested this item -->
+                                        <button th:if="${userRequestedItemIds.contains(item.itemId)}"
+                                                class="request-btn requested"
+                                                disabled>
+                                            Requested
+                                        </button>
+                                    </div>
+                                    <!-- Show disabled message if requests not allowed -->
+                                    <div th:if="${!canRequestItems}">
+                                        <span class="request-disabled"
+                                              title="Requests not available - no active events for this responsibility">
+                                            Request Unavailable
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Items Message -->
+            <div th:if="${items == null or #lists.isEmpty(items)}" class="no-items">
+                No items available in this responsibility
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
