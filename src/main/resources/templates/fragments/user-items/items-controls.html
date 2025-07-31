@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Items Controls Fragment -->
+<div th:fragment="controls" class="items-controls">
+    <!-- Filter and Sort Section -->
+    <div class="filter-sort-section">
+        <!-- Responsibility Filter -->
+        <div class="filter-group">
+            <label class="filter-label" for="responsibilityFilter">Filter:</label>
+            <select id="responsibilityFilter" class="filter-dropdown">
+                <option value="">All Responsibilities</option>
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="filter-group">
+            <label class="filter-label" for="sortItems">Sort:</label>
+            <select id="sortItems" class="sort-dropdown">
+                <option value="">Default Order</option>
+                <option value="name-asc">Item Name (A-Z)</option>
+                <option value="name-desc">Item Name (Z-A)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <input type="text"
+               id="searchItems"
+               class="search-input"
+               placeholder="Search items or responsibilities...">
+    </div>
+</div>
+
+</html>

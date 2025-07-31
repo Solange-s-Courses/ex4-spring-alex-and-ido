@@ -4,258 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Items - Event Management System</title>
-    <!-- Load admin styles for consistent styling -->
-    <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
+
+    <!-- Load user items specific styles -->
+    <link th:href="@{/css/user-items-styles.css}" rel="stylesheet">
 
     <!-- Include Navbar Styles -->
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-
-        /* Main Content */
-        .main-content {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .content-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .text-muted {
-            color: #6c757d;
-            margin-bottom: 2rem;
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Items Section Styling */
-        .items-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #007bff;
-        }
-
-        .items-title {
-            color: #007bff;
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .item-count {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Items Table */
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .items-table th,
-        .items-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .items-table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .items-table tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .item-name {
-            font-weight: 500;
-            color: #007bff;
-        }
-
-        .responsibility-name {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .btn-return {
-            background-color: #ffc107;
-            color: #212529;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .btn-return:hover {
-            background-color: #e0a800;
-        }
-
-        .btn-return:disabled {
-            background-color: #6c757d;
-            color: white;
-            cursor: not-allowed;
-        }
-
-        .no-items {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 3rem;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-
-        .modal-title {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .modal-message {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .modal-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .modal-btn-confirm {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .modal-btn-confirm:hover {
-            background: #e0a800;
-        }
-
-        .modal-btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-
-        .modal-btn-cancel:hover {
-            background: #5a6268;
-        }
-
-        .return-disabled {
-            color: #6c757d;
-            font-size: 0.8rem;
-            font-style: italic;
-            cursor: not-allowed;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 0 1rem;
-            }
-
-            .items-table {
-                font-size: 0.9rem;
-            }
-
-            .items-table th,
-            .items-table td {
-                padding: 8px;
-            }
-
-            .modal-content {
-                margin: 10% auto;
-                padding: 1.5rem;
-            }
-
-            .modal-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-    </style>
 </head>
 <body>
 
@@ -267,185 +21,50 @@
 <!-- Main Content -->
 <div class="main-content">
     <div class="content-card">
-        <h1>My Items</h1>
-        <p class="text-muted">Items currently assigned to you</p>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="icon">📦</i> My Items
+            </h1>
+            <p class="page-description">Items currently assigned to you</p>
+        </div>
 
         <!-- Alert Messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
         <!-- Items Section -->
-        <div class="items-header">
-            <h2 class="items-title">Your Items</h2>
-        </div>
+        <div class="items-section">
+            <!-- Items Header with Count -->
+            <div class="items-header">
+                <div class="header-content">
+                    <!-- Dynamic Item Count -->
+                    <div class="item-count" th:if="${itemCount != null}">
+                        <span id="filteredItemCount" th:text="${itemCount}">0</span> of
+                        <span id="totalItemCount" th:text="${itemCount}">0</span> items shown
+                    </div>
+                </div>
+            </div>
 
-        <div class="item-count" th:if="${itemCount != null}">
-            Total Items: <span th:text="${itemCount}">0</span>
-        </div>
+            <!-- Controls Fragment (Filter, Sort, Search) -->
+            <div th:replace="~{fragments/user-items/items-controls :: controls}"></div>
 
-        <!-- Items Table -->
-        <div th:if="${userItems != null and not #lists.isEmpty(userItems)}">
-            <table class="items-table">
-                <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Responsibility</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${userItems}">
-                    <td>
-                        <span class="item-name" th:text="${item.itemName}">Item Name</span>
-                    </td>
-                    <td>
-                        <span class="responsibility-name" th:text="${item.responsibilityName}">Responsibility Name</span>
-                    </td>
-                    <td>
-                        <!-- Show return button only if events allow returns -->
-                        <button th:if="${canReturnItems}"
-                                class="btn-return"
-                                th:data-item-id="${item.itemId}"
-                                th:data-item-name="${item.itemName}"
-                                onclick="showReturnModal(this.dataset.itemId, this.dataset.itemName)">
-                            Return
-                        </button>
-                        <!-- Show disabled message if returns not allowed -->
-                        <span th:if="${!canReturnItems}"
-                              class="return-disabled"
-                              title="Returns not available - no events in return mode">
-                            Return Unavailable
-                        </span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- No Items Message -->
-        <div th:if="${userItems == null or #lists.isEmpty(userItems)}" class="no-items">
-            <p>You don't have any items assigned to you yet.</p>
-        </div>
+            <!-- Items Table Fragment -->
+            <div th:replace="~{fragments/user-items/items-table :: table(${userItems}, ${canReturnItems}, ${userPendingReturnItemIds})}"></div>        </div>
     </div>
 </div>
 
-<!-- Return Item Modal -->
-<div id="returnModal" class="modal">
-    <div class="modal-content">
-        <h3 class="modal-title">Return Item</h3>
-        <p class="modal-message" id="returnMessage">Are you sure you want to return this item?</p>
-        <div class="modal-buttons">
-            <button class="modal-btn modal-btn-cancel" onclick="closeReturnModal()">Cancel</button>
-            <button class="modal-btn modal-btn-confirm" id="confirmReturnBtn" onclick="confirmItemReturn()">Return Item</button>
-        </div>
-    </div>
-</div>
+<!-- Return Modal Fragment -->
+<div th:replace="~{fragments/user-items/return-modal :: modal}"></div>
 
-<!-- Include Toast System -->
+<!-- Include Complete Toast System (CSS + HTML + JS) -->
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
 <!-- Include Navbar Scripts -->
 <script th:src="@{/js/navbar-scripts.js}"></script>
 
-<!-- Include Toast JavaScript -->
-<script th:src="@{/js/toast.js}"></script>
-
-<!-- Return functionality JavaScript -->
-<script>
-    // Global variables for return functionality
-    let currentItemId = null;
-    let currentItemName = null;
-
-    /**
-     * Show return confirmation modal
-     */
-    function showReturnModal(itemId, itemName) {
-        currentItemId = itemId;
-        currentItemName = itemName;
-
-        document.getElementById('returnMessage').textContent =
-            `Are you sure you want to request to return "${itemName}"?`;
-        document.getElementById('returnModal').style.display = 'block';
-    }
-
-    /**
-     * Close return modal
-     */
-    function closeReturnModal() {
-        document.getElementById('returnModal').style.display = 'none';
-        currentItemId = null;
-        currentItemName = null;
-    }
-
-    /**
-     * Confirm item return
-     */
-    function confirmItemReturn() {
-        if (!currentItemId) {
-            return;
-        }
-
-        const confirmBtn = document.getElementById('confirmReturnBtn');
-        const originalText = confirmBtn.textContent;
-
-        // Disable button and show loading
-        confirmBtn.disabled = true;
-        confirmBtn.textContent = 'Requesting...';
-
-        // Send AJAX request
-        fetch('/user/return-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `itemId=${currentItemId}`
-        })
-            .then(response => response.text())
-            .then(result => {
-                const [status, message] = result.split(':', 2);
-
-                if (status === 'success') {
-                    Toast.success(message);
-                    closeReturnModal();
-                    // Refresh the page to update the items list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    Toast.error(message);
-                    // Re-enable button
-                    confirmBtn.disabled = false;
-                    confirmBtn.textContent = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Toast.error('An error occurred while processing your request');
-                // Re-enable button
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = originalText;
-            });
-    }
-
-    /**
-     * Close modal when clicking outside
-     */
-    window.onclick = function(event) {
-        const modal = document.getElementById('returnModal');
-        if (event.target === modal) {
-            closeReturnModal();
-        }
-    }
-
-    /**
-     * Close modal with Escape key
-     */
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeReturnModal();
-        }
-    });
-</script>
+<!-- Include User Items Scripts -->
+<script th:src="@{/js/user-items-scripts.js}"></script>
 
 </body>
 </html>

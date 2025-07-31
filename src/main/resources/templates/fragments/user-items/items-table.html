@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Items Table Fragment -->
+<div th:fragment="table(userItems, canReturnItems, userPendingReturnItemIds)" class="items-table-container">
+    <div th:if="${userItems != null and not #lists.isEmpty(userItems)}">
+        <table class="items-table">
+            <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Responsibility</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${userItems}" class="item-row">
+                <td data-label="Item Name">
+                    <span class="item-name" th:text="${item.itemName}">Item Name</span>
+                </td>
+                <td data-label="Responsibility">
+                    <span class="responsibility-name" th:text="${item.responsibilityName}">Responsibility Name</span>
+                </td>
+                <td data-label="Actions">
+                    <div class="item-actions">
+                        <!-- Show return button only if events allow returns AND user hasn't already requested return -->
+                        <button th:if="${canReturnItems and !userPendingReturnItemIds.contains(item.itemId)}"
+                                class="btn-return"
+                                th:data-item-id="${item.itemId}"
+                                th:data-item-name="${item.itemName}"
+                                onclick="showReturnModal(this.dataset.itemId, this.dataset.itemName)">
+                            Return
+                        </button>
+                        <!-- Show "Return Pending" if user already has a return request -->
+                        <span th:if="${canReturnItems and userPendingReturnItemIds.contains(item.itemId)}"
+                              class="return-disabled"
+                              title="Return request already submitted and pending approval">
+                            Return Pending
+                        </span>
+                        <!-- Show disabled message if returns not allowed -->
+                        <span th:if="${!canReturnItems}"
+                              class="return-disabled"
+                              title="Returns not available - no events in return mode">
+                            Return Unavailable
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- No Items Message -->
+    <div th:if="${userItems == null or #lists.isEmpty(userItems)}" class="no-items">
+        <div class="no-items-content">
+            <i class="icon">📦</i>
+            <h3>No Items Yet</h3>
+            <p>You don't have any items assigned to you yet.</p>
+        </div>
+    </div>
+</div>
+
+<!-- No Filtered Items Message (hidden by default, shown by JavaScript) -->
+<div id="noFilteredItems" class="no-filtered-items">
+    <h3>No Items Found</h3>
+    <p>No items match your current search and filter criteria.</p>
+</div>
+
+</html>

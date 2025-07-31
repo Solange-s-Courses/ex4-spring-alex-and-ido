@@ -109,12 +109,21 @@ public class UserItemController {
         // Check if any events allow returns
         boolean canReturnItems = eventService.areItemReturnsAllowed();
 
+        // Check which items the current user has pending return requests for
+        List<Long> userPendingReturnItemIds = requestService.getRequestsByUserId(user.getUserId())
+                .stream()
+                .filter(request -> "return".equals(request.getRequestType()))
+                .map(request -> request.getItem().getItemId())
+                .toList();
+
+
         // Add data to model
         model.addAttribute("user", user);
         model.addAttribute("userItems", userItems);
         model.addAttribute("itemCount", userItems.size());
         model.addAttribute("canReturnItems", canReturnItems);
         model.addAttribute("activeNavButton", "myitems");
+        model.addAttribute("userPendingReturnItemIds", userPendingReturnItemIds);
 
         return "user-items";
     }
