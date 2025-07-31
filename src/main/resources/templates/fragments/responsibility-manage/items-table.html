@@ -8,11 +8,11 @@
         <div class="tab-navigation">
             <button class="tab-btn active" onclick="switchTab('items')" id="itemsTab">
                 <i class="icon">📦</i> Items
-                <span class="tab-count" th:if="${itemCount != null}" th:text="'(' + ${itemCount} + ')'"></span>
+                <span class="tab-count" th:if="${itemCount != null and itemCount != 0}" th:text="${itemCount}"></span>
             </button>
             <button class="tab-btn" onclick="switchTab('requests')" id="requestsTab">
                 <i class="icon">📋</i> Requests
-                <span class="tab-count" th:if="${requestCount != null}" th:text="'(' + ${requestCount} + ')'"></span>
+                <span class="tab-count" th:if="${requestCount != null and requestCount != 0}" th:text="${requestCount}"></span>
             </button>
         </div>
 

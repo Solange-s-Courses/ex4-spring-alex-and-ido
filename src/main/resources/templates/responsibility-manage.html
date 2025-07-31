@@ -56,8 +56,8 @@
         // Add a small delay to ensure everything is loaded
         setTimeout(function() {
             // Use th:inline="javascript" for proper variable injection
-            var successMessage = /*[[${success}]]*/ '';
-            var errorMessage = /*[[${error}]]*/ '';
+            let successMessage = /*[[${success}]]*/ '';
+            let errorMessage = /*[[${error}]]*/ '';
 
             // Show success toast
             if (successMessage && successMessage.length > 0) {
