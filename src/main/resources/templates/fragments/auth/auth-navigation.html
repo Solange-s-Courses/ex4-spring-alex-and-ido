@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Auth Navigation Fragment -->
+<!-- Parameters: description, linkText, linkUrl -->
+<div th:fragment="navigation(description, linkText, linkUrl)" class="auth-link">
+    <p th:text="${description}">Navigation description</p>
+    <a th:href="${linkUrl}" th:text="${linkText}">Link text</a>
+</div>
+
+</body>
+</html>
