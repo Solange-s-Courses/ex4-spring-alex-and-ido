@@ -90,7 +90,6 @@ public class AuthController {
 
     /**
      * Process user login
-     * UPDATED: Now stores both responsibility name and ID for managers
      */
     @PostMapping("/login")
     public String login(@RequestParam String email,
@@ -115,6 +114,9 @@ public class AuthController {
 
             return "redirect:/dashboard";
         } else {
+            // Preserve the attempted email and password for user convenience
+            model.addAttribute("email", email);
+            model.addAttribute("password", password);
             model.addAttribute("error", "Invalid email or password");
             return "login";
         }

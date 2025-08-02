@@ -67,6 +67,7 @@
               required
               autocomplete="email"
               inputmode="email"
+              th:value="${email}"
       >
     </div>
 
@@ -81,6 +82,7 @@
                 placeholder="Enter your password"
                 required
                 autocomplete="current-password"
+                th:value="${password}"
         >
         <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
           SHOW
