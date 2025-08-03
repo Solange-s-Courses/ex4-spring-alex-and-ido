@@ -2,6 +2,7 @@ package com.project.application.repository;
 
 import com.project.application.entity.Request;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -54,6 +55,12 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     void deleteByUser_UserId(Long userId);
 
     // Delete all requests for items in a responsibility (when responsibility is deleted)
+    @Modifying
     @Query("DELETE FROM Request r WHERE r.item.responsibility.responsibilityId = :responsibilityId")
     void deleteByResponsibilityId(@Param("responsibilityId") Long responsibilityId);
+
+    // FIXED: Delete all requests of a specific type for items in a responsibility
+    @Modifying
+    @Query("DELETE FROM Request r WHERE r.item.responsibility.responsibilityId = :responsibilityId AND r.requestType = :requestType")
+    void deleteByResponsibilityIdAndRequestType(@Param("responsibilityId") Long responsibilityId, @Param("requestType") String requestType);
 }

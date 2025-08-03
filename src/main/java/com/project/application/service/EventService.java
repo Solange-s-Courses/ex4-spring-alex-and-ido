@@ -3,6 +3,7 @@ package com.project.application.service;
 import com.project.application.entity.Event;
 import com.project.application.repository.EventRepository;
 import com.project.application.entity.Responsibility;
+import com.project.application.repository.RequestRepository;
 import com.project.application.repository.ResponsibilityRepository;
 import com.project.application.entity.EventResponsibility;
 import com.project.application.repository.EventResponsibilityRepository;
@@ -20,6 +21,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ResponsibilityRepository responsibilityRepository;
     private final EventResponsibilityRepository eventResponsibilityRepository;
+    private final ItemService itemService;
+    private final RequestRepository requestRepository;
 
     /**
      * Create a new event
@@ -221,6 +224,7 @@ public class EventService {
 
     /**
      * Switch event to return mode (Chief only, active events only)
+     * UPDATED: Now clears all "request" type requests from event responsibilities
      */
     @Transactional
     public String switchToReturnMode(Long eventId) {
@@ -238,6 +242,17 @@ public class EventService {
         }
 
         try {
+            // NEW: Clear all "request" type requests from responsibilities connected to this event
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(eventId);
+            if (!eventResponsibilities.isEmpty()) {
+                // Clear only "request" type requests for each responsibility
+                for (Responsibility responsibility : eventResponsibilities) {
+                    requestRepository.deleteByResponsibilityIdAndRequestType(
+                            responsibility.getResponsibilityId(), "request");
+                }
+            }
+
+            // Switch event status to equipment return
             event.setStatus(Event.STATUS_EQUIPMENT_RETURN);
             eventRepository.save(event);
             return "success";
@@ -245,6 +260,7 @@ public class EventService {
             return "Failed to switch to return mode: " + e.getMessage();
         }
     }
+
 
     /**
      * Switch event back to active mode (Chief only, equipment return events only)
@@ -275,6 +291,7 @@ public class EventService {
 
     /**
      * Complete event (Chief only, equipment return events only)
+     * UPDATED: Now checks for "In Use" items before allowing completion
      * Returns event to not-active status for potential reuse
      */
     @Transactional
@@ -292,12 +309,49 @@ public class EventService {
             return "Only events in equipment return mode can be completed";
         }
 
+        // NEW: Check for items still in use before allowing completion
+        String inUseValidation = validateNoItemsInUse(eventId);
+        if (!"success".equals(inUseValidation)) {
+            return inUseValidation;
+        }
+
         try {
             event.setStatus(Event.STATUS_NOT_ACTIVE);
             eventRepository.save(event);
             return "success";
         } catch (Exception e) {
             return "Failed to complete event: " + e.getMessage();
+        }
+    }
+
+    /**
+     * NEW: Validate that no items are still "In Use" for any responsibility in the event
+     */
+    private String validateNoItemsInUse(Long eventId) {
+        try {
+            // Get all responsibilities assigned to this event
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(eventId);
+
+            if (eventResponsibilities.isEmpty()) {
+                return "success"; // No responsibilities, no items to check
+            }
+
+            // Check each responsibility for "In Use" items
+            for (Responsibility responsibility : eventResponsibilities) {
+                List<com.project.application.entity.Item> inUseItems = itemService.getItemsByResponsibilityIdAndStatus(
+                        responsibility.getResponsibilityId(), "In Use");
+
+                if (!inUseItems.isEmpty()) {
+                    // Found items still in use
+                    return String.format("Cannot complete event: %d item(s) still in use in responsibility '%s'. All items must be returned before completing the event.",
+                            inUseItems.size(), responsibility.getResponsibilityName());
+                }
+            }
+
+            return "success"; // No items in use found
+
+        } catch (Exception e) {
+            return "Failed to validate items status: " + e.getMessage();
         }
     }
 

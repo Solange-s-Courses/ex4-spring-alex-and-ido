@@ -386,7 +386,13 @@ function confirmCompleteEvent() {
         const originalText = confirmBtn.textContent;
         confirmBtn.textContent = 'Completing...';
 
-        fetch(`/chief/events/${currentEventId}/complete`, {
+        // Store the eventId before closing modal (since closeModal sets currentEventId to null)
+        const eventIdToComplete = currentEventId;
+
+        // Close modal immediately after user confirms
+        closeCompleteEventModal();
+
+        fetch(`/chief/events/${eventIdToComplete}/complete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -397,18 +403,20 @@ function confirmCompleteEvent() {
                 if (data.success) {
                     // Store toast message for after page reload
                     sessionStorage.setItem('eventToast', 'Event completed successfully');
-                    closeCompleteEventModal();
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
                 } else {
+                    // Show error toast immediately (modal is already closed)
                     showToast(data.message || 'Failed to complete event', 'error');
+                    // Reset button text since page won't reload on error
                     confirmBtn.textContent = originalText;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 showToast('An error occurred while completing the event', 'error');
+                // Reset button text since page won't reload on error
                 confirmBtn.textContent = originalText;
             });
     }, 2000);
