@@ -66,9 +66,6 @@ function showAddResponsibilityModal() {
                 const option = document.createElement('option');
                 option.value = responsibility.id;
                 option.textContent = responsibility.name;
-                if (responsibility.description) {
-                    option.textContent += ` - ${responsibility.description}`;
-                }
                 select.appendChild(option);
             });
 
