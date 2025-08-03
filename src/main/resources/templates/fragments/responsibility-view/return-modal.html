@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Return Confirmation Modal Fragment -->
+<div th:fragment="modal" id="returnModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Return Item</h3>
+            <span class="close" onclick="closeReturnModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p class="modal-message" id="returnMessage">Are you sure you want to return this item?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeReturnModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmReturnBtn" onclick="confirmItemReturn()">Return Item</button>
+        </div>
+    </div>
+</div>
+
+</html>

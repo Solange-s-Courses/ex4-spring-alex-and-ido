@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <!-- Items Section Fragment for View Page -->
-<div th:fragment="section(items, user, userRequestedItemIds, canRequestItems)" class="items-main">
+<div th:fragment="section(items, user, userRequestedItemIds, canRequestItems, userPendingReturnItemIds, canReturnItems)" class="items-main">
     <div class="items-content">
         <!-- Items Header -->
         <div class="items-header">
@@ -44,7 +44,7 @@
                         </td>
                         <td data-label="Actions">
                             <div class="item-actions">
-                                <!-- Request button for available items (only for users, managers, and chiefs, not admins) -->
+                                <!-- REQUEST FUNCTIONALITY for available items -->
                                 <div th:if="${item.status == 'Available' and (user.roleName == 'user' or user.roleName == 'manager' or user.roleName == 'chief')}">
                                     <!-- Show request buttons only if events allow requests -->
                                     <div th:if="${canRequestItems}">
@@ -68,6 +68,34 @@
                                         <span class="request-disabled"
                                               title="Requests not available - no active events for this responsibility">
                                             Request Unavailable
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- NEW: RETURN FUNCTIONALITY for items owned by current user -->
+                                <div th:if="${item.status == 'In Use' and item.user != null and item.user.userId == user.userId and (user.roleName == 'user' or user.roleName == 'manager' or user.roleName == 'chief')}">
+                                    <!-- Show return buttons only if events allow returns -->
+                                    <div th:if="${canReturnItems}">
+                                        <!-- Show "Return" button if user hasn't requested return for this item -->
+                                        <button th:if="${!userPendingReturnItemIds.contains(item.itemId)}"
+                                                class="return-btn"
+                                                th:data-item-id="${item.itemId}"
+                                                th:data-item-name="${item.itemName}"
+                                                onclick="showReturnModal(this.dataset.itemId, this.dataset.itemName)">
+                                            Return
+                                        </button>
+                                        <!-- Show "Return Requested" button if user has already requested return for this item -->
+                                        <button th:if="${userPendingReturnItemIds.contains(item.itemId)}"
+                                                class="return-btn return-requested"
+                                                disabled>
+                                            Return Requested
+                                        </button>
+                                    </div>
+                                    <!-- Show disabled message if returns not allowed -->
+                                    <div th:if="${!canReturnItems}">
+                                        <span class="return-disabled"
+                                              title="Returns not available - no active or return-mode events for this responsibility">
+                                            Return Unavailable
                                         </span>
                                     </div>
                                 </div>

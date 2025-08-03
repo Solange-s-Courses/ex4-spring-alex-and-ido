@@ -37,7 +37,7 @@ public class ResponsibilityViewController {
 
     /**
      * Display responsibility details with item list for all users
-     * ENHANCED: Now includes request functionality, event status, and available items count
+     * ENHANCED: Now includes request AND return functionality, event status, and available items count
      */
     @GetMapping("/responsibility/view/{id}")
     public String viewResponsibility(@PathVariable Long id,
@@ -72,12 +72,21 @@ public class ResponsibilityViewController {
         // Check which items the current user has already requested
         List<Long> userRequestedItemIds = requestService.getRequestsByUserId(user.getUserId())
                 .stream()
+                .filter(request -> "request".equals(request.getRequestType()))
+                .map(request -> request.getItem().getItemId())
+                .toList();
+
+        // NEW: Check which items the current user has pending return requests for
+        List<Long> userPendingReturnItemIds = requestService.getRequestsByUserId(user.getUserId())
+                .stream()
+                .filter(request -> "return".equals(request.getRequestType()))
                 .map(request -> request.getItem().getItemId())
                 .toList();
 
         // Add event status data
         boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
-        boolean canReturnItems = eventService.isResponsibilityInReturnEvent(id);
+        // UPDATED: Use the new method for return validation
+        boolean canReturnItems = eventService.isResponsibilityInReturnAllowedEvent(id);
 
         // Calculate available items count and total items count
         long availableItemsCount = items.stream()
@@ -91,6 +100,7 @@ public class ResponsibilityViewController {
         model.addAttribute("items", items);
         model.addAttribute("responsibilityManagers", managers);
         model.addAttribute("userRequestedItemIds", userRequestedItemIds);
+        model.addAttribute("userPendingReturnItemIds", userPendingReturnItemIds); // NEW
         model.addAttribute("canRequestItems", canRequestItems);
         model.addAttribute("canReturnItems", canReturnItems);
         model.addAttribute("availableItemsCount", availableItemsCount);

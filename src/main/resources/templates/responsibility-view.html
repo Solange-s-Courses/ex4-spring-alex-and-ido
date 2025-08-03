@@ -24,13 +24,16 @@
         <!-- Left Sidebar Fragment -->
         <div th:replace="~{fragments/responsibility-view/responsibility-sidebar :: sidebar(${responsibility}, ${responsibilityManagers}, ${availableItemsCount}, ${totalItemsCount})}"></div>
 
-        <!-- Right Main Area Fragment -->
-        <div th:replace="~{fragments/responsibility-view/items-section :: section(${items}, ${user}, ${userRequestedItemIds}, ${canRequestItems})}"></div>
+        <!-- Right Main Area Fragment - UPDATED with new parameters -->
+        <div th:replace="~{fragments/responsibility-view/items-section :: section(${items}, ${user}, ${userRequestedItemIds}, ${canRequestItems}, ${userPendingReturnItemIds}, ${canReturnItems})}"></div>
     </div>
 </div>
 
-<!-- Modal Fragment -->
+<!-- Request Modal Fragment -->
 <div th:replace="~{fragments/responsibility-view/request-modal :: modal}"></div>
+
+<!-- NEW: Return Modal Fragment -->
+<div th:replace="~{fragments/responsibility-view/return-modal :: modal}"></div>
 
 <!-- Include Complete Toast System (CSS + HTML + JS) -->
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
