@@ -119,6 +119,7 @@ function addSelectedResponsibility() {
             if (data.success) {
                 updateResponsibilitiesList(data.responsibilities);
                 hideAddResponsibilityModal();
+                showToast('Responsibility added successfully!', 'success');
             } else {
                 showToast(data.message || 'Error adding responsibility', 'error');
             }
@@ -232,12 +233,12 @@ function confirmActivateEvent() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showToast('Event activated successfully!', 'success');
+                    // Store toast message for after page reload
+                    sessionStorage.setItem('eventToast', 'Event activated successfully!');
                     closeActivateEventModal();
-                    // Reload page to update UI
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1000);
+                    }, 500);
                 } else {
                     showToast(data.message || 'Failed to activate event', 'error');
                     confirmBtn.textContent = originalText;
@@ -286,9 +287,9 @@ function confirmReturnMode() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // No success toast - silent update
+                    // Store toast message for after page reload
+                    sessionStorage.setItem('eventToast', 'Event switched to Return Equipment mode');
                     closeReturnModeModal();
-                    // Reload page to update UI
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
@@ -340,9 +341,9 @@ function confirmActiveMode() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // No success toast - silent update
+                    // Store toast message for after page reload
+                    sessionStorage.setItem('eventToast', 'Event switched to Active mode');
                     closeActiveModeModal();
-                    // Reload page to update UI
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
@@ -394,9 +395,9 @@ function confirmCompleteEvent() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // No success toast - silent update
+                    // Store toast message for after page reload
+                    sessionStorage.setItem('eventToast', 'Event completed successfully');
                     closeCompleteEventModal();
-                    // Reload page to update UI
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
@@ -482,12 +483,12 @@ function saveEventChanges() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showToast('Event updated successfully!', 'success');
+                // Store toast message for after page reload
+                sessionStorage.setItem('eventToast', 'Event updated successfully!');
                 hideEditEventModal();
-                // Reload the page to show updated information
                 setTimeout(() => {
                     window.location.reload();
-                }, 1000);
+                }, 500);
             } else {
                 showEditError(data.message || 'Error updating event');
             }
@@ -581,6 +582,15 @@ function updateResponsibilitiesList(responsibilities) {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize script with data from HTML
     initializeEventScript();
+
+    // Check for stored toast message after page reload
+    const toastMessage = sessionStorage.getItem('eventToast');
+    if (toastMessage) {
+        sessionStorage.removeItem('eventToast');
+        setTimeout(() => {
+            showToast(toastMessage, 'success');
+        }, 500);
+    }
 
     // Initialize character counter
     const editDescTextarea = document.getElementById('editDescription');
