@@ -72,19 +72,19 @@ public class RequestService {
                     return "Item is already owned by another user";
                 }
             } else if ("return".equals(requestType)) {
-                // For return requests: check if responsibility is in return-mode event
-                if (!eventService.isResponsibilityInReturnEvent(responsibilityId)) {
-                    return "Item returns are not allowed at this time. No events in return mode for this responsibility.";
-                }
-
-                // For return requests, user must own the item
-                if (!"In Use".equals(item.getStatus())) {
-                    return "Item is not currently in use";
-                }
-                if (!item.isOwnedBy(userId)) {
-                    return "You don't own this item";
-                }
+            // For return requests: check if responsibility is in active OR return-mode event
+            if (!eventService.isResponsibilityInReturnAllowedEvent(responsibilityId)) {
+                return "Item returns are not allowed at this time. No active or return-mode events for this responsibility.";
             }
+
+            // For return requests, user must own the item
+            if (!"In Use".equals(item.getStatus())) {
+                return "Item is not currently in use";
+            }
+            if (!item.isOwnedBy(userId)) {
+                return "You don't own this item";
+            }
+        }
 
             // Create and save request
             Request request = new Request(user, item, requestType);

@@ -424,12 +424,13 @@ public class EventService {
     }
 
     /**
-     * Check if any events allow item returns
-     * Returns true if there are events in "equipment return" status
+     * Check if any events allow item returns (updated to include active events)
+     * Returns true if there are events in "active" OR "equipment return" status
      */
     public boolean areItemReturnsAllowed() {
+        List<Event> activeEvents = getEventsByStatus(Event.STATUS_ACTIVE);
         List<Event> returnEvents = getEventsByStatus(Event.STATUS_EQUIPMENT_RETURN);
-        return !returnEvents.isEmpty();
+        return !activeEvents.isEmpty() || !returnEvents.isEmpty();
     }
 
     /**
@@ -461,6 +462,38 @@ public class EventService {
                 }
             }
         }
+        return false;
+    }
+
+    /**
+     * Check if a specific responsibility is part of any event that allows returns
+     * (active or equipment return events)
+     */
+    public boolean isResponsibilityInReturnAllowedEvent(Long responsibilityId) {
+        // Get both active and equipment return events
+        List<Event> activeEvents = getEventsByStatus(Event.STATUS_ACTIVE);
+        List<Event> returnEvents = getEventsByStatus(Event.STATUS_EQUIPMENT_RETURN);
+
+        // Check active events
+        for (Event event : activeEvents) {
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(event.getEventId());
+            for (Responsibility responsibility : eventResponsibilities) {
+                if (responsibility.getResponsibilityId().equals(responsibilityId)) {
+                    return true;
+                }
+            }
+        }
+
+        // Check equipment return events
+        for (Event event : returnEvents) {
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(event.getEventId());
+            for (Responsibility responsibility : eventResponsibilities) {
+                if (responsibility.getResponsibilityId().equals(responsibilityId)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 }
