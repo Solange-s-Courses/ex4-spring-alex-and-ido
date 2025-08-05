@@ -787,7 +787,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 12px;
 }
 
 .status-pending {
@@ -972,9 +971,7 @@ body {
 
     /* Request status message mobile adjustments */
     .request-status-message {
-        padding: 10px 8px;
         justify-content: flex-start;
-        margin-left: 35%;
     }
 
     .status-pending {
