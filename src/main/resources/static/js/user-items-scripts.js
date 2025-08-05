@@ -35,8 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize filtering and sorting
     initializeFiltersAndSorting();
-
-    console.log('User items page loaded');
 });
 
 /**

@@ -254,6 +254,7 @@ body {
 
 .items-table tbody tr:last-child td {
     border-bottom: none;
+    justify-content: center;
 }
 
 /* Table Content Styling */
@@ -306,27 +307,6 @@ body {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-}
-
-.btn-return-requested {
-    background: #a0aec0 !important;
-    color: white !important;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: not-allowed !important;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-.btn-return-requested:hover {
-    background: #a0aec0 !important;
-    transform: none !important;
-    box-shadow: none !important;
 }
 
 .return-disabled {
@@ -638,7 +618,7 @@ body {
     }
 
     .item-actions {
-        justify-content: flex-end;
+        justify-content: center;
         width: 100%;
     }
 
