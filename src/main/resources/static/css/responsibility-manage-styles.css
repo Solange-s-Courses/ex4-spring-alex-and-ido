@@ -403,7 +403,7 @@ body {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 999; /* Lower than navbar to avoid conflicts */
     left: 0;
     top: 0;
     width: 100%;
@@ -414,13 +414,15 @@ body {
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
+    margin: 8% auto; /* Increased top margin to avoid navbar */
     padding: 0;
     border-radius: 16px;
     width: 90%;
     max-width: 500px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     overflow: hidden;
+    position: relative;
+    top: 60px; /* Additional offset to ensure it's below navbar */
 }
 
 .modal-header {
@@ -543,159 +545,6 @@ body {
 
 .char-counter.danger {
     color: #e53e3e;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .management-layout {
-        grid-template-columns: 40% 1fr;
-        gap: 1.5rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        padding: 0 1rem;
-        margin: 1rem auto;
-    }
-
-    /* Stack layout on mobile */
-    .management-layout {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .responsibility-sidebar {
-        position: static;
-        max-height: none;
-    }
-
-    .sidebar-content,
-    .items-content {
-        padding: 1.5rem;
-    }
-
-    /* Items header mobile */
-    .items-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-
-    .add-item-btn {
-        align-self: stretch;
-        justify-content: center;
-        padding: 14px 24px;
-        font-size: 16px;
-    }
-
-    /* Mobile table - card layout */
-    .items-table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .items-table thead,
-    .items-table tbody,
-    .items-table th,
-    .items-table td,
-    .items-table tr {
-        display: block;
-    }
-
-    .items-table thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-
-    .items-table tr {
-        border: 1px solid #e2e8f0;
-        margin-bottom: 12px;
-        padding: 1rem;
-        border-radius: 12px;
-        background: #f7fafc;
-    }
-
-    .items-table td {
-        border: none;
-        position: relative;
-        padding: 8px 8px 8px 35%;
-        text-align: left;
-        white-space: normal;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-    }
-
-    .items-table td:before {
-        content: attr(data-label) ": ";
-        position: absolute;
-        left: 8px;
-        width: 30%;
-        padding-right: 10px;
-        white-space: nowrap;
-        font-weight: bold;
-        color: #4a5568;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Mobile buttons */
-    .item-actions {
-        flex-direction: column;
-        gap: 6px;
-        width: 100%;
-    }
-
-    .btn-edit-item, .btn-delete-item {
-        padding: 10px 16px;
-        font-size: 13px;
-        width: 100%;
-        justify-content: center;
-        min-width: unset;
-    }
-
-    /* Mobile modals */
-    .modal-content {
-        margin: 2% auto;
-        width: 95%;
-        max-width: 400px;
-    }
-
-    .modal-footer {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .modal-footer, .btn {
-        width: 100%;
-        padding: 12px 24px;
-        font-size: 16px;
-    }
-
-    .form-input {
-        padding: 14px 16px;
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .sidebar-content,
-    .items-content {
-        padding: 1rem;
-    }
-
-    .items-table td {
-        padding: 6px 6px 6px 40%;
-    }
-
-    .items-table td:before {
-        left: 6px;
-        width: 35%;
-        font-size: 12px;
-    }
 }
 
 /* Tab System Styles */
@@ -933,8 +782,214 @@ body {
     line-height: 1.6;
 }
 
-/* Mobile Responsive for Tabs */
+/* Request Status Message Styles */
+.request-status-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    color: #9a3412;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #f97316;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* Light Modal Title Override */
+.modal-header h3 {
+    color: #ffffff !important;
+}
+
+/* Also update the confirmation modal title specifically */
+#confirmationTitle {
+    color: #ffffff !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .management-layout {
+        grid-template-columns: 40% 1fr;
+        gap: 1.5rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .main-content {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+
+    /* Stack layout on mobile */
+    .management-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .responsibility-sidebar {
+        position: static;
+        max-height: none;
+    }
+
+    .sidebar-content,
+    .items-content {
+        padding: 1.5rem;
+    }
+
+    /* Items header mobile */
+    .items-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .add-item-btn {
+        align-self: stretch;
+        justify-content: center;
+        padding: 14px 24px;
+        font-size: 16px;
+    }
+
+    /* Hybrid Mobile Design - Table-like with mobile adjustments */
+    .items-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .items-table thead,
+    .items-table tbody,
+    .items-table th,
+    .items-table td,
+    .items-table tr {
+        display: block;
+    }
+
+    .items-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    /* Mobile table rows - maintaining table feel */
+    .items-table tr {
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .items-table tr:hover {
+        background-color: #f7fafc;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    /* Mobile table cells with labels */
+    .items-table td {
+        border: none;
+        position: relative;
+        padding: 10px 8px 10px 35%;
+        text-align: left;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f3f7;
+    }
+
+    .items-table td:last-child {
+        border-bottom: none;
+    }
+
+    .items-table td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 8px;
+        width: 32%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Status badge mobile adjustments */
+    .items-table td[data-label="Status"] .status-badge {
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 20px;
+        min-width: 90px;
+        text-align: center;
+    }
+
+    /* Mobile action buttons - side by side */
+    .item-actions {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .item-actions > div {
+        flex: 1;
+    }
+
+    .item-actions > div > div {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .btn-edit-item,
+    .btn-delete-item {
+        flex: 1;
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        min-width: 65px;
+        white-space: nowrap;
+        text-align: center;
+        transition: all 0.3s ease;
+        /* Maintain desktop colors and gradients */
+    }
+
+    .btn-edit-item:hover,
+    .btn-delete-item:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Request status message mobile adjustments */
+    .request-status-message {
+        padding: 10px 8px;
+        justify-content: flex-start;
+        margin-left: 35%;
+    }
+
+    .status-pending {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid #f97316;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    /* Mobile Responsive for Tabs */
     .tab-btn {
         padding: 0.75rem 1rem;
         font-size: 13px;
@@ -1005,46 +1060,143 @@ body {
         justify-content: center;
         min-width: unset;
     }
-}
 
-/* Request Status Message Styles */
-.request-status-message {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-}
+    /* Mobile modals */
+    .modal-content {
+        margin: 5% auto; /* Adjusted for mobile */
+        width: 95%;
+        max-width: 400px;
+        top: 80px; /* Increased offset for mobile navbar */
+    }
 
-.status-pending {
-    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-    color: #9a3412;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid #f97316;
-    display: inline-block;
-    white-space: nowrap;
-}
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
-/* Mobile responsive for status message */
-@media (max-width: 768px) {
-    .status-pending {
-        padding: 8px 12px;
-        font-size: 12px;
-        min-width: unset;
-        text-align: center;
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .form-input {
+        padding: 14px 16px;
+        font-size: 16px;
     }
 }
 
-/* Light Modal Title Override */
-.modal-header h3 {
-    color: #ffffff !important;
+/* Extra small screens */
+@media (max-width: 480px) {
+    .sidebar-content,
+    .items-content {
+        padding: 1rem;
+    }
+
+    .items-table tr {
+        margin-bottom: 0.75rem;
+        padding: 1rem;
+    }
+
+    .items-table td {
+        padding: 8px 6px 8px 38%;
+        min-height: 36px;
+    }
+
+    .items-table td:before {
+        left: 6px;
+        width: 35%;
+        font-size: 12px;
+    }
+
+    .items-table td[data-label="Status"] .status-badge {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 80px;
+    }
+
+    .btn-edit-item,
+    .btn-delete-item {
+        padding: 9px 12px;
+        font-size: 11px;
+        min-width: 55px;
+    }
+
+    .request-status-message {
+        margin-left: 38%;
+        padding: 8px 6px;
+    }
+
+    .status-pending {
+        padding: 5px 10px;
+        font-size: 10px;
+        min-width: 85px;
+    }
+
+    .requests-table td {
+        padding: 6px 6px 6px 40%;
+    }
+
+    .requests-table td:before {
+        left: 6px;
+        width: 35%;
+        font-size: 12px;
+    }
 }
 
-/* Also update the confirmation modal title specifically */
-#confirmationTitle {
-    color: #ffffff !important;
+/* Tablet portrait adjustments */
+@media (min-width: 481px) and (max-width: 768px) {
+    .items-table tr {
+        padding: 1.5rem;
+    }
+
+    .items-table td {
+        padding: 12px 10px 12px 35%;
+        min-height: 44px;
+    }
+
+    .items-table td:before {
+        font-size: 14px;
+    }
+
+    .items-table td[data-label="Status"] .status-badge {
+        padding: 9px 16px;
+        font-size: 14px;
+        min-width: 100px;
+    }
+
+    .btn-edit-item,
+    .btn-delete-item {
+        padding: 11px 16px;
+        font-size: 13px;
+        min-width: 70px;
+    }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+    .items-table tr:focus-within {
+        outline: 2px solid #4299e1;
+        outline-offset: 2px;
+    }
+
+    .btn-edit-item:focus,
+    .btn-delete-item:focus {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+    }
+}
+
+/* Loading state for mobile cards */
+@media (max-width: 768px) {
+    .items-table tr.loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .items-table tr.loading .btn-edit-item,
+    .items-table tr.loading .btn-delete-item {
+        background: #e2e8f0 !important;
+        color: #a0aec0 !important;
+    }
 }
