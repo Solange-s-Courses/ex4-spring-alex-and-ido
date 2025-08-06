@@ -1,0 +1,33 @@
+<!-- fragments/dashboard/delete-modal.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Delete Confirmation Modal Fragment -->
+<div th:fragment="deleteModal">
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Delete Event</h3>
+            <p class="modal-message">
+                Are you sure you want to delete the event "<span id="eventNameToDelete"></span>"?
+                <br><br>
+                This action cannot be undone. Any responsibilities assigned to this event will be unassigned.
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-delete" onclick="confirmDeleteEvent()">Delete</button>
+                <button class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for delete submission -->
+    <form id="deleteEventForm" th:action="@{/chief/events/delete}" method="post" style="display: none;">
+        <input type="hidden" id="eventIdToDelete" name="eventId">
+    </form>
+
+</div>
+
+</body>
+</html>

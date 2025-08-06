@@ -1,0 +1,43 @@
+<!-- fragments/dashboard/events-section.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Events Section Fragment -->
+<div th:fragment="eventsSection(events, userRole, showEventForm, eventFormError, eventFormData)"
+     class="content-card">
+
+    <div class="event-section-header">
+        <h2 th:text="${userRole == 'chief'} ? 'My Events' : 'Ongoing Events'">Events</h2>
+
+        <!-- Create Event Button (Chief Only) -->
+        <button th:if="${userRole == 'chief'}"
+                class="create-event-toggle-btn"
+                id="createEventBtn"
+                onclick="showEventForm()"
+                th:style="${showEventForm} ? 'display: none;' : ''">
+            + Create Event
+        </button>
+    </div>
+
+    <!-- Event Creation Form (Chief Only) -->
+    <div th:if="${userRole == 'chief'}"
+         th:replace="~{fragments/dashboard/event-creation-form :: eventCreationForm(${showEventForm}, ${eventFormError}, ${eventFormData})}">
+    </div>
+
+    <!-- Events Grid -->
+    <div th:if="${events != null and !events.isEmpty()}" class="events-grid">
+        <th:block th:each="event : ${events}">
+            <div th:replace="~{fragments/dashboard/event-card :: eventCard(event=${event}, userRole=${userRole})}"></div>
+        </th:block>
+    </div>
+
+    <!-- Events Empty State -->
+    <div th:if="${events == null or events.isEmpty()}" class="no-events">
+        <span th:if="${userRole == 'chief'}">No events created yet. Create your first event above!</span>
+        <span th:if="${userRole != 'chief'}">No ongoing events at the moment.</span>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!-- fragments/dashboard/responsibility-card.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Responsibility Card Fragment -->
+<div th:fragment="responsibilityCard(responsibility, managers)" class="responsibility-card">
+
+    <h2 class="card-title" th:text="${responsibility.responsibilityName}">Responsibility Name</h2>
+
+    <p th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+       class="card-subtitle"
+       th:text="${responsibility.description}">Description here</p>
+
+    <div class="managers-label">Managers</div>
+
+    <div th:if="${managers != null and !managers.isEmpty()}" class="managers-list">
+        <!-- Show first 2 managers -->
+        <div th:each="manager, iterStat : ${managers}"
+             th:if="${iterStat.index < 2}"
+             class="manager-badge"
+             th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</div>
+
+        <!-- Show "+X more" if there are more than 2 managers -->
+        <div th:if="${managers.size() > 2}"
+             class="manager-badge more-managers"
+             th:text="${'+' + (managers.size() - 2) + ' more'}">+1 more</div>
+    </div>
+
+    <div th:if="${managers == null or managers.isEmpty()}" class="no-managers">
+        No managers assigned
+    </div>
+
+    <button class="view-btn"
+            th:onclick="'window.location.href=\'/responsibility/view/' + ${responsibility.responsibilityId} + '\''">
+        View
+    </button>
+</div>
+
+</body>
+</html>

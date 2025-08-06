@@ -1,0 +1,43 @@
+<!-- fragments/dashboard/event-card.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Event Card Fragment -->
+<div th:fragment="eventCard(event, userRole)" class="event-card">
+
+    <!-- Delete Button (Chief only, not-active events only) -->
+    <button th:if="${userRole == 'chief' and event != null and event.status == 'not-active'}"
+            class="event-delete-btn"
+            th:data-event-id="${event.eventId}"
+            th:data-event-name="${event.eventName}"
+            onclick="showDeleteModalFromData(this)">
+        ×
+    </button>
+
+    <div class="event-title" th:text="${event.eventName}">Event Name</div>
+
+    <div th:if="${event.description != null and !#strings.isEmpty(event.description)}"
+         class="event-description"
+         th:text="${event.description}">Event description here</div>
+
+    <div class="event-meta">
+        <span class="event-status"
+              th:class="'event-status status-' + ${event.status.replace(' ', '-')}"
+              th:text="${event.displayStatus}">Status</span>
+
+        <span class="event-date"
+              th:text="${#temporals.format(event.dateOfCreation, 'MMM dd, yyyy')}">Date</span>
+    </div>
+
+    <!-- View Button with conditional visibility -->
+    <button th:if="${(userRole == 'chief' or userRole == 'admin') or
+                    (event.status == 'active' or event.status == 'equipment return')}"
+            class="event-view-btn"
+            th:onclick="'window.location.href=\'/event/view/' + ${event.eventId} + '\''">
+        View
+    </button>
+</div>
+
+</body>
+</html>
