@@ -1,0 +1,52 @@
+<!-- fragments/user-info/change-name-modal.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Change Name Modal Fragment -->
+<div th:fragment="changeNameModal(user)" class="modal-overlay" id="nameModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Change Name</h3>
+      <button class="modal-close" onclick="closeNameModal()" type="button">&times;</button>
+    </div>
+
+    <form th:action="@{/change-name}" method="post">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text"
+                   id="firstName"
+                   name="firstName"
+                   th:value="${#strings.capitalize(user.firstName)}"
+                   maxlength="20"
+                   pattern="[A-Za-z]+"
+                   required
+                   placeholder="Enter first name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text"
+                   id="lastName"
+                   name="lastName"
+                   th:value="${#strings.capitalize(user.lastName)}"
+                   maxlength="20"
+                   pattern="[A-Za-z]+"
+                   required
+                   placeholder="Enter last name">
+          </div>
+        </div>
+        <div class="form-helper">Names can only contain letters and must be 1-20 characters long</div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="cancel-btn" onclick="closeNameModal()">Cancel</button>
+        <button type="submit" class="submit-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!-- fragments/user-info/user-info-card.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- User Info Card Fragment -->
+<div th:fragment="userInfoCard(user, userRole)" class="user-info-card">
+
+    <div class="card-header">
+        <h1 class="page-title">My User Information</h1>
+    </div>
+
+    <div class="card-body">
+        <!-- Full Name Section -->
+        <div th:replace="~{fragments/user-info/info-section :: infoSection(
+            label='Full Name',
+            value=${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)},
+            editable=true,
+            action='changeName'
+        )}"></div>
+
+        <!-- Email Section -->
+        <div th:replace="~{fragments/user-info/info-section :: infoSection(
+            label='Email Address',
+            value=${user.emailAddress},
+            editable=false,
+            action=null
+        )}"></div>
+
+        <!-- Phone Number Section -->
+        <div th:replace="~{fragments/user-info/info-section :: infoSection(
+            label='Phone Number',
+            value=${user.phoneNumber},
+            editable=true,
+            action='changePhone'
+        )}"></div>
+
+        <!-- Role Section -->
+        <div th:replace="~{fragments/user-info/info-section :: roleSection(
+            label='Role',
+            value=${#strings.capitalize(userRole)}
+        )}"></div>
+
+        <!-- Member Since Section -->
+        <div th:replace="~{fragments/user-info/info-section :: infoSection(
+            label='Member Since',
+            value=${#temporals.format(user.dateOfIssue, 'dd/MM/yyyy')},
+            editable=false,
+            action=null
+        )}"></div>
+    </div>
+</div>
+
+</body>
+</html>

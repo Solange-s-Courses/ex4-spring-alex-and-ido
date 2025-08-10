@@ -1,0 +1,34 @@
+<!-- fragments/user-info/info-section.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Standard Info Section Fragment -->
+<div th:fragment="infoSection(label, value, editable, action)"
+     class="info-section"
+     th:classappend="${!editable} ? 'readonly' : ''">
+
+    <div class="info-content">
+        <div class="info-label" th:text="${label}">Label</div>
+        <div class="info-value" th:text="${value}">Value</div>
+    </div>
+
+    <button th:if="${editable}"
+            class="change-btn"
+            th:onclick="${action == 'changeName'} ? 'openNameModal()' : 'openPhoneModal()'">
+        <span>Change</span>
+    </button>
+</div>
+
+<!-- Special Role Section Fragment with Badge -->
+<div th:fragment="roleSection(label, value)" class="info-section readonly">
+    <div class="info-content">
+        <div class="info-label" th:text="${label}">Role</div>
+        <div class="info-value">
+            <span class="role-badge" th:text="${value}">Role Value</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

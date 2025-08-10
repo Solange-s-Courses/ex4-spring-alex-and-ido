@@ -1,0 +1,39 @@
+<!-- fragments/user-info/change-phone-modal.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Change Phone Modal Fragment -->
+<div th:fragment="changePhoneModal(user)" class="modal-overlay" id="phoneModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Change Phone Number</h3>
+      <button class="modal-close" onclick="closePhoneModal()" type="button">&times;</button>
+    </div>
+
+    <form th:action="@{/change-phone}" method="post">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel"
+                 id="phoneNumber"
+                 name="phoneNumber"
+                 th:value="${user.phoneNumber}"
+                 maxlength="10"
+                 pattern="[0-9]{10}"
+                 required
+                 placeholder="Enter 10-digit phone number">
+          <div class="form-helper">Enter exactly 10 digits (no spaces or dashes)</div>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="cancel-btn" onclick="closePhoneModal()">Cancel</button>
+        <button type="submit" class="submit-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

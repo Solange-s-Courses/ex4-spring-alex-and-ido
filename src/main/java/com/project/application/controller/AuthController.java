@@ -159,12 +159,11 @@ public class AuthController {
     public String changeName(@RequestParam String firstName,
                              @RequestParam String lastName,
                              HttpSession session,
-                             RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes) throws java.io.UnsupportedEncodingException {
 
         User loggedInUser = authHelper.getLoggedInUser(session);
         if (loggedInUser == null) {
-            redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
-            return "redirect:/login";
+            return "redirect:/login?error=" + java.net.URLEncoder.encode("Session expired! Please log in again.", "UTF-8");
         }
 
         String result = userService.updateUserName(loggedInUser, firstName, lastName);
@@ -172,12 +171,10 @@ public class AuthController {
         if ("success".equals(result)) {
             // Update session with new user data
             authHelper.updateUserSession(session, loggedInUser);
-            redirectAttributes.addFlashAttribute("success", "Name changed successfully!");
+            return "redirect:/user-info?success=" + java.net.URLEncoder.encode("Name changed successfully!", "UTF-8");
         } else {
-            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/user-info?error=" + java.net.URLEncoder.encode(result, "UTF-8");
         }
-
-        return "redirect:/user-info";
     }
 
     /**
@@ -186,12 +183,11 @@ public class AuthController {
     @PostMapping("/change-phone")
     public String changePhone(@RequestParam String phoneNumber,
                               HttpSession session,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes) throws java.io.UnsupportedEncodingException {
 
         User loggedInUser = authHelper.getLoggedInUser(session);
         if (loggedInUser == null) {
-            redirectAttributes.addFlashAttribute("error", "Session expired! Please log in again.");
-            return "redirect:/login";
+            return "redirect:/login?error=" + java.net.URLEncoder.encode("Session expired! Please log in again.", "UTF-8");
         }
 
         String result = userService.updateUserPhone(loggedInUser, phoneNumber);
@@ -199,11 +195,9 @@ public class AuthController {
         if ("success".equals(result)) {
             // Update session with new user data
             authHelper.updateUserSession(session, loggedInUser);
-            redirectAttributes.addFlashAttribute("success", "Phone number changed successfully!");
+            return "redirect:/user-info?success=" + java.net.URLEncoder.encode("Phone number changed successfully!", "UTF-8");
         } else {
-            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/user-info?error=" + java.net.URLEncoder.encode(result, "UTF-8");
         }
-
-        return "redirect:/user-info";
     }
 }
