@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -47,7 +48,7 @@ public class EventController {
                               @RequestParam(required = false) String description,
                               HttpSession session,
                               RedirectAttributes redirectAttributes,
-                              Model model) {
+                              Model model) throws UnsupportedEncodingException {
 
         // Check access using helper
         String accessCheck = accessControl.validateAccess(session, "chief");
@@ -61,8 +62,7 @@ public class EventController {
         String result = eventService.createEvent(eventName, description);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Event created successfully!");
-            return "redirect:/dashboard";
+            return "redirect:/dashboard?success=" + java.net.URLEncoder.encode("Event created successfully!", "UTF-8");
         } else {
             // Error occurred - reload dashboard with form data and error message
 
@@ -109,7 +109,7 @@ public class EventController {
     @PostMapping("/chief/events/delete")
     public String deleteEvent(@RequestParam Long eventId,
                               HttpSession session,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes) throws UnsupportedEncodingException {
 
         // Check access using helper
         String accessCheck = accessControl.validateAccess(session, "chief");
@@ -121,12 +121,10 @@ public class EventController {
         String result = eventService.deleteEvent(eventId);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Event deleted successfully!");
+            return "redirect:/dashboard?success=" + java.net.URLEncoder.encode("Event deleted successfully!", "UTF-8");
         } else {
-            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/dashboard?error=" + java.net.URLEncoder.encode(result, "UTF-8");
         }
-
-        return "redirect:/dashboard";
     }
 
     /**

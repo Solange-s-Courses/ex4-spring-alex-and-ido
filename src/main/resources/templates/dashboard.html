@@ -28,6 +28,8 @@
 <div th:if="${userRole == 'chief'}" th:replace="~{fragments/dashboard/event-modal :: eventModal(${eventFormError}, ${eventFormData})}"></div>
 <div th:if="${userRole == 'chief'}" th:replace="~{fragments/dashboard/delete-modal :: deleteModal}"></div>
 
+<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+
 <script th:src="@{/js/navbar-scripts.js}"></script>
 <script th:src="@{/js/dashboard-scripts.js}"></script>
 

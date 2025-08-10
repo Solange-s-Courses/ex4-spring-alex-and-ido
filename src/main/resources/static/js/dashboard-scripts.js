@@ -203,4 +203,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.create-event-btn, .view-btn, .event-view-btn').forEach(btn => {
         addRippleEffect(btn);
     });
+
+    // Toast notifications for flash messages
+    const urlParams = new URLSearchParams(window.location.search);
+    const successMsg = urlParams.get('success');
+    const errorMsg = urlParams.get('error');
+
+    if (successMsg) {
+        Toast.success(successMsg);
+    }
+    if (errorMsg) {
+        Toast.error(errorMsg);
+    }
 });
