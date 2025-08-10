@@ -5,21 +5,24 @@
 
 <!-- Responsibilities Section Fragment (Chief and Admin Only) -->
 <div th:fragment="responsibilitiesSection(responsibilitiesWithManagers)"
-     class="content-card">
+     class="responsibilities-panel">
 
-    <h2>Responsibilities</h2>
-
-    <div th:if="${responsibilitiesWithManagers != null and !responsibilitiesWithManagers.isEmpty()}"
-         class="responsibilities-grid">
-
-        <th:block th:each="entry : ${responsibilitiesWithManagers}">
-            <div th:replace="~{fragments/dashboard/responsibility-card :: responsibilityCard(responsibility=${entry.key}, managers=${entry.value})}"></div>
-        </th:block>
+    <div class="panel-header">
+        <h2 class="panel-title">Responsibilities</h2>
     </div>
 
-    <div th:if="${responsibilitiesWithManagers == null or responsibilitiesWithManagers.isEmpty()}"
-         class="no-responsibilities">
-        No responsibilities available at the moment.
+    <div class="panel-content">
+        <div th:if="${responsibilitiesWithManagers != null and !responsibilitiesWithManagers.isEmpty()}"
+             class="responsibilities-grid">
+            <th:block th:each="entry : ${responsibilitiesWithManagers}">
+                <div th:replace="~{fragments/dashboard/responsibility-card :: responsibilityCard(responsibility=${entry.key}, managers=${entry.value})}"></div>
+            </th:block>
+        </div>
+
+        <div th:if="${responsibilitiesWithManagers == null or responsibilitiesWithManagers.isEmpty()}"
+             class="no-responsibilities">
+            No responsibilities available at the moment.
+        </div>
     </div>
 </div>
 

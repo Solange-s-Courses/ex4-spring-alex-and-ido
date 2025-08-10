@@ -4,44 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Event Management System</title>
-
-  <!-- Include Navbar Styles -->
   <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
-
-  <!-- Include Dashboard Styles -->
   <link rel="stylesheet" th:href="@{/css/dashboard-styles.css}">
 </head>
 <body>
 
-<!-- Include Navbar Fragment -->
 <div th:replace="~{fragments/layout :: navbar}"></div>
-
-<!-- Include Alerts Fragment -->
 <div th:replace="~{fragments/common/alerts :: alerts}"></div>
 
-<!-- Main Content -->
-<div class="main-content dashboard-content">
-
-  <!-- Events Section -->
-  <div th:replace="~{fragments/dashboard/events-section :: eventsSection(${events}, ${userRole}, ${showEventForm}, ${eventFormError}, ${eventFormData})}">
+<div class="main-content">
+  <div class="mobile-tabs">
+    <button class="tab-btn active" data-tab="events" onclick="switchTab('events')">Events</button>
+    <button class="tab-btn" data-tab="responsibilities" onclick="switchTab('responsibilities')">Responsibilities</button>
   </div>
 
-  <!-- Responsibilities Section (Chief and Admin Only) -->
-  <div th:if="${userRole == 'chief' or userRole == 'admin'}"
-       th:replace="~{fragments/dashboard/responsibilities-section :: responsibilitiesSection(${responsibilitiesWithManagers})}">
+  <div class="dashboard-panels">
+    <div th:replace="~{fragments/dashboard/events-section :: eventsSection(${events}, ${userRole}, ${showEventForm}, ${eventFormError}, ${eventFormData})}"></div>
+    <div th:if="${userRole == 'chief' or userRole == 'admin'}"
+         th:replace="~{fragments/dashboard/responsibilities-section :: responsibilitiesSection(${responsibilitiesWithManagers})}"></div>
   </div>
-
 </div>
 
-<!-- Delete Modal (only included if user is chief) -->
-<div th:if="${userRole == 'chief'}"
-     th:replace="~{fragments/dashboard/delete-modal :: deleteModal}">
-</div>
+<div th:if="${userRole == 'chief'}" th:replace="~{fragments/dashboard/event-modal :: eventModal(${eventFormError}, ${eventFormData})}"></div>
+<div th:if="${userRole == 'chief'}" th:replace="~{fragments/dashboard/delete-modal :: deleteModal}"></div>
 
-<!-- Include Navbar Scripts -->
 <script th:src="@{/js/navbar-scripts.js}"></script>
-
-<!-- Include Dashboard Scripts -->
 <script th:src="@{/js/dashboard-scripts.js}"></script>
 
 </body>

@@ -1,32 +1,54 @@
-// Dashboard Page Scripts
+// Dashboard Page Scripts - Modern Redesign
 
-// Event Form Management
-function showEventForm() {
-    const formContainer = document.getElementById('eventFormContainer');
-    const createBtn = document.getElementById('createEventBtn');
+// Mobile Tab Management
+let activeTab = 'events';
 
-    formContainer.classList.add('show');
-    createBtn.style.display = 'none';
+function switchTab(tabName) {
+    activeTab = tabName;
 
-    // Focus on the event name input
-    document.getElementById('eventName').focus();
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    // Update panels
+    document.querySelectorAll('.events-panel, .responsibilities-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+
+    if (tabName === 'events') {
+        document.querySelector('.events-panel').classList.add('active');
+    } else {
+        document.querySelector('.responsibilities-panel').classList.add('active');
+    }
 }
 
-function hideEventForm() {
-    const formContainer = document.getElementById('eventFormContainer');
-    const createBtn = document.getElementById('createEventBtn');
+// Event Creation Modal Management
+function showEventModal() {
+    const modal = document.getElementById('eventCreationModal');
+    if (modal) {
+        modal.classList.add('show');
+        // Focus on the event name input
+        setTimeout(() => {
+            document.getElementById('eventName').focus();
+        }, 100);
+    }
+}
 
-    formContainer.classList.remove('show');
-    createBtn.style.display = 'inline-block';
+function hideEventModal() {
+    const modal = document.getElementById('eventCreationModal');
+    if (modal) {
+        modal.classList.remove('show');
+        // Clear form inputs
+        document.getElementById('eventName').value = '';
+        document.getElementById('description').value = '';
 
-    // Clear form inputs
-    document.getElementById('eventName').value = '';
-    document.getElementById('description').value = '';
-
-    // Clear any error messages
-    const errorDiv = formContainer.querySelector('.event-form-error');
-    if (errorDiv) {
-        errorDiv.style.display = 'none';
+        // Clear any error messages
+        const errorDiv = modal.querySelector('.event-form-error');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
     }
 }
 
@@ -59,7 +81,30 @@ function confirmDeleteEvent() {
 
 // Initialize event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Close modal when clicking outside
+    // Initialize mobile tabs if on mobile
+    const isMobile = window.innerWidth <= 1024;
+    if (isMobile) {
+        // Set initial active tab
+        switchTab('events');
+
+        // Add tab click listeners
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab(this.getAttribute('data-tab'));
+            });
+        });
+    }
+
+    // Close modals when clicking outside
+    const eventCreationModal = document.getElementById('eventCreationModal');
+    if (eventCreationModal) {
+        eventCreationModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideEventModal();
+            }
+        });
+    }
+
     const deleteModal = document.getElementById('deleteModal');
     if (deleteModal) {
         deleteModal.addEventListener('click', function(e) {
@@ -72,27 +117,90 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle ESC key to close modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            // Close event creation modal if open
+            if (eventCreationModal && eventCreationModal.classList.contains('show')) {
+                hideEventModal();
+            }
             // Close delete modal if open
             if (deleteModal && deleteModal.classList.contains('show')) {
                 hideDeleteModal();
             }
-            // Close event form if open
-            const eventFormContainer = document.getElementById('eventFormContainer');
-            if (eventFormContainer && eventFormContainer.classList.contains('show')) {
-                hideEventForm();
-            }
         }
     });
 
-    // Auto-show event form if there was an error
+    // Auto-show event modal if there was an error
     const eventFormError = document.querySelector('.event-form-error');
-    const eventFormContainer = document.getElementById('eventFormContainer');
-    if (eventFormError && eventFormContainer) {
-        // Form should already be shown via Thymeleaf, but ensure it's visible
-        eventFormContainer.classList.add('show');
-        const createBtn = document.getElementById('createEventBtn');
-        if (createBtn) {
-            createBtn.style.display = 'none';
-        }
+    if (eventFormError && eventCreationModal) {
+        showEventModal();
     }
+
+    // Handle window resize for responsive behavior
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            const wasMobile = isMobile;
+            const isNowMobile = window.innerWidth <= 1024;
+
+            if (wasMobile !== isNowMobile) {
+                location.reload(); // Simple reload for layout change
+            }
+        }, 250);
+    });
+
+    // Add smooth scroll behavior for panels
+    document.querySelectorAll('.panel-content').forEach(panel => {
+        panel.addEventListener('scroll', function() {
+            // Add shadow to panel header when scrolled
+            const header = this.previousElementSibling;
+            if (this.scrollTop > 10) {
+                header.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+            } else {
+                header.style.boxShadow = 'none';
+            }
+        });
+    });
+
+    // Add card status classes for styling
+    document.querySelectorAll('.event-card').forEach(card => {
+        const statusElement = card.querySelector('.event-status');
+        if (statusElement) {
+            if (statusElement.classList.contains('status-active')) {
+                card.classList.add('status-active');
+            } else if (statusElement.classList.contains('status-not-active')) {
+                card.classList.add('status-not-active');
+            } else if (statusElement.classList.contains('status-equipment-return')) {
+                card.classList.add('status-equipment-return');
+            }
+        }
+    });
+});
+
+// Utility function to add ripple effect to buttons
+function addRippleEffect(element) {
+    element.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+}
+
+// Add ripple effect to all buttons
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.create-event-btn, .view-btn, .event-view-btn').forEach(btn => {
+        addRippleEffect(btn);
+    });
 });

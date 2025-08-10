@@ -6,35 +6,42 @@
 <!-- Responsibility Card Fragment -->
 <div th:fragment="responsibilityCard(responsibility, managers)" class="responsibility-card">
 
-    <h2 class="card-title" th:text="${responsibility.responsibilityName}">Responsibility Name</h2>
+    <div class="responsibility-card-content">
+        <h2 class="card-title" th:text="${responsibility.responsibilityName}">Responsibility Name</h2>
 
-    <p th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
-       class="card-subtitle"
-       th:text="${responsibility.description}">Description here</p>
+        <p th:if="${responsibility.description != null and !#strings.isEmpty(responsibility.description)}"
+           class="card-subtitle"
+           th:text="${responsibility.description}">Description here</p>
 
-    <div class="managers-label">Managers</div>
+        <p th:if="${responsibility.description == null or #strings.isEmpty(responsibility.description)}"
+           class="card-subtitle">No description available</p>
 
-    <div th:if="${managers != null and !managers.isEmpty()}" class="managers-list">
-        <!-- Show first 2 managers -->
-        <div th:each="manager, iterStat : ${managers}"
-             th:if="${iterStat.index < 2}"
-             class="manager-badge"
-             th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</div>
+        <div class="managers-section">
+            <div class="managers-label">Assigned Managers</div>
 
-        <!-- Show "+X more" if there are more than 2 managers -->
-        <div th:if="${managers.size() > 2}"
-             class="manager-badge more-managers"
-             th:text="${'+' + (managers.size() - 2) + ' more'}">+1 more</div>
+            <div th:if="${managers != null and !managers.isEmpty()}" class="managers-list">
+                <!-- Show first 2 managers -->
+                <div th:each="manager, iterStat : ${managers}"
+                     th:if="${iterStat.index < 2}"
+                     class="manager-badge"
+                     th:text="${manager.firstName + ' ' + manager.lastName}">Manager Name</div>
+
+                <!-- Show "+X more" if there are more than 2 managers -->
+                <div th:if="${managers.size() > 2}"
+                     class="manager-badge more-managers"
+                     th:text="${'+' + (managers.size() - 2) + ' more'}">+1 more</div>
+            </div>
+
+            <div th:if="${managers == null or managers.isEmpty()}" class="no-managers">
+                No managers assigned
+            </div>
+        </div>
+
+        <button class="view-btn"
+                th:onclick="'window.location.href=\'/responsibility/view/' + ${responsibility.responsibilityId} + '\''">
+            View Details
+        </button>
     </div>
-
-    <div th:if="${managers == null or managers.isEmpty()}" class="no-managers">
-        No managers assigned
-    </div>
-
-    <button class="view-btn"
-            th:onclick="'window.location.href=\'/responsibility/view/' + ${responsibility.responsibilityId} + '\''">
-        View
-    </button>
 </div>
 
 </body>
