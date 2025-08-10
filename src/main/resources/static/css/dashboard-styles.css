@@ -305,13 +305,13 @@ body {
 }
 
 .manager-badge {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
     transition: transform 0.2s ease;
 }
 
@@ -381,7 +381,7 @@ body {
 /* View Button for Responsibilities */
 .view-btn {
     width: 100%;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
     color: white;
     border: none;
     border-radius: 6px;
@@ -397,7 +397,7 @@ body {
 
 .view-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 4px 8px rgba(128, 90, 213, 0.3);
 }
 
 /* Event Creation Modal - Matching Responsibility View */
