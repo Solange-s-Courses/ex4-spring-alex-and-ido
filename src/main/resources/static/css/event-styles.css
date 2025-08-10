@@ -160,6 +160,28 @@ body {
 .responsibilities-container {
     flex-grow: 1;
     min-height: 200px;
+    max-height: 60vh;       /* Limit height to 60% of viewport */
+    overflow-y: auto;       /* Enable vertical scrolling */
+    padding-right: 8px;     /* Add padding for scrollbar */
+}
+
+/* Custom scrollbar styling for better appearance */
+.responsibilities-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.responsibilities-container::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
+}
+
+.responsibilities-container::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+}
+
+.responsibilities-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.3);
 }
 
 /* Responsibility Items */
@@ -719,6 +741,11 @@ body {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+
+    .responsibilities-container {
+        max-height: 400px;
+    }
+
     .return-buttons {
         flex-direction: column;
         gap: 10px;
