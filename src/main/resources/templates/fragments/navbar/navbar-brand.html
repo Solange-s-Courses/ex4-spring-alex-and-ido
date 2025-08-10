@@ -3,7 +3,7 @@
 
 <!-- Navbar Brand/Welcome Message Fragment -->
 <div th:fragment="brand" class="navbar-left">
-    <span>Welcome <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>!</span>
+    <span>Logged in as <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>.</span>
 </div>
 
 </html>
