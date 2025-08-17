@@ -14,24 +14,21 @@
     <!-- Error Message -->
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-    <form th:action="@{/register}" th:object="${user}" method="post" id="registerForm">
+    <!-- WORKING FORM: Using @RequestParam approach -->
+    <form th:action="@{/register}" method="post" id="registerForm">
 
         <div class="form-group">
             <label for="emailAddress" class="form-label">Email Address</label>
             <input
                     type="email"
                     id="emailAddress"
-                    th:field="*{emailAddress}"
+                    name="emailAddress"
                     class="form-input"
-                    th:classappend="${#fields.hasErrors('emailAddress')} ? 'error' : ''"
                     placeholder="Enter your email address"
                     required
                     autocomplete="email"
                     inputmode="email"
             >
-            <div th:if="${#fields.hasErrors('emailAddress')}" class="field-error">
-                <span th:errors="*{emailAddress}"></span>
-            </div>
         </div>
 
         <div class="form-group">
@@ -39,9 +36,8 @@
             <input
                     type="tel"
                     id="phoneNumber"
-                    th:field="*{phoneNumber}"
+                    name="phoneNumber"
                     class="form-input"
-                    th:classappend="${#fields.hasErrors('phoneNumber')} ? 'error' : ''"
                     placeholder="Enter your phone number"
                     required
                     autocomplete="tel"
@@ -49,9 +45,6 @@
                     maxlength="10"
                     pattern="[0-9]{10}"
             >
-            <div th:if="${#fields.hasErrors('phoneNumber')}" class="field-error">
-                <span th:errors="*{phoneNumber}"></span>
-            </div>
         </div>
 
         <!-- First Name and Last Name in one row -->
@@ -61,16 +54,12 @@
                 <input
                         type="text"
                         id="firstName"
-                        th:field="*{firstName}"
+                        name="firstName"
                         class="form-input"
-                        th:classappend="${#fields.hasErrors('firstName')} ? 'error' : ''"
                         placeholder="First name"
                         required
                         autocomplete="given-name"
                 >
-                <div th:if="${#fields.hasErrors('firstName')}" class="field-error">
-                    <span th:errors="*{firstName}"></span>
-                </div>
             </div>
 
             <div class="form-group">
@@ -78,21 +67,36 @@
                 <input
                         type="text"
                         id="lastName"
-                        th:field="*{lastName}"
+                        name="lastName"
                         class="form-input"
-                        th:classappend="${#fields.hasErrors('lastName')} ? 'error' : ''"
                         placeholder="Last name"
                         required
                         autocomplete="family-name"
                 >
-                <div th:if="${#fields.hasErrors('lastName')}" class="field-error">
-                    <span th:errors="*{lastName}"></span>
-                </div>
             </div>
         </div>
 
-        <!-- Password field using fragment -->
-        <div th:replace="~{fragments/auth/password-field :: passwordField('password', 'Create a secure password', 'new-password', null, true)}"></div>
+        <!-- Password field -->
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="password-field-container">
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input password-input"
+                        placeholder="Create a secure password"
+                        autocomplete="new-password"
+                        required
+                >
+                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+                    SHOW
+                </button>
+            </div>
+            <div class="field-help">
+                Password must be 8-16 characters with letters, numbers, and special characters (@$!%*?&)
+            </div>
+        </div>
 
         <button type="submit" class="auth-button" id="registerBtn">
             Create Account

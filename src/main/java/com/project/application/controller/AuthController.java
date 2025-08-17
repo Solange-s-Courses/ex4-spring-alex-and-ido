@@ -2,19 +2,17 @@ package com.project.application.controller;
 
 import com.project.application.entity.User;
 import com.project.application.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller handling authentication and user profile management
- * STEP 3: Updated to work with Spring Security
+ * Updated to work with Spring Security and fixed form binding issues
  */
 @Controller
 @RequiredArgsConstructor
@@ -39,30 +37,48 @@ public class AuthController {
      */
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new User());
+        // No need to add user object for @RequestParam approach
         return "register";
     }
 
     /**
      * Process user registration
+     * FIXED: Using @RequestParam instead of @ModelAttribute to avoid binding issues
      */
     @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute User user,
-                               BindingResult bindingResult,
+    public String registerUser(@RequestParam String emailAddress,
+                               @RequestParam String phoneNumber,
+                               @RequestParam String firstName,
+                               @RequestParam String lastName,
+                               @RequestParam String password,
                                Model model,
                                RedirectAttributes redirectAttributes) {
 
-        // Check for validation errors
-        if (bindingResult.hasErrors()) {
+        // Validate required fields
+        if (emailAddress == null || emailAddress.trim().isEmpty() ||
+                phoneNumber == null || phoneNumber.trim().isEmpty() ||
+                firstName == null || firstName.trim().isEmpty() ||
+                lastName == null || lastName.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
+
+            model.addAttribute("error", "All fields are required");
             return "register";
         }
 
-        // Use service to register user (includes role assignment)
+        // Create User object from form parameters
+        User user = new User();
+        user.setEmailAddress(emailAddress.trim());
+        user.setPhoneNumber(phoneNumber.trim());
+        user.setFirstName(firstName.trim());
+        user.setLastName(lastName.trim());
+        user.setPassword(password);
+
+        // Use service to register user (includes role assignment and validation)
         String result = userService.registerUser(user);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Registration successful!");
-            return "redirect:/register";
+            redirectAttributes.addFlashAttribute("success", "Registration successful! You can now log in.");
+            return "redirect:/login"; // Redirect to login page on success
         } else {
             model.addAttribute("error", result);
             return "register";
@@ -71,18 +87,15 @@ public class AuthController {
 
     /**
      * Show login form
-     * STEP 3: Simplified - Spring Security handles authentication
+     * Spring Security handles authentication
      */
     @GetMapping("/login")
     public String loginForm() {
         return "login";
     }
 
-    // STEP 3: Login POST is now handled by Spring Security automatically
-    // No need for manual @PostMapping("/login") method
-
     /**
-     * STEP 3: Helper method to get current authenticated user
+     * Helper method to get current authenticated user
      */
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -98,8 +111,6 @@ public class AuthController {
 
     /**
      * Show user profile information
-     * STEP 3: Updated to use Spring Security authentication
-     * User data now provided globally by ControllerAdvice
      */
     @GetMapping("/user-info")
     public String userInfo(Model model) {
@@ -108,15 +119,12 @@ public class AuthController {
             return "redirect:/login";
         }
 
-        // Only add page-specific attributes (user data added globally)
         model.addAttribute("activeNavButton", "userinfo");
-
         return "user-info";
     }
 
     /**
      * Change username
-     * STEP 3: Updated to use Spring Security authentication
      */
     @PostMapping("/change-name")
     public String changeName(@RequestParam String firstName,
@@ -139,7 +147,6 @@ public class AuthController {
 
     /**
      * Change user phone number
-     * STEP 3: Updated to use Spring Security authentication
      */
     @PostMapping("/change-phone")
     public String changePhone(@RequestParam String phoneNumber,
