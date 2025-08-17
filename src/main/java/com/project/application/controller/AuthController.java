@@ -77,8 +77,8 @@ public class AuthController {
         String result = userService.registerUser(user);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Registration successful! You can now log in.");
-            return "redirect:/login"; // Redirect to login page on success
+            // Use URL parameter for success message to ensure it displays on redirect
+            return "redirect:/login?registered=true";
         } else {
             model.addAttribute("error", result);
             return "register";

@@ -10,7 +10,15 @@
 
   <!-- Display error message if login fails -->
   <div th:if="${param.error}" class="alert alert-error">Invalid email or password</div>
+
+  <!-- Display logout success message -->
   <div th:if="${param.logout}" class="alert alert-success">You have been logged out successfully</div>
+
+  <!-- NEW: Display registration success message -->
+  <div th:if="${param.registered}" class="alert alert-success">Registration successful! You can now log in with your credentials.</div>
+
+  <!-- NEW: Display any flash attribute success messages -->
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
   <!-- STEP 3: Updated form for Spring Security -->
   <form th:action="@{/login}" method="post" id="loginForm">
