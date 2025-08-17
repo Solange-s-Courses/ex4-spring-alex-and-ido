@@ -359,3 +359,145 @@ body {
     outline: 2px solid #ffffff;
     outline-offset: 2px;
 }
+
+/* Password Validation Styles */
+
+.password-requirements-info {
+    background-color: #e8f4fd;
+    border: 1px solid #b8daff;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #0c5460;
+}
+
+.password-validation-feedback {
+    display: none;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.validation-requirement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    transition: color 0.3s ease;
+}
+
+.validation-requirement:last-child {
+    margin-bottom: 0;
+}
+
+.req-icon {
+    margin-right: 8px;
+    font-size: 12px;
+    min-width: 16px;
+}
+
+.validation-requirement.passed {
+    color: #28a745;
+}
+
+.validation-requirement.failed {
+    color: #dc3545;
+}
+
+/* Form error states */
+.form-input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.field-error {
+    display: none;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.field-error:not(:empty) {
+    display: block;
+}
+
+/* Alert styles for consistency */
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Password field container */
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input {
+    flex: 1;
+    padding-right: 60px; /* Space for toggle button */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: #495057;
+}
+
+/* Form row for first/last name */
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .password-validation-feedback {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .validation-requirement {
+        margin-bottom: 4px;
+    }
+}

@@ -14,7 +14,7 @@
     <!-- Error Message -->
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-    <!-- WORKING FORM: Using @RequestParam approach -->
+    <!-- Registration Form with Password Validation -->
     <form th:action="@{/register}" method="post" id="registerForm">
 
         <div class="form-group">
@@ -44,6 +44,7 @@
                     inputmode="numeric"
                     maxlength="10"
                     pattern="[0-9]{10}"
+                    title="Please enter exactly 10 digits"
             >
         </div>
 
@@ -59,6 +60,8 @@
                         placeholder="First name"
                         required
                         autocomplete="given-name"
+                        pattern="[A-Za-z]{1,20}"
+                        title="First name must contain only letters and be 1-20 characters long"
                 >
             </div>
 
@@ -72,11 +75,13 @@
                         placeholder="Last name"
                         required
                         autocomplete="family-name"
+                        pattern="[A-Za-z]{1,20}"
+                        title="Last name must contain only letters and be 1-20 characters long"
                 >
             </div>
         </div>
 
-        <!-- Password field -->
+        <!-- Enhanced Password field with validation -->
         <div class="form-group">
             <label for="password" class="form-label">Password</label>
             <div class="password-field-container">
@@ -88,13 +93,18 @@
                         placeholder="Create a secure password"
                         autocomplete="new-password"
                         required
+                        minlength="8"
+                        maxlength="16"
                 >
                 <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
                     SHOW
                 </button>
             </div>
+
+            <!-- Password validation feedback will be inserted here by JavaScript -->
+
             <div class="field-help">
-                Password must be 8-16 characters with letters, numbers, and special characters (@$!%*?&)
+                Password must be 8-16 characters with at least one letter, one number, and one special character (@$!%*?&)
             </div>
         </div>
 

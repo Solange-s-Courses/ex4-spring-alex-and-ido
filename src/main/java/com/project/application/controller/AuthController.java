@@ -9,16 +9,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.regex.Pattern;
 
 /**
  * Controller handling authentication and user profile management
- * Updated to work with Spring Security and fixed form binding issues
+ * Enhanced with comprehensive password validation
  */
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
+
+    // Password validation patterns
+    private static final Pattern LETTER_PATTERN = Pattern.compile(".*[a-zA-Z].*");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile(".*[0-9].*");
+    private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile(".*[@$!%*?&].*");
 
     // ==========================================
     // AUTHENTICATION ROUTES
@@ -37,13 +43,11 @@ public class AuthController {
      */
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        // No need to add user object for @RequestParam approach
         return "register";
     }
 
     /**
-     * Process user registration
-     * FIXED: Using @RequestParam instead of @ModelAttribute to avoid binding issues
+     * Process user registration with comprehensive validation
      */
     @PostMapping("/register")
     public String registerUser(@RequestParam String emailAddress,
@@ -65,6 +69,13 @@ public class AuthController {
             return "register";
         }
 
+        // Comprehensive password validation
+        String passwordValidationError = validatePassword(password);
+        if (passwordValidationError != null) {
+            model.addAttribute("error", passwordValidationError);
+            return "register";
+        }
+
         // Create User object from form parameters
         User user = new User();
         user.setEmailAddress(emailAddress.trim());
@@ -73,11 +84,10 @@ public class AuthController {
         user.setLastName(lastName.trim());
         user.setPassword(password);
 
-        // Use service to register user (includes role assignment and validation)
+        // Use service to register user (includes role assignment and additional validation)
         String result = userService.registerUser(user);
 
         if ("success".equals(result)) {
-            // Use URL parameter for success message to ensure it displays on redirect
             return "redirect:/login?registered=true";
         } else {
             model.addAttribute("error", result);
@@ -86,8 +96,45 @@ public class AuthController {
     }
 
     /**
+     * Comprehensive password validation
+     * Returns null if valid, error message if invalid
+     */
+    private String validatePassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            return "Password is required";
+        }
+
+        // Length validation
+        if (password.length() < 8) {
+            return "Password must be at least 8 characters long";
+        }
+        if (password.length() > 16) {
+            return "Password must not exceed 16 characters";
+        }
+
+        // Character type validation
+        if (!LETTER_PATTERN.matcher(password).matches()) {
+            return "Password must contain at least one letter (a-z, A-Z)";
+        }
+
+        if (!NUMBER_PATTERN.matcher(password).matches()) {
+            return "Password must contain at least one number (0-9)";
+        }
+
+        if (!SPECIAL_CHAR_PATTERN.matcher(password).matches()) {
+            return "Password must contain at least one special character (@$!%*?&)";
+        }
+
+        // Check for invalid characters
+        if (!password.matches("^[a-zA-Z0-9@$!%*?&]+$")) {
+            return "Password can only contain letters, numbers, and these special characters: @$!%*?&";
+        }
+
+        return null; // Password is valid
+    }
+
+    /**
      * Show login form
-     * Spring Security handles authentication
      */
     @GetMapping("/login")
     public String loginForm() {
