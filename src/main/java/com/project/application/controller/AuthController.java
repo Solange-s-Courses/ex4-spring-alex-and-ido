@@ -99,6 +99,7 @@ public class AuthController {
     /**
      * Show user profile information
      * STEP 3: Updated to use Spring Security authentication
+     * User data now provided globally by ControllerAdvice
      */
     @GetMapping("/user-info")
     public String userInfo(Model model) {
@@ -107,8 +108,7 @@ public class AuthController {
             return "redirect:/login";
         }
 
-        model.addAttribute("user", loggedInUser);
-        model.addAttribute("userRole", loggedInUser.getRoleName());
+        // Only add page-specific attributes (user data added globally)
         model.addAttribute("activeNavButton", "userinfo");
 
         return "user-info";

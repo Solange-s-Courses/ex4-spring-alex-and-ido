@@ -35,6 +35,7 @@ public class DashboardController {
     /**
      * Display main dashboard with events and responsibilities
      * STEP 4: Updated to use Spring Security authentication
+     * STEP 5: User data now provided globally by ControllerAdvice
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -57,17 +58,10 @@ public class DashboardController {
             events = eventService.getOngoingEvents();
         }
 
-        model.addAttribute("user", loggedInUser);
-        model.addAttribute("userRole", loggedInUser.getRoleName());
+        // Add only dashboard-specific data (user data added globally)
         model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
         model.addAttribute("events", events);
         model.addAttribute("activeNavButton", "dashboard");
-
-        // STEP 5: Add responsibility data for navbar (managers only)
-        if ("manager".equals(loggedInUser.getRoleName())) {
-            Long userResponsibilityId = userService.getUserResponsibilityId(loggedInUser.getUserId());
-            model.addAttribute("userResponsibilityId", userResponsibilityId);
-        }
 
         return "dashboard";
     }
