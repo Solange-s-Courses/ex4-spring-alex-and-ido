@@ -11,14 +11,22 @@ import com.project.application.entity.UserResponsibility;
 import com.project.application.repository.UserResponsibilityRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+// STEP 2: Add Spring Security imports
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService { // STEP 2: Implement UserDetailsService
 
     private static final String NAME_PATTERN = "^[A-Za-z]{1,20}$";
     private static final String PHONE_PATTERN = "^[0-9]{10}$";
@@ -29,6 +37,22 @@ public class UserService {
     private final RoleService roleService;
     private final ResponsibilityService responsibilityService;
     private final UserResponsibilityRepository userResponsibilityRepository;
+
+    // STEP 2: Add PasswordEncoder dependency
+    private final PasswordEncoder passwordEncoder;
+
+    // STEP 2: Implement UserDetailsService method
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByEmailAddress(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmailAddress())
+                .password(user.getPassword())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoleName().toUpperCase())))
+                .build();
+    }
 
     // Register new user with default "user" role
     public String registerUser(User user) {
@@ -62,10 +86,12 @@ public class UserService {
             Role defaultRole = roleService.getDefaultUserRole();
 
             // Set role and timestamp
-            user.setRole(defaultRole); // NEW: Assign default role
+            user.setRole(defaultRole);
             user.setDateOfIssue(LocalDateTime.now());
 
-            // Password is already set in the user object (plain text for now)
+            // STEP 2: Encode password for new users
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
             userRepository.save(user);
             return "success";
 
@@ -76,16 +102,28 @@ public class UserService {
         }
     }
 
-    // Login user - matches your current logic
+    // STEP 2: Enhanced login method with password migration
     public User loginUser(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmailAddress(email);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            // Using plain text comparison like your current code
-            if (password.equals(user.getPassword())) {
-                // Role information is automatically loaded due to EAGER fetching
-                return user;
+            String storedPassword = user.getPassword();
+
+            // Check if password is already BCrypt encoded (starts with $2a$)
+            if (storedPassword.startsWith("$2a$")) {
+                // Use BCrypt verification
+                if (passwordEncoder.matches(password, storedPassword)) {
+                    return user;
+                }
+            } else {
+                // Legacy plain text password - verify and migrate
+                if (password.equals(storedPassword)) {
+                    // Migrate to BCrypt
+                    user.setPassword(passwordEncoder.encode(password));
+                    userRepository.save(user);
+                    return user;
+                }
             }
         }
         return null;
@@ -330,14 +368,21 @@ public class UserService {
         }
     }
 
-    // Verify admin password (for critical operations)
+    // STEP 2: Enhanced admin password verification with BCrypt support
     public boolean verifyAdminPassword(Long adminId, String password) {
         try {
             Optional<User> adminOptional = userRepository.findById(adminId);
             if (adminOptional.isPresent()) {
                 User admin = adminOptional.get();
-                // Using plain text comparison like your current code
-                return password.equals(admin.getPassword());
+                String storedPassword = admin.getPassword();
+
+                // Check if password is BCrypt encoded
+                if (storedPassword.startsWith("$2a$")) {
+                    return passwordEncoder.matches(password, storedPassword);
+                } else {
+                    // Legacy plain text comparison
+                    return password.equals(storedPassword);
+                }
             }
             return false;
         } catch (Exception e) {
@@ -352,7 +397,7 @@ public class UserService {
 
     /**
      * Assign responsibility to a user and automatically make them manager
-    */
+     */
     @Transactional
     public String assignResponsibility(Long userId, String responsibilityName) {
         try {

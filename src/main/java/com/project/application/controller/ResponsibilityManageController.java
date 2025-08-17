@@ -1,12 +1,13 @@
 package com.project.application.controller;
 
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Item;
 import com.project.application.entity.User;
 import com.project.application.entity.Request;
 import com.project.application.service.*;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,46 +16,28 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller handling responsibility management for managers
+ * STEP 4: Updated to use Spring Security instead of manual session management
+ */
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('MANAGER')") // STEP 4: Secure entire controller for manager role
 public class ResponsibilityManageController {
 
     private final ItemService itemService;
     private final UserService userService;
     private final ResponsibilityService responsibilityService;
     private final RequestService requestService;
-
-    private static final String LOGGED_IN_USER = "loggedInUser";
-
-    // Helper method to get logged in user
-    private User getLoggedInUser(HttpSession session) {
-        return (User) session.getAttribute(LOGGED_IN_USER);
-    }
-
-    // Helper method to check if user is logged in
-    private boolean isUserLoggedIn(HttpSession session) {
-        return getLoggedInUser(session) != null;
-    }
+    private final SecurityHelper securityHelper;
 
     /**
      * Display responsibility management page for managers
-     * UPDATED: Now accepts responsibilityId parameter and fetches managers + handles flash messages
+     * STEP 4: Updated to use Spring Security authentication
      */
     @GetMapping("/responsibility-manage/{responsibilityId}")
-    public String responsibilityManagement(@PathVariable Long responsibilityId,
-                                           HttpSession session,
-                                           Model model) {
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Check if user is manager
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+    public String responsibilityManagement(@PathVariable Long responsibilityId, Model model) {
+        User user = securityHelper.getCurrentUser();
 
         // Get responsibility details
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -100,24 +83,15 @@ public class ResponsibilityManageController {
 
     /**
      * Approve a request
-     * UPDATED: Now uses redirect with flash attributes instead of AJAX response and handles tab parameter
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/approve-request")
     public String approveRequest(@PathVariable Long responsibilityId,
                                  @RequestParam Long requestId,
-                                 HttpSession session,
                                  RedirectAttributes redirectAttributes,
                                  HttpServletRequest request) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -188,24 +162,15 @@ public class ResponsibilityManageController {
 
     /**
      * Deny a request
-     * UPDATED: Now uses redirect with flash attributes instead of AJAX response and handles tab parameter
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/deny-request")
     public String denyRequest(@PathVariable Long responsibilityId,
                               @RequestParam Long requestId,
-                              HttpSession session,
                               RedirectAttributes redirectAttributes,
                               HttpServletRequest request) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -276,23 +241,14 @@ public class ResponsibilityManageController {
 
     /**
      * Update responsibility description
-     * UPDATED: Now includes responsibilityId in URL and redirect
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/update-description")
     public String updateDescription(@PathVariable Long responsibilityId,
                                     @RequestParam String description,
-                                    HttpSession session,
                                     RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Get responsibility
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -341,24 +297,15 @@ public class ResponsibilityManageController {
 
     /**
      * Add new item
-     * UPDATED: Now includes responsibilityId in URL and redirect
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/add-item")
     public String addItem(@PathVariable Long responsibilityId,
                           @RequestParam String itemName,
                           @RequestParam String status,
-                          HttpSession session,
                           RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -390,25 +337,16 @@ public class ResponsibilityManageController {
 
     /**
      * Update existing item
-     * UPDATED: Now includes responsibilityId in URL and redirect
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/update-item")
     public String updateItem(@PathVariable Long responsibilityId,
                              @RequestParam Long itemId,
                              @RequestParam String itemName,
                              @RequestParam String status,
-                             HttpSession session,
                              RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -459,23 +397,14 @@ public class ResponsibilityManageController {
 
     /**
      * Delete item
-     * UPDATED: Now includes responsibilityId in URL and redirect
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/responsibility-manage/{responsibilityId}/delete-item")
     public String deleteItem(@PathVariable Long responsibilityId,
                              @RequestParam Long itemId,
-                             HttpSession session,
                              RedirectAttributes redirectAttributes) {
 
-        // Check if user is logged in and is manager
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-        if (!"manager".equals(user.getRoleName())) {
-            return "error/404";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Verify responsibility exists and user has permission
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =

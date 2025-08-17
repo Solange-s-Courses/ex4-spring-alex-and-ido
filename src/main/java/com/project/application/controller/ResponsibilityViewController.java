@@ -1,10 +1,11 @@
 package com.project.application.controller;
 
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Item;
 import com.project.application.entity.User;
 import com.project.application.service.*;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * STEP 4: Updated to use Spring Security instead of manual session management
+ */
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()") // STEP 4: Require authentication for all methods
 public class ResponsibilityViewController {
 
     private final ItemService itemService;
@@ -22,33 +27,15 @@ public class ResponsibilityViewController {
     private final ResponsibilityService responsibilityService;
     private final RequestService requestService;
     private final EventService eventService;
-
-    private static final String LOGGED_IN_USER = "loggedInUser";
-
-    // Helper method to get logged in user
-    private User getLoggedInUser(HttpSession session) {
-        return (User) session.getAttribute(LOGGED_IN_USER);
-    }
-
-    // Helper method to check if user is logged in
-    private boolean isUserLoggedIn(HttpSession session) {
-        return getLoggedInUser(session) != null;
-    }
+    private final SecurityHelper securityHelper;
 
     /**
      * Display responsibility details with item list for all users
-     * ENHANCED: Now includes request AND return functionality, event status, and available items count
+     * STEP 4: Updated to use Spring Security authentication
      */
     @GetMapping("/responsibility/view/{id}")
-    public String viewResponsibility(@PathVariable Long id,
-                                     HttpSession session,
-                                     Model model) {
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
+    public String viewResponsibility(@PathVariable Long id, Model model) {
+        User user = securityHelper.getCurrentUser();
 
         // Get responsibility details
         Optional<com.project.application.entity.Responsibility> responsibilityOptional =
@@ -76,7 +63,7 @@ public class ResponsibilityViewController {
                 .map(request -> request.getItem().getItemId())
                 .toList();
 
-        // NEW: Check which items the current user has pending return requests for
+        // Check which items the current user has pending return requests for
         List<Long> userPendingReturnItemIds = requestService.getRequestsByUserId(user.getUserId())
                 .stream()
                 .filter(request -> "return".equals(request.getRequestType()))
@@ -85,7 +72,6 @@ public class ResponsibilityViewController {
 
         // Add event status data
         boolean canRequestItems = eventService.isResponsibilityInActiveEvent(id);
-        // UPDATED: Use the new method for return validation
         boolean canReturnItems = eventService.isResponsibilityInReturnAllowedEvent(id);
 
         // Calculate available items count and total items count
@@ -100,7 +86,7 @@ public class ResponsibilityViewController {
         model.addAttribute("items", items);
         model.addAttribute("responsibilityManagers", managers);
         model.addAttribute("userRequestedItemIds", userRequestedItemIds);
-        model.addAttribute("userPendingReturnItemIds", userPendingReturnItemIds); // NEW
+        model.addAttribute("userPendingReturnItemIds", userPendingReturnItemIds);
         model.addAttribute("canRequestItems", canRequestItems);
         model.addAttribute("canReturnItems", canReturnItems);
         model.addAttribute("availableItemsCount", availableItemsCount);

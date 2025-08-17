@@ -1,13 +1,12 @@
 package com.project.application.controller;
 
-import com.project.application.controller.helper.AuthenticationHelper;
-import com.project.application.controller.helper.AccessControlHelper;
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Role;
 import com.project.application.entity.User;
 import com.project.application.service.RoleService;
 import com.project.application.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +17,17 @@ import java.util.stream.Collectors;
 
 /**
  * Controller handling admin-specific operations
- * - User management (view, edit, delete)
- * - Bulk operations (delete all users)
- * - Admin password verification
+ * STEP 4: Updated to use Spring Security with @PreAuthorize annotations
  */
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // STEP 4: Secure entire controller for admin role
 public class AdminController {
 
     private final UserService userService;
     private final RoleService roleService;
-    private final AuthenticationHelper authHelper;
-    private final AccessControlHelper accessControl;
+    private final SecurityHelper securityHelper;
 
     // ==========================================
     // ADMIN USER MANAGEMENT
@@ -40,14 +37,8 @@ public class AdminController {
      * Display admin dashboard with user management
      */
     @GetMapping
-    public String adminPage(HttpSession session, Model model) {
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "admin");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+    public String adminPage(Model model) {
+        User user = securityHelper.getCurrentUser();
 
         // Get all non-admin users for the user list
         List<User> users = userService.getAllNonAdminUsers();
@@ -70,16 +61,9 @@ public class AdminController {
      */
     @PostMapping("/delete-user")
     public String deleteUser(@RequestParam Long userId,
-                             HttpSession session,
                              RedirectAttributes redirectAttributes) {
 
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "admin");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+        User user = securityHelper.getCurrentUser();
 
         // Prevent admin from deleting themselves
         if (user.getUserId().equals(userId)) {
@@ -106,16 +90,9 @@ public class AdminController {
                            @RequestParam String firstName,
                            @RequestParam String lastName,
                            @RequestParam String roleName,
-                           HttpSession session,
                            RedirectAttributes redirectAttributes) {
 
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "admin");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+        User user = securityHelper.getCurrentUser();
 
         // Prevent admin from editing themselves
         if (user.getUserId().equals(userId)) {
@@ -143,16 +120,9 @@ public class AdminController {
      */
     @PostMapping("/delete-all-users")
     public String deleteAllUsers(@RequestParam String adminPassword,
-                                 HttpSession session,
                                  RedirectAttributes redirectAttributes) {
 
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "admin");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+        User user = securityHelper.getCurrentUser();
 
         // Verify admin password
         if (!userService.verifyAdminPassword(user.getUserId(), adminPassword)) {
@@ -182,22 +152,12 @@ public class AdminController {
      */
     @PostMapping("/verify-password")
     @ResponseBody
-    public String verifyPassword(@RequestParam String adminPassword,
-                                 HttpSession session) {
+    public String verifyPassword(@RequestParam String adminPassword) {
 
-        // Check access using helper
-        if (!accessControl.isAdmin(session)) {
-            return "invalid";
-        }
+        User user = securityHelper.getCurrentUser();
 
-        User user = authHelper.getLoggedInUser(session);
-
-        // Temporary debug - remove after testing
-        System.out.println("Session user password: '" + user.getPassword() + "'");
-        System.out.println("Entered password: '" + adminPassword + "'");
-
-        // Simple direct comparison for testing
-        if (adminPassword.equals(user.getPassword())) {
+        // Verify password using service (handles both BCrypt and legacy passwords)
+        if (userService.verifyAdminPassword(user.getUserId(), adminPassword)) {
             return "valid";
         } else {
             return "invalid";

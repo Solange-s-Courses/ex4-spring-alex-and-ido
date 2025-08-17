@@ -1,13 +1,12 @@
 package com.project.application.controller;
 
-import com.project.application.controller.helper.AuthenticationHelper;
-import com.project.application.controller.helper.AccessControlHelper;
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Role;
 import com.project.application.entity.User;
 import com.project.application.service.RoleService;
 import com.project.application.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +17,17 @@ import java.util.stream.Collectors;
 
 /**
  * Controller handling chief-specific operations
- * - User management and role assignments
- * - Responsibility assignments to users (promoting them to managers)
- * - Chief user list management
+ * STEP 4: Updated to use Spring Security with @PreAuthorize annotations
  */
 @Controller
 @RequestMapping("/chief")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('CHIEF')") // STEP 4: Secure entire controller for chief role
 public class ChiefController {
 
     private final UserService userService;
     private final RoleService roleService;
-    private final AuthenticationHelper authHelper;
-    private final AccessControlHelper accessControl;
+    private final SecurityHelper securityHelper;
 
     // ==========================================
     // CHIEF USER MANAGEMENT
@@ -40,14 +37,8 @@ public class ChiefController {
      * Display chief user management page
      */
     @GetMapping("/user-list")
-    public String chiefUserList(HttpSession session, Model model) {
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "chief");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+    public String chiefUserList(Model model) {
+        User user = securityHelper.getCurrentUser();
 
         // Get managers and users with their responsibilities populated
         List<User> users = userService.getManagersAndUsersWithResponsibilities();
@@ -75,14 +66,7 @@ public class ChiefController {
     @PostMapping("/assign-responsibility")
     public String assignResponsibility(@RequestParam Long userId,
                                        @RequestParam String responsibilityName,
-                                       HttpSession session,
                                        RedirectAttributes redirectAttributes) {
-
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "chief");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
 
         // Assign responsibility using service
         String result = userService.assignResponsibility(userId, responsibilityName);
@@ -101,14 +85,7 @@ public class ChiefController {
      */
     @PostMapping("/remove-responsibility")
     public String removeResponsibility(@RequestParam Long userId,
-                                       HttpSession session,
                                        RedirectAttributes redirectAttributes) {
-
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "chief");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
 
         // Remove responsibility using service
         String result = userService.removeUserFromResponsibility(userId);

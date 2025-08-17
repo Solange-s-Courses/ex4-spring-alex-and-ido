@@ -1,42 +1,45 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<!-- Mobile Menu Fragment - With Controller-Based Active States -->
+<!-- Mobile Menu Fragment - STEP 5: Updated for Spring Security -->
 <div th:fragment="mobile-menu" class="mobile-menu" id="mobileMenu">
-    <!-- Dashboard button -->
+    <!-- Dashboard button - Available to all authenticated users -->
     <a th:href="@{/dashboard}"
-       th:class="'mobile-nav-btn' + (${activeNavButton} == 'dashboard' ? ' active' : '')">Dashboard</a>
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'dashboard' ? ' active' : '')"
+       sec:authorize="isAuthenticated()">Dashboard</a>
 
-    <!-- Mobile Manage Responsibility button (only for managers) -->
-    <a th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'manager' and session.userResponsibilityName != null and session.userResponsibilityId != null}"
-       th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${session.userResponsibilityId})}"
-       th:class="'mobile-nav-btn' + (${activeNavButton} == 'responsibility' ? ' active' : '')">
+    <!-- Mobile Manage Responsibility button (only for managers with responsibilities) -->
+    <a th:if="${user != null and user.roleName == 'manager' and userResponsibilityId != null}"
+       th:href="@{/responsibility-manage/{responsibilityId}(responsibilityId=${userResponsibilityId})}"
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'responsibility' ? ' active' : '')"
+       sec:authorize="hasRole('MANAGER')">
         Manage Responsibility
     </a>
 
     <!-- My Items button (for users, managers, and chiefs) -->
     <a th:href="@{/user/my-items}"
        th:class="'mobile-nav-btn mobile-nav-btn-items' + (${activeNavButton} == 'myitems' ? ' active' : '')"
-       th:if="${session.loggedInUser != null and (session.loggedInUser.role.name == 'user' or session.loggedInUser.role.name == 'manager' or session.loggedInUser.role.name == 'chief')}">
+       sec:authorize="hasAnyRole('USER', 'MANAGER', 'CHIEF')">
         My Items
     </a>
 
     <!-- Chief User List button (only for chief) -->
     <a th:href="@{/chief/user-list}"
        th:class="'mobile-nav-btn' + (${activeNavButton} == 'userlist' ? ' active' : '')"
-       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'chief'}">User List</a>
+       sec:authorize="hasRole('CHIEF')">User List</a>
 
     <!-- Admin Page button (only for admin) -->
     <a th:href="@{/admin}"
        th:class="'mobile-nav-btn' + (${activeNavButton} == 'admin' ? ' active' : '')"
-       th:if="${session.loggedInUser != null and session.loggedInUser.role.name == 'admin'}">Admin Page</a>
+       sec:authorize="hasRole('ADMIN')">Admin Page</a>
 
-    <!-- User Info button -->
+    <!-- User Info button - Available to all authenticated users -->
     <a th:href="@{/user-info}"
-       th:class="'mobile-nav-btn' + (${activeNavButton} == 'userinfo' ? ' active' : '')">User Info</a>
+       th:class="'mobile-nav-btn' + (${activeNavButton} == 'userinfo' ? ' active' : '')"
+       sec:authorize="isAuthenticated()">User Info</a>
 
-    <!-- Logout button -->
-    <a th:href="@{/logout}" class="mobile-logout-btn">Logout</a>
+    <!-- Logout button - Available to all authenticated users -->
+    <a th:href="@{/logout}" class="mobile-logout-btn" sec:authorize="isAuthenticated()">Logout</a>
 </div>
 
 </html>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- Navbar Brand/Welcome Message Fragment -->
+<!-- STEP 5: Updated to use Spring Security expressions -->
 <div th:fragment="brand" class="navbar-left">
     <span>Logged in as <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>.</span>
 </div>

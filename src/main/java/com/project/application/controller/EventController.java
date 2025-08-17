@@ -1,16 +1,15 @@
 package com.project.application.controller;
 
-import com.project.application.controller.helper.AuthenticationHelper;
-import com.project.application.controller.helper.AccessControlHelper;
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Event;
 import com.project.application.entity.Responsibility;
 import com.project.application.entity.User;
 import com.project.application.service.EventService;
 import com.project.application.service.ResponsibilityService;
 import com.project.application.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +20,7 @@ import java.util.*;
 
 /**
  * Controller handling all event-related operations
- * - Event CRUD operations (create, edit, delete, view)
- * - Event lifecycle management (activate, return mode, complete)
- * - Event-responsibility management (add/remove responsibilities)
- * - Event viewing with proper access control
+ * STEP 4: Updated to use Spring Security instead of manual session management
  */
 @Controller
 @RequiredArgsConstructor
@@ -33,8 +29,7 @@ public class EventController {
     private final EventService eventService;
     private final ResponsibilityService responsibilityService;
     private final UserService userService;
-    private final AuthenticationHelper authHelper;
-    private final AccessControlHelper accessControl;
+    private final SecurityHelper securityHelper;
 
     // ==========================================
     // EVENT CRUD OPERATIONS (CHIEF ONLY)
@@ -44,19 +39,13 @@ public class EventController {
      * Create new event (Chief only)
      */
     @PostMapping("/chief/events/create")
+    @PreAuthorize("hasRole('CHIEF')")
     public String createEvent(@RequestParam String eventName,
                               @RequestParam(required = false) String description,
-                              HttpSession session,
                               RedirectAttributes redirectAttributes,
                               Model model) throws UnsupportedEncodingException {
 
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "chief");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
-
-        User user = authHelper.getLoggedInUser(session);
+        User user = securityHelper.getCurrentUser();
 
         // Create event using service
         String result = eventService.createEvent(eventName, description);
@@ -107,15 +96,9 @@ public class EventController {
      * Delete event (Chief only, not-active events only)
      */
     @PostMapping("/chief/events/delete")
+    @PreAuthorize("hasRole('CHIEF')")
     public String deleteEvent(@RequestParam Long eventId,
-                              HttpSession session,
                               RedirectAttributes redirectAttributes) throws UnsupportedEncodingException {
-
-        // Check access using helper
-        String accessCheck = accessControl.validateAccess(session, "chief");
-        if (accessCheck != null) {
-            return accessCheck;
-        }
 
         // Delete event using service
         String result = eventService.deleteEvent(eventId);
@@ -132,18 +115,11 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/edit")
     @ResponseBody
+    @PreAuthorize("hasRole('CHIEF')")
     public Map<String, Object> editEvent(@PathVariable Long eventId,
                                          @RequestParam String eventName,
-                                         @RequestParam(required = false) String description,
-                                         HttpSession session) {
+                                         @RequestParam(required = false) String description) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Update event using service
         String result = eventService.updateEvent(eventId, eventName, description);
@@ -168,16 +144,9 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/activate")
     @ResponseBody
-    public Map<String, Object> activateEvent(@PathVariable Long eventId,
-                                             HttpSession session) {
+    @PreAuthorize("hasRole('CHIEF')")
+    public Map<String, Object> activateEvent(@PathVariable Long eventId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Activate event using service
         String result = eventService.activateEvent(eventId);
@@ -198,16 +167,9 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/switch-to-return")
     @ResponseBody
-    public Map<String, Object> switchToReturnMode(@PathVariable Long eventId,
-                                                  HttpSession session) {
+    @PreAuthorize("hasRole('CHIEF')")
+    public Map<String, Object> switchToReturnMode(@PathVariable Long eventId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Switch to return mode using service
         String result = eventService.switchToReturnMode(eventId);
@@ -228,16 +190,9 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/switch-to-active")
     @ResponseBody
-    public Map<String, Object> switchToActiveMode(@PathVariable Long eventId,
-                                                  HttpSession session) {
+    @PreAuthorize("hasRole('CHIEF')")
+    public Map<String, Object> switchToActiveMode(@PathVariable Long eventId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Switch to active mode using service
         String result = eventService.switchToActiveMode(eventId);
@@ -258,16 +213,9 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/complete")
     @ResponseBody
-    public Map<String, Object> completeEvent(@PathVariable Long eventId,
-                                             HttpSession session) {
+    @PreAuthorize("hasRole('CHIEF')")
+    public Map<String, Object> completeEvent(@PathVariable Long eventId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Complete event using service
         String result = eventService.completeEvent(eventId);
@@ -289,17 +237,13 @@ public class EventController {
 
     /**
      * Display event details page for authorized users
+     * STEP 4: Updated to use Spring Security authentication
      */
     @GetMapping("/event/view/{eventId}")
-    public String viewEvent(@PathVariable Long eventId,
-                            HttpSession session,
-                            Model model) {
+    @PreAuthorize("isAuthenticated()")
+    public String viewEvent(@PathVariable Long eventId, Model model) {
 
-        // Check if user is logged in
-        User user = authHelper.getLoggedInUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Get event details
         Optional<Event> eventOptional = eventService.findById(eventId);
@@ -357,12 +301,8 @@ public class EventController {
      */
     @GetMapping("/chief/events/{eventId}/available-responsibilities")
     @ResponseBody
-    public List<Map<String, Object>> getAvailableResponsibilities(@PathVariable Long eventId,
-                                                                  HttpSession session) {
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            return new ArrayList<>();
-        }
+    @PreAuthorize("hasRole('CHIEF')")
+    public List<Map<String, Object>> getAvailableResponsibilities(@PathVariable Long eventId) {
 
         // Get responsibilities not assigned to THIS specific event
         List<Responsibility> unassignedResponsibilities = eventService.getUnassignedResponsibilities(eventId);
@@ -385,17 +325,10 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/add-responsibility")
     @ResponseBody
+    @PreAuthorize("hasRole('CHIEF')")
     public Map<String, Object> addResponsibilityToEvent(@PathVariable Long eventId,
-                                                        @RequestParam Long responsibilityId,
-                                                        HttpSession session) {
+                                                        @RequestParam Long responsibilityId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Add responsibility to event
         String result = eventService.addResponsibilityToEvent(eventId, responsibilityId);
@@ -439,17 +372,10 @@ public class EventController {
      */
     @PostMapping("/chief/events/{eventId}/remove-responsibility")
     @ResponseBody
+    @PreAuthorize("hasRole('CHIEF')")
     public Map<String, Object> removeResponsibilityFromEvent(@PathVariable Long eventId,
-                                                             @RequestParam Long responsibilityId,
-                                                             HttpSession session) {
+                                                             @RequestParam Long responsibilityId) {
         Map<String, Object> response = new HashMap<>();
-
-        // Check access using helper
-        if (!accessControl.isChief(session)) {
-            response.put("success", false);
-            response.put("message", "Access denied");
-            return response;
-        }
 
         // Remove responsibility from event
         String result = eventService.removeResponsibilityFromEvent(eventId, responsibilityId);

@@ -8,26 +8,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
-// Entity - Tells JPA this class represents a database table.
-// Table - Specifies the actual table name in database (without this, it would use class name "User")
-// Data - Automatically generates getters, setters, toString(), equals(), hashCode()
-// NoArgsConstructor - Creates empty constructor User()
-// AllArgsConstructor - Creates constructor with all fields User(userId, email, phone, password, date)
-
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-
-    // id - Marks this as the primary key
-    // GeneratedValue - Database auto-generates the ID (auto-increment)
-    // column - Maps to database column "user_id"
-    // unique - Creates unique constraint (no duplicate emails/phones allowed)
-    // nullable - Field cannot be null (required field)
-    // name - Maps Java camelCase to database snake_case
-    // CreationTimeStamp - Hibernate automatically sets this to current timestamp when entity is first saved
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,10 +42,10 @@ public class User {
     @Pattern(regexp = "^[A-Za-z]+$", message = "Last name can only contain letters")
     private String lastName;
 
-    @Column(name = "encrypted_password", nullable = false)
+    // STEP 2 FIX: Updated password validation for BCrypt compatibility
+    @Column(name = "encrypted_password", nullable = false, length = 255)
     @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 16, message = "Password must be between 8 and 16 characters")
-    @Pattern(regexp = "^[A-Za-z0-9@$!%*?&]+$", message = "Password can only contain letters, numbers, and special characters (@$!%*?&)")
+    // Remove size and pattern constraints for database storage (validation handled in service layer)
     private String password;
 
     @Column(name = "date_of_issue", nullable = false)

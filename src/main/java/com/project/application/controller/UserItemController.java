@@ -1,55 +1,40 @@
 package com.project.application.controller;
 
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.Item;
 import com.project.application.entity.User;
 import com.project.application.service.*;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * STEP 4: Updated to use Spring Security instead of manual session management
+ */
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()") // STEP 4: Require authentication for all methods
 public class UserItemController {
 
     private final ItemService itemService;
     private final RequestService requestService;
     private final EventService eventService;
-
-    private static final String LOGGED_IN_USER = "loggedInUser";
-
-    // Helper method to get logged in user
-    private User getLoggedInUser(HttpSession session) {
-        return (User) session.getAttribute(LOGGED_IN_USER);
-    }
-
-    // Helper method to check if user is logged in
-    private boolean isUserLoggedIn(HttpSession session) {
-        return getLoggedInUser(session) != null;
-    }
+    private final SecurityHelper securityHelper;
 
     /**
      * Handle user item request via AJAX
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/user/request-item")
     @ResponseBody
-    public String requestItem(@RequestParam Long itemId,
-                              HttpSession session) {
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'CHIEF')") // Only these roles can request items
+    public String requestItem(@RequestParam Long itemId) {
 
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "error:Please log in to request items";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Users, managers, and chiefs can request items, but not admins
-        if ("admin".equals(user.getRoleName())) {
-            return "error:Your role cannot request items";
-        }
+        User user = securityHelper.getCurrentUser();
 
         // Create the request
         String result = requestService.createRequest(user.getUserId(), itemId, "request");
@@ -63,18 +48,14 @@ public class UserItemController {
 
     /**
      * Handle user item return request via AJAX
+     * STEP 4: Updated to use Spring Security authentication
      */
     @PostMapping("/user/return-item")
     @ResponseBody
-    public String returnItem(@RequestParam Long itemId,
-                             HttpSession session) {
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'CHIEF')") // Only these roles can return items
+    public String returnItem(@RequestParam Long itemId) {
 
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "error:Please log in to return items";
-        }
-
-        User user = getLoggedInUser(session);
+        User user = securityHelper.getCurrentUser();
 
         // Create the return request
         String result = requestService.createRequest(user.getUserId(), itemId, "return");
@@ -88,20 +69,12 @@ public class UserItemController {
 
     /**
      * Display user's owned items page with event status integration
+     * STEP 4: Updated to use Spring Security authentication
      */
     @GetMapping("/user/my-items")
-    public String myItems(HttpSession session, Model model) {
-        // Check if user is logged in
-        if (!isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
-
-        User user = getLoggedInUser(session);
-
-        // Users, managers, and chiefs can view their items, but not admins
-        if ("admin".equals(user.getRoleName())) {
-            return "error/404";
-        }
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'CHIEF')") // Only these roles can view their items
+    public String myItems(Model model) {
+        User user = securityHelper.getCurrentUser();
 
         // Get all items owned by this user
         List<Item> userItems = itemService.getItemsByUserId(user.getUserId());
@@ -115,7 +88,6 @@ public class UserItemController {
                 .filter(request -> "return".equals(request.getRequestType()))
                 .map(request -> request.getItem().getItemId())
                 .toList();
-
 
         // Add data to model
         model.addAttribute("user", user);

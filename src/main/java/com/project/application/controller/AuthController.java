@@ -1,12 +1,11 @@
 package com.project.application.controller;
 
-import com.project.application.controller.helper.AuthenticationHelper;
-import com.project.application.controller.helper.AccessControlHelper;
 import com.project.application.entity.User;
 import com.project.application.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,14 +14,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller handling authentication and user profile management
+ * STEP 3: Updated to work with Spring Security
  */
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
-    private final AuthenticationHelper authHelper;
-    private final AccessControlHelper accessControl;
 
     // ==========================================
     // AUTHENTICATION ROUTES
@@ -32,10 +30,7 @@ public class AuthController {
      * Home page redirect
      */
     @GetMapping("/")
-    public String home(HttpSession session) {
-        if (!authHelper.isUserLoggedIn(session)) {
-            return "redirect:/login";
-        }
+    public String home() {
         return "redirect:/dashboard";
     }
 
@@ -43,10 +38,7 @@ public class AuthController {
      * Show registration form
      */
     @GetMapping("/register")
-    public String showRegistrationForm(Model model, HttpSession session) {
-        if (authHelper.isUserLoggedIn(session)) {
-            return "redirect:/dashboard";
-        }
+    public String showRegistrationForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
@@ -79,56 +71,25 @@ public class AuthController {
 
     /**
      * Show login form
+     * STEP 3: Simplified - Spring Security handles authentication
      */
     @GetMapping("/login")
-    public String loginForm(HttpSession session) {
-        if (authHelper.isUserLoggedIn(session)) {
-            return "redirect:/dashboard";
-        }
+    public String loginForm() {
         return "login";
     }
 
+    // STEP 3: Login POST is now handled by Spring Security automatically
+    // No need for manual @PostMapping("/login") method
+
     /**
-     * Process user login
+     * STEP 3: Helper method to get current authenticated user
      */
-    @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        HttpSession session,
-                        Model model) {
-
-        User user = userService.loginUser(email, password);
-
-        if (user != null) {
-            // Store user information in session using helper
-            authHelper.setUserSession(session, user);
-
-            // Store responsibility information in session for managers
-            if ("manager".equals(user.getRoleName())) {
-                String responsibilityName = userService.getUserResponsibilityName(user.getUserId());
-                Long responsibilityId = userService.getUserResponsibilityId(user.getUserId());
-                authHelper.setResponsibilitySession(session, responsibilityName, responsibilityId);
-            } else {
-                authHelper.clearResponsibilitySession(session);
-            }
-
-            return "redirect:/dashboard";
-        } else {
-            // Preserve the attempted email and password for user convenience
-            model.addAttribute("email", email);
-            model.addAttribute("password", password);
-            model.addAttribute("error", "Invalid email or password");
-            return "login";
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            return userService.findByEmailAddress(auth.getName()).orElse(null);
         }
-    }
-
-    /**
-     * Logout user
-     */
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        authHelper.clearSession(session);
-        return "redirect:/login";
+        return null;
     }
 
     // ==========================================
@@ -137,16 +98,17 @@ public class AuthController {
 
     /**
      * Show user profile information
+     * STEP 3: Updated to use Spring Security authentication
      */
     @GetMapping("/user-info")
-    public String userInfo(HttpSession session, Model model) {
-        User loggedInUser = authHelper.getLoggedInUser(session);
+    public String userInfo(Model model) {
+        User loggedInUser = getCurrentUser();
         if (loggedInUser == null) {
             return "redirect:/login";
         }
 
         model.addAttribute("user", loggedInUser);
-        model.addAttribute("userRole", authHelper.getUserRole(session));
+        model.addAttribute("userRole", loggedInUser.getRoleName());
         model.addAttribute("activeNavButton", "userinfo");
 
         return "user-info";
@@ -154,14 +116,14 @@ public class AuthController {
 
     /**
      * Change username
+     * STEP 3: Updated to use Spring Security authentication
      */
     @PostMapping("/change-name")
     public String changeName(@RequestParam String firstName,
                              @RequestParam String lastName,
-                             HttpSession session,
                              RedirectAttributes redirectAttributes) throws java.io.UnsupportedEncodingException {
 
-        User loggedInUser = authHelper.getLoggedInUser(session);
+        User loggedInUser = getCurrentUser();
         if (loggedInUser == null) {
             return "redirect:/login?error=" + java.net.URLEncoder.encode("Session expired! Please log in again.", "UTF-8");
         }
@@ -169,8 +131,6 @@ public class AuthController {
         String result = userService.updateUserName(loggedInUser, firstName, lastName);
 
         if ("success".equals(result)) {
-            // Update session with new user data
-            authHelper.updateUserSession(session, loggedInUser);
             return "redirect:/user-info?success=" + java.net.URLEncoder.encode("Name changed successfully!", "UTF-8");
         } else {
             return "redirect:/user-info?error=" + java.net.URLEncoder.encode(result, "UTF-8");
@@ -179,13 +139,13 @@ public class AuthController {
 
     /**
      * Change user phone number
+     * STEP 3: Updated to use Spring Security authentication
      */
     @PostMapping("/change-phone")
     public String changePhone(@RequestParam String phoneNumber,
-                              HttpSession session,
                               RedirectAttributes redirectAttributes) throws java.io.UnsupportedEncodingException {
 
-        User loggedInUser = authHelper.getLoggedInUser(session);
+        User loggedInUser = getCurrentUser();
         if (loggedInUser == null) {
             return "redirect:/login?error=" + java.net.URLEncoder.encode("Session expired! Please log in again.", "UTF-8");
         }
@@ -193,8 +153,6 @@ public class AuthController {
         String result = userService.updateUserPhone(loggedInUser, phoneNumber);
 
         if ("success".equals(result)) {
-            // Update session with new user data
-            authHelper.updateUserSession(session, loggedInUser);
             return "redirect:/user-info?success=" + java.net.URLEncoder.encode("Phone number changed successfully!", "UTF-8");
         } else {
             return "redirect:/user-info?error=" + java.net.URLEncoder.encode(result, "UTF-8");

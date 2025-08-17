@@ -1,14 +1,13 @@
 package com.project.application.controller;
 
-import com.project.application.controller.helper.AuthenticationHelper;
-import com.project.application.controller.helper.AccessControlHelper;
+import com.project.application.controller.helper.SecurityHelper;
 import com.project.application.entity.User;
 import com.project.application.service.EventService;
 import com.project.application.entity.Event;
 import com.project.application.service.ResponsibilityService;
 import com.project.application.entity.Responsibility;
+import com.project.application.service.UserService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,7 @@ import java.util.*;
 
 /**
  * Controller handling dashboard display functionality
- * Provides the main dashboard view with events and responsibilities based on user role
+ * STEP 4: Updated to use Spring Security instead of manual session management
  */
 @Controller
 @RequiredArgsConstructor
@@ -26,8 +25,8 @@ public class DashboardController {
 
     private final ResponsibilityService responsibilityService;
     private final EventService eventService;
-    private final AuthenticationHelper authHelper;
-    private final AccessControlHelper accessControl;
+    private final SecurityHelper securityHelper;
+    private final UserService userService; // STEP 5: Added UserService dependency
 
     // ==========================================
     // DASHBOARD DISPLAY
@@ -35,13 +34,12 @@ public class DashboardController {
 
     /**
      * Display main dashboard with events and responsibilities
-     * - Chiefs see all their events (including not-active)
-     * - Other users see only ongoing events (active/equipment return)
-     * - Shows responsibilities with their assigned managers
+     * STEP 4: Updated to use Spring Security authentication
      */
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        User loggedInUser = authHelper.getLoggedInUser(session);
+    public String dashboard(Model model) {
+        // Get current authenticated user using Spring Security
+        User loggedInUser = securityHelper.getCurrentUser();
         if (loggedInUser == null) {
             return "redirect:/login";
         }
@@ -60,10 +58,16 @@ public class DashboardController {
         }
 
         model.addAttribute("user", loggedInUser);
-        model.addAttribute("userRole", authHelper.getUserRole(session));
+        model.addAttribute("userRole", loggedInUser.getRoleName());
         model.addAttribute("responsibilitiesWithManagers", responsibilitiesWithManagers);
         model.addAttribute("events", events);
         model.addAttribute("activeNavButton", "dashboard");
+
+        // STEP 5: Add responsibility data for navbar (managers only)
+        if ("manager".equals(loggedInUser.getRoleName())) {
+            Long userResponsibilityId = userService.getUserResponsibilityId(loggedInUser.getUserId());
+            model.addAttribute("userResponsibilityId", userResponsibilityId);
+        }
 
         return "dashboard";
     }
