@@ -1,11 +1,11 @@
 /**
- * Authentication Pages - Combined JavaScript
- * Handles both login and register page functionality
+ * Authentication Pages - JavaScript
+ * Handles login and register page functionality
+ * CLEANED: Removed password toggle functionality (no longer needed with Spring Security)
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize shared functionality
-    initPasswordToggle();
+    // Initialize functionality
     initFormLoadingStates();
     initMobileFocus();
 
@@ -14,28 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
         initPhoneRestriction(); // Register page only
     }
 });
-
-/**
- * Password Toggle Functionality
- * Shows/hides password field with toggle button
- */
-function initPasswordToggle() {
-    const passwordInput = document.getElementById('password');
-    const passwordToggle = document.getElementById('passwordToggle');
-
-    if (passwordInput && passwordToggle) {
-        passwordToggle.addEventListener('click', function() {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-
-            // Update text
-            this.textContent = type === 'password' ? 'SHOW' : 'HIDE';
-
-            // Update aria-label for accessibility
-            this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-        });
-    }
-}
 
 /**
  * Form Loading States
@@ -73,7 +51,7 @@ function initFormLoadingStates() {
  */
 function initMobileFocus() {
     if (window.innerWidth > 768) {
-        const emailField = document.getElementById('email') || document.getElementById('emailAddress');
+        const emailField = document.getElementById('email') || document.getElementById('emailAddress') || document.getElementById('username');
         if (emailField) {
             emailField.focus();
         }
