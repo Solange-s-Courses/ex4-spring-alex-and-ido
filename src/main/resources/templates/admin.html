@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common/head :: head('Admin Dashboard')}"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrator Page</title>
+</head>
 
 <body>
 <!-- Include Navbar Styles -->
+<link rel="stylesheet" th:href="@{/css/admin-styles.css}">
 <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
 
 <!-- Navigation -->
