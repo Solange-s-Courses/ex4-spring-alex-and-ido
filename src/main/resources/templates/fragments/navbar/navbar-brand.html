@@ -4,7 +4,7 @@
 <!-- Navbar Brand/Welcome Message Fragment -->
 <!-- STEP 5: Updated to use Spring Security expressions -->
 <div th:fragment="brand" class="navbar-left">
-    <span>Logged in as <span th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>.</span>
+    <span>Logged in as <span class="navbar-username" th:text="${#strings.capitalize(user.firstName) + ' ' + #strings.capitalize(user.lastName)}"></span>.</span>
 </div>
 
 </html>
