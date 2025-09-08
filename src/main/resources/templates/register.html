@@ -2,119 +2,154 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/auth/auth-head :: head('Register')}"></head>
 <body>
-<div class="auth-container">
-    <div class="auth-header">
-        <h1 class="auth-title">Create Account</h1>
-        <p class="auth-subtitle">Join our event management system</p>
+<div class="auth-container register-container">
+
+    <!-- LEFT PAGE - User Information -->
+    <div class="book-page left-page">
+        <div class="auth-header page-header">
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join our event management system</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="form-section">
+            <form th:action="@{/register}" method="post" id="registerForm">
+
+                <!-- Email Address -->
+                <div class="form-group">
+                    <label for="emailAddress" class="form-label">Email Address</label>
+                    <input
+                            type="email"
+                            id="emailAddress"
+                            name="emailAddress"
+                            class="form-input"
+                            placeholder="Enter your email address"
+                            required
+                            autocomplete="email"
+                            inputmode="email"
+                    >
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                    <input
+                            type="tel"
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            class="form-input"
+                            placeholder="Enter your phone number"
+                            required
+                            autocomplete="tel"
+                            inputmode="numeric"
+                            maxlength="10"
+                            pattern="[0-9]{10}"
+                            title="Please enter exactly 10 digits"
+                    >
+                </div>
+
+                <!-- First Name and Last Name -->
+                <div class="name-row">
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input
+                                type="text"
+                                id="firstName"
+                                name="firstName"
+                                class="form-input"
+                                placeholder="First name"
+                                required
+                                autocomplete="given-name"
+                                pattern="[A-Za-z]{1,20}"
+                                title="First name must contain only letters and be 1-20 characters long"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input
+                                type="text"
+                                id="lastName"
+                                name="lastName"
+                                class="form-input"
+                                placeholder="Last name"
+                                required
+                                autocomplete="family-name"
+                                pattern="[A-Za-z]{1,20}"
+                                title="Last name must contain only letters and be 1-20 characters long"
+                        >
+                    </div>
+                </div>
+
+        </div>
     </div>
 
-    <!-- Success Message -->
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <!-- RIGHT PAGE - Security & Actions -->
+    <div class="book-page right-page">
+        <div class="form-section">
 
-    <!-- Error Message -->
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-    <!-- Registration Form with Password Validation -->
-    <form th:action="@{/register}" method="post" id="registerForm">
-
-        <div class="form-group">
-            <label for="emailAddress" class="form-label">Email Address</label>
-            <input
-                    type="email"
-                    id="emailAddress"
-                    name="emailAddress"
-                    class="form-input"
-                    placeholder="Enter your email address"
-                    required
-                    autocomplete="email"
-                    inputmode="email"
-            >
-        </div>
-
-        <div class="form-group">
-            <label for="phoneNumber" class="form-label">Phone Number</label>
-            <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    class="form-input"
-                    placeholder="Enter your phone number"
-                    required
-                    autocomplete="tel"
-                    inputmode="numeric"
-                    maxlength="10"
-                    pattern="[0-9]{10}"
-                    title="Please enter exactly 10 digits"
-            >
-        </div>
-
-        <!-- First Name and Last Name in one row -->
-        <div class="form-row">
+            <!-- Password field with validation -->
             <div class="form-group">
-                <label for="firstName" class="form-label">First Name</label>
-                <input
-                        type="text"
-                        id="firstName"
-                        name="firstName"
-                        class="form-input"
-                        placeholder="First name"
-                        required
-                        autocomplete="given-name"
-                        pattern="[A-Za-z]{1,20}"
-                        title="First name must contain only letters and be 1-20 characters long"
-                >
+                <label for="password" class="form-label">Password</label>
+                <div class="password-field-container">
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input password-input"
+                            placeholder="Create a secure password"
+                            autocomplete="new-password"
+                            required
+                            minlength="8"
+                            maxlength="16"
+                    >
+                    <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+                        SHOW
+                    </button>
+                </div>
+
+                <!-- Always visible password validation feedback -->
+                <div class="password-validation-feedback" id="passwordValidation" style="display: block;">
+                    <div class="validation-requirement" data-rule="length">
+                        <span class="req-icon">✗</span>
+                        <span>8-16 characters</span>
+                    </div>
+                    <div class="validation-requirement" data-rule="letter">
+                        <span class="req-icon">✗</span>
+                        <span>One letter (a-z, A-Z)</span>
+                    </div>
+                    <div class="validation-requirement" data-rule="number">
+                        <span class="req-icon">✗</span>
+                        <span>One number (0-9)</span>
+                    </div>
+                    <div class="validation-requirement" data-rule="special">
+                        <span class="req-icon">✗</span>
+                        <span>One special (@$!%*?&)</span>
+                    </div>
+                </div>
+
+                <div class="field-help">
+                    Password must be 8-16 characters with at least one letter, one number, and one special character (@$!%*?&)
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input
-                        type="text"
-                        id="lastName"
-                        name="lastName"
-                        class="form-input"
-                        placeholder="Last name"
-                        required
-                        autocomplete="family-name"
-                        pattern="[A-Za-z]{1,20}"
-                        title="Last name must contain only letters and be 1-20 characters long"
-                >
-            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="auth-button" id="registerBtn">
+                Create Account
+            </button>
+
+            </form>
         </div>
 
-        <!-- Enhanced Password field with validation -->
-        <div class="form-group">
-            <label for="password" class="form-label">Password</label>
-            <div class="password-field-container">
-                <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input password-input"
-                        placeholder="Create a secure password"
-                        autocomplete="new-password"
-                        required
-                        minlength="8"
-                        maxlength="16"
-                >
-                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
-                    SHOW
-                </button>
-            </div>
-
-            <!-- Password validation feedback will be inserted here by JavaScript -->
-
-            <div class="field-help">
-                Password must be 8-16 characters with at least one letter, one number, and one special character (@$!%*?&)
-            </div>
+        <!-- Navigation -->
+        <div class="auth-link">
+            <p>Already have an account?</p>
+            <a th:href="@{/login}">Sign in here</a>
         </div>
-
-        <button type="submit" class="auth-button" id="registerBtn">
-            Create Account
-        </button>
-    </form>
-
-    <!-- Navigation using fragment -->
-    <div th:replace="~{fragments/auth/auth-navigation :: navigation('Already have an account?', 'Sign in here', @{/login})}"></div>
+    </div>
 </div>
 
 <script th:src="@{/js/auth-scripts.js}"></script>

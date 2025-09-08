@@ -1,4 +1,23 @@
 /**
+ * Authentication Pages - JavaScript
+ * Clean and minimal - only essential functionality
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize core functionality
+    initFormLoadingStates();
+    initMobileFocus();
+    initPasswordToggle();
+
+    // Initialize page-specific functionality
+    if (document.getElementById('phoneNumber')) {
+        // Register page only
+        initPhoneRestriction();
+        initPasswordValidation();
+    }
+});
+
+/**
  * Password Toggle Functionality
  * Shows/hides password text for both login and register forms
  */
@@ -15,30 +34,6 @@ function initPasswordToggle() {
         });
     }
 }
-
-/**
- * Authentication Pages - JavaScript
- * Handles login and register page functionality
- * ENHANCED: Added comprehensive password validation
- */
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize functionality
-    initFormLoadingStates();
-    initMobileFocus();
-
-    // Initialize page-specific functionality
-    if (document.getElementById('phoneNumber')) {
-        initPhoneRestriction(); // Register page only
-        initPasswordValidation(); // Register page only
-        initPasswordToggle(); // Register page only
-    }
-
-    // Initialize password toggle for login page too
-    if (document.getElementById('loginForm')) {
-        initPasswordToggle(); // Login page
-    }
-});
 
 /**
  * Form Loading States
@@ -105,8 +100,8 @@ function initPhoneRestriction() {
 }
 
 /**
- * PASSWORD VALIDATION SYSTEM
- * Comprehensive real-time password validation with visual feedback
+ * Password Validation System
+ * Always visible validation feedback on register page
  */
 function initPasswordValidation() {
     const passwordInput = document.getElementById('password');
@@ -114,65 +109,59 @@ function initPasswordValidation() {
 
     if (!passwordInput) return;
 
-    // Create validation feedback container
-    createPasswordValidationFeedback(passwordContainer);
+    // Ensure validation feedback exists and is always visible
+    ensurePasswordValidationExists(passwordContainer);
 
     // Add real-time validation
     passwordInput.addEventListener('input', function() {
         validatePasswordRealTime(this.value);
     });
-
-    // Add focus/blur handlers
-    passwordInput.addEventListener('focus', function() {
-        showPasswordValidation();
-    });
-
-    passwordInput.addEventListener('blur', function() {
-        // Only hide if password is valid or empty
-        if (this.value === '' || validatePasswordRequirements()) {
-            hidePasswordValidation();
-        }
-    });
 }
 
 /**
- * Create password validation feedback UI
+ * Ensure password validation feedback exists
  */
-function createPasswordValidationFeedback(container) {
-    const existingFeedback = container.querySelector('.password-validation-feedback');
-    if (existingFeedback) return;
+function ensurePasswordValidationExists(container) {
+    let validationContainer = document.getElementById('passwordValidation');
 
-    const validationHTML = `
-        <div class="password-validation-feedback" id="passwordValidation">
-            <div class="validation-requirement" data-rule="length">
-                <span class="req-icon">✗</span>
-                <span>8-16 characters long</span>
+    if (!validationContainer) {
+        const validationHTML = `
+            <div class="password-validation-feedback" id="passwordValidation" style="display: block !important;">
+                <div class="validation-requirement" data-rule="length">
+                    <span class="req-icon">✗</span>
+                    <span>8-16 characters</span>
+                </div>
+                <div class="validation-requirement" data-rule="letter">
+                    <span class="req-icon">✗</span>
+                    <span>One letter (a-z, A-Z)</span>
+                </div>
+                <div class="validation-requirement" data-rule="number">
+                    <span class="req-icon">✗</span>
+                    <span>One number (0-9)</span>
+                </div>
+                <div class="validation-requirement" data-rule="special">
+                    <span class="req-icon">✗</span>
+                    <span>One special (@$!%*?&)</span>
+                </div>
             </div>
-            <div class="validation-requirement" data-rule="letter">
-                <span class="req-icon">✗</span>
-                <span>At least one letter (a-z, A-Z)</span>
-            </div>
-            <div class="validation-requirement" data-rule="number">
-                <span class="req-icon">✗</span>
-                <span>At least one number (0-9)</span>
-            </div>
-            <div class="validation-requirement" data-rule="special">
-                <span class="req-icon">✗</span>
-                <span>At least one special character (@$!%*?&)</span>
-            </div>
-        </div>
-    `;
+        `;
 
-    // Insert after the password field container
-    const passwordFieldContainer = container.querySelector('.password-field-container') || container.querySelector('.form-input');
-    passwordFieldContainer.insertAdjacentHTML('afterend', validationHTML);
+        const passwordFieldContainer = container.querySelector('.password-field-container') || container.querySelector('.form-input');
+        passwordFieldContainer.insertAdjacentHTML('afterend', validationHTML);
+
+        validationContainer = document.getElementById('passwordValidation');
+    }
+
+    // Ensure it's always visible on register page
+    validationContainer.style.display = 'block';
 }
 
 /**
- * Real-time password validation
+ * Real-time password validation - only updates validation feedback
  */
 function validatePasswordRealTime(password) {
     const validationContainer = document.getElementById('passwordValidation');
+
     if (!validationContainer) return;
 
     const rules = {
@@ -198,49 +187,8 @@ function validatePasswordRealTime(password) {
         }
     });
 
-    // Update password input styling
-    const passwordInput = document.getElementById('password');
     const allPassed = Object.values(rules).every(passed => passed);
-
-    if (password.length === 0) {
-        // Empty password - neutral state
-        passwordInput.classList.remove('error', 'valid');
-    } else if (allPassed) {
-        // Valid password
-        passwordInput.classList.remove('error');
-        passwordInput.classList.add('valid');
-    } else {
-        // Invalid password
-        passwordInput.classList.remove('valid');
-        passwordInput.classList.add('error');
-    }
-
     return allPassed;
-}
-
-/**
- * Show password validation feedback
- */
-function showPasswordValidation() {
-    const validationContainer = document.getElementById('passwordValidation');
-    if (validationContainer) {
-        validationContainer.style.display = 'block';
-        // Trigger validation for current password
-        const passwordInput = document.getElementById('password');
-        if (passwordInput.value) {
-            validatePasswordRealTime(passwordInput.value);
-        }
-    }
-}
-
-/**
- * Hide password validation feedback
- */
-function hidePasswordValidation() {
-    const validationContainer = document.getElementById('passwordValidation');
-    if (validationContainer) {
-        validationContainer.style.display = 'none';
-    }
 }
 
 /**
@@ -248,11 +196,9 @@ function hidePasswordValidation() {
  */
 function validatePasswordRequirements() {
     const passwordInput = document.getElementById('password');
-    if (!passwordInput) return true; // Not on register page
+    if (!passwordInput) return true;
 
     const password = passwordInput.value;
-
-    // Check all requirements
     const isValid = password.length >= 8 &&
         password.length <= 16 &&
         /[a-zA-Z]/.test(password) &&
@@ -260,17 +206,12 @@ function validatePasswordRequirements() {
         /[@$!%*?&]/.test(password);
 
     if (!isValid) {
-        // Show validation feedback and scroll to password field
-        showPasswordValidation();
         validatePasswordRealTime(password);
         passwordInput.focus();
-
-        // Show error message
         showPasswordError('Please ensure your password meets all requirements.');
         return false;
     }
 
-    // Clear any error messages
     clearPasswordError();
     return true;
 }

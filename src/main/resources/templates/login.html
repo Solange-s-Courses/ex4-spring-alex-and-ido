@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/auth/auth-head :: head('Login')}"></head>
 <body>
-<div class="auth-container">
+<div class="auth-container login-container">
   <div class="auth-header">
     <h1 class="auth-title">Welcome Back</h1>
     <p class="auth-subtitle">Sign in to your account</p>
@@ -14,13 +14,13 @@
   <!-- Display logout success message -->
   <div th:if="${param.logout}" class="alert alert-success">You have been logged out successfully</div>
 
-  <!-- NEW: Display registration success message -->
+  <!-- Display registration success message -->
   <div th:if="${param.registered}" class="alert alert-success">Registration successful! You can now log in with your credentials.</div>
 
-  <!-- NEW: Display any flash attribute success messages -->
+  <!-- Display any flash attribute success messages -->
   <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-  <!-- STEP 3: Updated form for Spring Security -->
+  <!-- Login Form -->
   <form th:action="@{/login}" method="post" id="loginForm">
     <div class="form-group">
       <label for="username" class="form-label">Email Address</label>
@@ -36,18 +36,22 @@
       >
     </div>
 
-    <!-- Password field using fragment -->
     <div class="form-group">
       <label for="password" class="form-label">Password</label>
-      <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-input"
-              placeholder="Enter your password"
-              required
-              autocomplete="current-password"
-      >
+      <div class="password-field-container">
+        <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-input password-input"
+                placeholder="Enter your password"
+                required
+                autocomplete="current-password"
+        >
+        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+          SHOW
+        </button>
+      </div>
     </div>
 
     <button type="submit" class="auth-button" id="loginBtn">
@@ -55,8 +59,11 @@
     </button>
   </form>
 
-  <!-- Navigation using fragment -->
-  <div th:replace="~{fragments/auth/auth-navigation :: navigation('Do not have an account?', 'Create new account', @{/register})}"></div>
+  <!-- Navigation -->
+  <div class="auth-link">
+    <p>Do not have an account?</p>
+    <a th:href="@{/register}">Create new account</a>
+  </div>
 </div>
 
 <script th:src="@{/js/auth-scripts.js}"></script>
