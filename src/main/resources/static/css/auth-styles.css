@@ -245,6 +245,7 @@ body::before {
 
 .auth-button:hover {
     transform: translateY(-2px);
+    background: linear-gradient(135deg, #004c5e 0%, #0e7490 100%);
     box-shadow: 0 10px 25px rgba(8, 145, 178, 0.4);
 }
 
@@ -530,13 +531,6 @@ body::before {
 
 /* Desktop Specific */
 @media (min-width: 769px) {
-    .auth-container:hover {
-        transform: translateY(-2px);
-        box-shadow:
-                0 30px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.15);
-    }
-
     .form-input:hover {
         border-color: #cbd5e0;
         background-color: #fafafa;
