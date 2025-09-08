@@ -33,7 +33,6 @@ Before setting up the database, ensure you have:
    - Select the `ex4.sql` file from the `database/` folder
    - Leave all other settings as default
    - Scroll down and click **"Import"** button
-   - Wait for the import process to complete (should take a few seconds)
 
 3. **Verify Database Creation**
    - After successful import, you should see a success message
