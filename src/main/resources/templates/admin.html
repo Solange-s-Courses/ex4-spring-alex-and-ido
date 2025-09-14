@@ -100,21 +100,26 @@
 
             <!-- User Table -->
             <div class="user-table-container">
-              <div id="userTableLoading" class="loading-message">Loading users...</div>
+              <div id="userTableLoading" class="loading-message">
+                <div class="loading-spinner"></div>
+                Loading users...
+              </div>
               <div id="userTableEmpty" class="empty-message" style="display: none;">No users found</div>
-              <table id="userTable" class="user-table" style="display: none;">
-                <thead>
-                <tr>
-                  <th>Full Name</th>
-                  <th>Phone</th>
-                  <th>Current Role</th>
-                  <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="userTableBody">
-                <!-- Users will be populated by JavaScript -->
-                </tbody>
-              </table>
+              <div id="userTableWrapper" class="table-scroll-wrapper" style="display: none;">
+                <table id="userTable" class="user-table">
+                  <thead class="table-header-fixed">
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Current Role</th>
+                    <th>Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody id="userTableBody">
+                  <!-- Users will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

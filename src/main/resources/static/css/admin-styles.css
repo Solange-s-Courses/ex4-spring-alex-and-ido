@@ -517,25 +517,133 @@ h1 {
     border-color: #007bff;
 }
 
-/* Table Container */
+/* Table Container - Updated for Scrolling */
 .user-table-container {
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     min-height: 200px;
+    max-height: 400px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Loading and Empty States */
-.loading-message, .empty-message {
+/* Scrollable Table Wrapper */
+.table-scroll-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+/* Table Header - Fixed */
+.table-header-fixed {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Custom Scrollbar Styling */
+.table-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Firefox Scrollbar */
+.table-scroll-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* Enhanced Empty State */
+.empty-message {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #6c757d;
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border: 2px solid #e9ecef;
+}
+
+.empty-icon::before {
+    content: "👥";
+    font-size: 28px;
+    opacity: 0.6;
+}
+
+.empty-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Loading State Enhancement */
+.loading-message {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 200px;
     color: #6c757d;
     font-size: 1rem;
     font-weight: 500;
+    background: white;
+    border-radius: 8px;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* User Table */
@@ -546,12 +654,12 @@ h1 {
 }
 
 .user-table th {
-    background: #f8f9fa;
     color: #495057;
     font-weight: 600;
     padding: 1rem 0.75rem;
     text-align: left;
-    border-bottom: 2px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+    background: inherit;
 }
 
 .user-table td {

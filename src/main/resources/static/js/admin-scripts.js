@@ -211,25 +211,25 @@ async function loadUserManagementData() {
     }
 }
 
-// Render user table
+// Render user table - Updated for scrollable wrapper
 function renderUserTable() {
     const loadingElement = document.getElementById('userTableLoading');
     const emptyElement = document.getElementById('userTableEmpty');
-    const tableElement = document.getElementById('userTable');
+    const tableWrapperElement = document.getElementById('userTableWrapper');
     const tbody = document.getElementById('userTableBody');
 
     // Hide loading
     loadingElement.style.display = 'none';
 
     if (filteredUsers.length === 0) {
-        tableElement.style.display = 'none';
+        tableWrapperElement.style.display = 'none';
         emptyElement.style.display = 'block';
         return;
     }
 
-    // Show table and populate
+    // Show table wrapper and populate
     emptyElement.style.display = 'none';
-    tableElement.style.display = 'table';
+    tableWrapperElement.style.display = 'block';
 
     tbody.innerHTML = filteredUsers.map(user => `
         <tr data-user-id="${user.userId}">
@@ -248,16 +248,22 @@ function renderUserTable() {
     `).join('');
 }
 
-// Show error in user table
+// Show error in user table - Enhanced empty state
 function showUserTableError(message) {
     const loadingElement = document.getElementById('userTableLoading');
-    const tableElement = document.getElementById('userTable');
+    const tableWrapperElement = document.getElementById('userTableWrapper');
     const emptyElement = document.getElementById('userTableEmpty');
 
     loadingElement.style.display = 'none';
-    tableElement.style.display = 'none';
+    tableWrapperElement.style.display = 'none';
     emptyElement.style.display = 'block';
-    emptyElement.textContent = message;
+
+    // Create enhanced empty state content
+    emptyElement.innerHTML = `
+        <div class="empty-icon"></div>
+        <h4 class="empty-title">No Users Found</h4>
+        <p class="empty-subtitle">${message === 'No users found' ? 'Try adjusting your search or filter criteria' : message}</p>
+    `;
 }
 
 // Promote user to chief
