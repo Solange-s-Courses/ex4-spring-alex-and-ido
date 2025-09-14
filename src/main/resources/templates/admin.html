@@ -41,8 +41,9 @@
 
       <!-- Tab Contents -->
       <div class="tab-content-wrapper">
-        <!-- Tab 1 Content -->
+        <!-- Tab 1 Content - Users Metrics + User Management -->
         <div id="tab1" class="tab-content active">
+          <!-- User Distribution Metrics -->
           <div class="metric-card">
             <div class="metric-card-header">
               <h3>User Distribution</h3>
@@ -73,6 +74,47 @@
                   <span class="total-count" id="totalUserCount">0</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- User Management Section -->
+          <div class="user-management-card">
+            <div class="user-management-header">
+              <h3>User Role Management</h3>
+              <p>Manage chief role assignments</p>
+            </div>
+
+            <!-- Search and Filter Controls -->
+            <div class="user-controls">
+              <div class="search-container">
+                <input type="text" id="userSearch" placeholder="Search by name or phone..." class="search-input">
+              </div>
+              <div class="filter-container">
+                <select id="roleFilter" class="filter-select">
+                  <option value="all">All Users</option>
+                  <option value="chief">Chiefs Only</option>
+                  <option value="non-chief">Non-Chiefs</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- User Table -->
+            <div class="user-table-container">
+              <div id="userTableLoading" class="loading-message">Loading users...</div>
+              <div id="userTableEmpty" class="empty-message" style="display: none;">No users found</div>
+              <table id="userTable" class="user-table" style="display: none;">
+                <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Phone</th>
+                  <th>Current Role</th>
+                  <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="userTableBody">
+                <!-- Users will be populated by JavaScript -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

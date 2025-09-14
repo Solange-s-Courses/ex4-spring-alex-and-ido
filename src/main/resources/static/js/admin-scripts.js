@@ -185,3 +185,219 @@ function switchTab(tabId) {
 
     setTimeout(() => createChartForActiveTab(tabId), 100);
 }
+
+// User Management Variables
+let allUsers = [];
+let filteredUsers = [];
+
+// Load user management data
+async function loadUserManagementData() {
+    try {
+        const response = await fetch('/admin/user-management');
+        const data = await response.json();
+
+        if (data.error) {
+            showUserTableError(data.error);
+            return;
+        }
+
+        allUsers = data.users || [];
+        filteredUsers = [...allUsers];
+        renderUserTable();
+
+    } catch (error) {
+        console.error('Error loading user management data:', error);
+        showUserTableError('Failed to load users');
+    }
+}
+
+// Render user table
+function renderUserTable() {
+    const loadingElement = document.getElementById('userTableLoading');
+    const emptyElement = document.getElementById('userTableEmpty');
+    const tableElement = document.getElementById('userTable');
+    const tbody = document.getElementById('userTableBody');
+
+    // Hide loading
+    loadingElement.style.display = 'none';
+
+    if (filteredUsers.length === 0) {
+        tableElement.style.display = 'none';
+        emptyElement.style.display = 'block';
+        return;
+    }
+
+    // Show table and populate
+    emptyElement.style.display = 'none';
+    tableElement.style.display = 'table';
+
+    tbody.innerHTML = filteredUsers.map(user => `
+        <tr data-user-id="${user.userId}">
+            <td class="user-name">${user.fullName}</td>
+            <td class="user-phone">${user.phone}</td>
+            <td class="user-role">
+                <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
+            </td>
+            <td class="user-actions">
+                ${user.isChief
+        ? `<button class="btn-demote" onclick="demoteUser(${user.userId})">Remove Chief</button>`
+        : `<button class="btn-promote" onclick="promoteUser(${user.userId})">Make Chief</button>`
+    }
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Show error in user table
+function showUserTableError(message) {
+    const loadingElement = document.getElementById('userTableLoading');
+    const tableElement = document.getElementById('userTable');
+    const emptyElement = document.getElementById('userTableEmpty');
+
+    loadingElement.style.display = 'none';
+    tableElement.style.display = 'none';
+    emptyElement.style.display = 'block';
+    emptyElement.textContent = message;
+}
+
+// Promote user to chief
+async function promoteUser(userId) {
+    if (!confirm('Are you sure you want to promote this user to Chief?')) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('userId', userId);
+
+        const response = await fetch('/admin/promote-chief', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast(result.message, 'success');
+            await loadUserManagementData(); // Refresh table
+            await loadAllMetricsData(); // Refresh metrics charts
+        } else {
+            showToast(result.message, 'error');
+        }
+
+    } catch (error) {
+        console.error('Error promoting user:', error);
+        showToast('Failed to promote user', 'error');
+    }
+}
+
+// Demote chief to user
+async function demoteUser(userId) {
+    try {
+        // Check if this is the last chief
+        const checkResponse = await fetch(`/admin/check-last-chief?userId=${userId}`);
+        const checkResult = await checkResponse.json();
+
+        let confirmMessage = 'Are you sure you want to remove Chief role from this user?';
+        if (checkResult.isLastChief) {
+            confirmMessage = 'WARNING: This is the last Chief in the system! Are you sure you want to remove their Chief role? The system will have no Chiefs after this action.';
+        }
+
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        // Proceed with demotion
+        const formData = new FormData();
+        formData.append('userId', userId);
+
+        const response = await fetch('/admin/demote-chief', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            let message = result.message;
+            if (result.wasLastChief) {
+                message += ' (System now has no Chiefs)';
+            }
+            showToast(message, 'success');
+            await loadUserManagementData(); // Refresh table
+            await loadAllMetricsData(); // Refresh metrics charts
+        } else {
+            showToast(result.message, 'error');
+        }
+
+    } catch (error) {
+        console.error('Error demoting chief:', error);
+        showToast('Failed to demote chief', 'error');
+    }
+}
+
+// Search and filter functionality
+function setupUserManagementControls() {
+    const searchInput = document.getElementById('userSearch');
+    const roleFilter = document.getElementById('roleFilter');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterUsers);
+    }
+
+    if (roleFilter) {
+        roleFilter.addEventListener('change', filterUsers);
+    }
+}
+
+// Filter users based on search and role filter
+function filterUsers() {
+    const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+    const roleFilter = document.getElementById('roleFilter').value;
+
+    filteredUsers = allUsers.filter(user => {
+        // Search filter
+        const matchesSearch = searchTerm === '' ||
+            user.fullName.toLowerCase().includes(searchTerm) ||
+            user.phone.includes(searchTerm);
+
+        // Role filter
+        let matchesRole = true;
+        if (roleFilter === 'chief') {
+            matchesRole = user.isChief;
+        } else if (roleFilter === 'non-chief') {
+            matchesRole = !user.isChief;
+        }
+
+        return matchesSearch && matchesRole;
+    });
+
+    renderUserTable();
+}
+
+// Simple toast notification (fallback if toast.js not available)
+function showToast(message, type) {
+    if (typeof window.toast !== 'undefined') {
+        if (type === 'success') {
+            window.toast.success(message);
+        } else {
+            window.toast.error(message);
+        }
+    } else {
+        alert(message); // Fallback
+    }
+}
+
+// Update the existing switchTab function to handle user management
+const originalSwitchTab = switchTab;
+switchTab = function(tabId) {
+    originalSwitchTab(tabId);
+
+    // Load user management data when tab 1 is activated
+    if (tabId === 'tab1') {
+        setTimeout(() => {
+            loadUserManagementData();
+            setupUserManagementControls();
+        }, 200); // Small delay to ensure chart loads first
+    }
+};

@@ -563,4 +563,122 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
 
         return null; // User has no responsibility
     }
+
+    /**
+     * Get all non-admin users for user management (admin functionality)
+     */
+    public List<User> getAllUsersForManagement() {
+        return userRepository.findAllNonAdminUsers();
+    }
+
+    /**
+     * Promote user to chief role
+     */
+    @Transactional
+    public String promoteToChief(Long userId) {
+        try {
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (!userOptional.isPresent()) {
+                return "User not found";
+            }
+
+            User user = userOptional.get();
+
+            // Prevent promoting admin users
+            if ("admin".equals(user.getRoleName())) {
+                return "Cannot modify admin users";
+            }
+
+            // Check if user is already chief
+            if ("chief".equals(user.getRoleName())) {
+                return "User is already a chief";
+            }
+
+            // If user is currently a manager, remove them from responsibility
+            if ("manager".equals(user.getRoleName())) {
+                String removeResult = removeUserFromResponsibility(userId);
+                if (!removeResult.equals("success")) {
+                    return "Failed to remove user from responsibility: " + removeResult;
+                }
+            }
+
+            // Get chief role
+            Optional<Role> chiefRole = roleService.findByName("chief");
+            if (!chiefRole.isPresent()) {
+                return "Chief role not found in system";
+            }
+
+            // Update user role to chief
+            user.setRole(chiefRole.get());
+            userRepository.save(user);
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to promote user to chief: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Demote chief to regular user role
+     */
+    @Transactional
+    public String demoteChief(Long userId) {
+        try {
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (!userOptional.isPresent()) {
+                return "User not found";
+            }
+
+            User user = userOptional.get();
+
+            // Prevent modifying admin users
+            if ("admin".equals(user.getRoleName())) {
+                return "Cannot modify admin users";
+            }
+
+            // Check if user is actually a chief
+            if (!"chief".equals(user.getRoleName())) {
+                return "User is not a chief";
+            }
+
+            // Get user role
+            Optional<Role> userRole = roleService.findByName("user");
+            if (!userRole.isPresent()) {
+                return "User role not found in system";
+            }
+
+            // Update user role to regular user
+            user.setRole(userRole.get());
+            userRepository.save(user);
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to demote chief: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Check if this is the last chief in the system
+     */
+    public boolean isLastChief(Long userId) {
+        try {
+            // Count total chiefs
+            List<User> allUsers = getAllNonAdminUsers();
+            long chiefCount = allUsers.stream()
+                    .filter(u -> "chief".equals(u.getRoleName()))
+                    .count();
+
+            // If there's only 1 chief and this user is that chief, then it's the last one
+            if (chiefCount == 1) {
+                Optional<User> userOptional = userRepository.findById(userId);
+                return userOptional.isPresent() && "chief".equals(userOptional.get().getRoleName());
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -108,5 +110,104 @@ public class AdminController {
     @FunctionalInterface
     private interface MetricsSupplier {
         Map<String, Object> get() throws Exception;
+    }
+
+    @GetMapping("/user-management")
+    @ResponseBody
+    public Map<String, Object> getUserManagementData() {
+        try {
+            List<User> users = userService.getAllUsersForManagement();
+
+            List<Map<String, Object>> userList = users.stream()
+                    .map(user -> {
+                        Map<String, Object> userMap = new HashMap<>();
+                        userMap.put("userId", user.getUserId());
+                        userMap.put("fullName", capitalizeNames(user.getFirstName(), user.getLastName()));
+                        userMap.put("phone", user.getPhoneNumber());
+                        userMap.put("role", capitalizeFirst(user.getRoleName()));
+                        userMap.put("isChief", "chief".equals(user.getRoleName()));
+                        return userMap;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", userList);
+            response.put("totalUsers", users.size());
+            return response;
+
+        } catch (Exception e) {
+            return Map.of("users", List.of(), "totalUsers", 0, "error", "Failed to load users");
+        }
+    }
+
+    @PostMapping("/promote-chief")
+    @ResponseBody
+    public Map<String, Object> promoteToChief(@RequestParam Long userId) {
+        try {
+            String result = userService.promoteToChief(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            if ("success".equals(result)) {
+                response.put("success", true);
+                response.put("message", "User promoted to Chief successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", result);
+            }
+            return response;
+
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to promote user: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/demote-chief")
+    @ResponseBody
+    public Map<String, Object> demoteChief(@RequestParam Long userId) {
+        try {
+            // Check if this is the last chief
+            boolean isLastChief = userService.isLastChief(userId);
+
+            String result = userService.demoteChief(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            if ("success".equals(result)) {
+                response.put("success", true);
+                response.put("message", "Chief demoted successfully");
+                response.put("wasLastChief", isLastChief);
+            } else {
+                response.put("success", false);
+                response.put("message", result);
+                response.put("wasLastChief", false);
+            }
+            return response;
+
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to demote chief: " + e.getMessage(), "wasLastChief", false);
+        }
+    }
+
+    @GetMapping("/check-last-chief")
+    @ResponseBody
+    public Map<String, Object> checkLastChief(@RequestParam Long userId) {
+        try {
+            boolean isLastChief = userService.isLastChief(userId);
+            return Map.of("isLastChief", isLastChief);
+        } catch (Exception e) {
+            return Map.of("isLastChief", false, "error", "Failed to check chief status");
+        }
+    }
+
+    // Helper method to capitalize names for display
+    private String capitalizeNames(String firstName, String lastName) {
+        return capitalizeFirst(firstName) + " " + capitalizeFirst(lastName);
+    }
+
+    // Helper method to capitalize first letter
+    private String capitalizeFirst(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
     }
 }

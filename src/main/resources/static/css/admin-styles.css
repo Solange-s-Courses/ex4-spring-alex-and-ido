@@ -437,3 +437,282 @@ h1 {
         min-width: 100px;
     }
 }
+
+/* User Management Styles */
+
+.user-management-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 1000px;
+    margin: 2rem auto 0 auto;
+}
+
+.user-management-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.user-management-header h3 {
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.user-management-header p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Controls Section */
+.user-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.filter-container {
+    flex-shrink: 0;
+}
+
+.filter-select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Table Container */
+.user-table-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 200px;
+    position: relative;
+}
+
+/* Loading and Empty States */
+.loading-message, .empty-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* User Table */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.user-table th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.user-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.user-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Table Cell Styles */
+.user-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.user-phone {
+    color: #6c757d;
+    font-family: monospace;
+}
+
+.user-role {
+    text-align: center;
+}
+
+/* Role Badges */
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-chief {
+    background-color: #007bff;
+    color: white;
+}
+
+.role-manager {
+    background-color: #28a745;
+    color: white;
+}
+
+.role-user {
+    background-color: #fd7e14;
+    color: white;
+}
+
+/* Action Buttons */
+.user-actions {
+    text-align: center;
+}
+
+.btn-promote, .btn-demote {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-promote {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-promote:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-demote {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-demote:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design for User Management */
+@media (max-width: 768px) {
+    .user-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-container {
+        min-width: auto;
+        max-width: none;
+    }
+
+    .user-table {
+        font-size: 0.8rem;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 0.5rem 0.4rem;
+    }
+
+    .user-phone {
+        font-size: 0.75rem;
+    }
+
+    .role-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .btn-promote, .btn-demote {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .user-table thead {
+        display: none;
+    }
+
+    .user-table tbody tr {
+        display: block;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: white;
+    }
+
+    .user-table td {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .user-table td:last-child {
+        border-bottom: none;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .user-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #495057;
+    }
+
+    /* Add data labels for mobile */
+    .user-name::before { content: "Name: "; }
+    .user-phone::before { content: "Phone: "; }
+    .user-role::before { content: "Role: "; }
+    .user-actions::before { content: ""; }
+}
