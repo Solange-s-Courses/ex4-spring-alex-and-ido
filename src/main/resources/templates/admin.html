@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administrator Page</title>
+  <title>Administrator Dashboard</title>
 </head>
 
 <body>
@@ -18,26 +18,147 @@
 
 <div class="container">
   <h1>Admin Dashboard</h1>
-  <p class="text-muted">Manage users and system settings</p>
+  <p class="subtitle">System Administration & Management</p>
 
   <!-- Alert Messages -->
-  <div th:replace="~{fragments/common/alerts :: alerts}"></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-  <!-- User List Section -->
-  <div th:replace="~{fragments/admin/user-list :: userList}"></div>
+  <!-- Admin Content Area - Tabbed Section -->
+  <div class="admin-content">
+    <div class="tabs-section">
+      <div class="tabs-header">
+        <h2>Admin Controls</h2>
+        <p class="tabs-subtitle">Management and configuration options</p>
+      </div>
 
-  <!-- Critical Actions -->
-  <div th:replace="~{fragments/admin/critical-actions :: criticalActions}"></div>
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button class="tab-button active" data-tab="tab1" onclick="switchTab('tab1')">Users</button>
+        <button class="tab-button" data-tab="tab2" onclick="switchTab('tab2')">Items</button>
+        <button class="tab-button" data-tab="tab3" onclick="switchTab('tab3')">Events</button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="tab-content-wrapper">
+        <!-- Tab 1 Content -->
+        <div id="tab1" class="tab-content active">
+          <div class="metric-card">
+            <div class="metric-card-header">
+              <h3>User Distribution</h3>
+              <p>Users by role</p>
+            </div>
+            <div class="chart-container">
+              <div class="chart-wrapper">
+                <canvas id="userRoleChart"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color chief-color"></span>
+                  <span class="legend-label">Chief</span>
+                  <span class="legend-count" id="chiefCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color manager-color"></span>
+                  <span class="legend-label">Manager</span>
+                  <span class="legend-count" id="managerCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color user-color"></span>
+                  <span class="legend-label">User</span>
+                  <span class="legend-count" id="userCount">0</span>
+                </div>
+                <div class="legend-total">
+                  <span class="total-label">Total Users:</span>
+                  <span class="total-count" id="totalUserCount">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2 Content -->
+        <div id="tab2" class="tab-content">
+          <div class="metric-card">
+            <div class="metric-card-header">
+              <h3>Item Status</h3>
+              <p>Items by availability status</p>
+            </div>
+            <div class="chart-container">
+              <div class="chart-wrapper">
+                <canvas id="itemStatusChart"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color available-color"></span>
+                  <span class="legend-label">Available</span>
+                  <span class="legend-count" id="availableCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color inuse-color"></span>
+                  <span class="legend-label">In Use</span>
+                  <span class="legend-count" id="inUseCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color unavailable-color"></span>
+                  <span class="legend-label">Unavailable</span>
+                  <span class="legend-count" id="unavailableCount">0</span>
+                </div>
+                <div class="legend-total">
+                  <span class="total-label">Total Items:</span>
+                  <span class="total-count" id="totalItemCount">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3 Content -->
+        <div id="tab3" class="tab-content">
+          <div class="metric-card">
+            <div class="metric-card-header">
+              <h3>Event Status</h3>
+              <p>Events by current status</p>
+            </div>
+            <div class="chart-container">
+              <div class="chart-wrapper">
+                <canvas id="eventStatusChart"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color not-active-color"></span>
+                  <span class="legend-label">Not Active</span>
+                  <span class="legend-count" id="notActiveCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color active-color"></span>
+                  <span class="legend-label">Active</span>
+                  <span class="legend-count" id="activeCount">0</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color equipment-return-color"></span>
+                  <span class="legend-label">Equipment Return</span>
+                  <span class="legend-count" id="equipmentReturnCount">0</span>
+                </div>
+                <div class="legend-total">
+                  <span class="total-label">Total Events:</span>
+                  <span class="total-count" id="totalEventCount">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- All Modals -->
-<div th:replace="~{fragments/admin/modals :: allModals}"></div>
+<!-- Chart.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-<!-- Scripts -->
-<div th:replace="~{fragments/layout :: scripts}"></div>
-
-<!-- Include Navbar Scripts -->
+<!-- Include Scripts -->
 <script th:src="@{/js/navbar-scripts.js}"></script>
+<script th:src="@{/js/admin-scripts.js}"></script>
 
 </body>
 </html>

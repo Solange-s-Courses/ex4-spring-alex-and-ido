@@ -1,166 +1,112 @@
 package com.project.application.controller;
 
 import com.project.application.controller.helper.SecurityHelper;
-import com.project.application.entity.Role;
 import com.project.application.entity.User;
-import com.project.application.service.RoleService;
+import com.project.application.entity.Event;
 import com.project.application.service.UserService;
+import com.project.application.service.ItemService;
+import com.project.application.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-/**
- * Controller handling admin-specific operations
- * STEP 4: Updated to use Spring Security with @PreAuthorize annotations
- */
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')") // STEP 4: Secure entire controller for admin role
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    private final UserService userService;
-    private final RoleService roleService;
     private final SecurityHelper securityHelper;
+    private final UserService userService;
+    private final ItemService itemService;
+    private final EventService eventService;
 
-    // ==========================================
-    // ADMIN USER MANAGEMENT
-    // ==========================================
-
-    /**
-     * Display admin dashboard with user management
-     */
     @GetMapping
     public String adminPage(Model model) {
-        User user = securityHelper.getCurrentUser();
-
-        // Get all non-admin users for the user list
-        List<User> users = userService.getAllNonAdminUsers();
-
-        // Get all roles for the dropdown (excluding admin)
-        List<Role> roles = roleService.getAllRoles().stream()
-                .filter(role -> !"admin".equals(role.getName()))
-                .collect(Collectors.toList());
-
-        model.addAttribute("user", user);
-        model.addAttribute("users", users);
-        model.addAttribute("roles", roles);
+        model.addAttribute("user", securityHelper.getCurrentUser());
         model.addAttribute("activeNavButton", "admin");
-
         return "admin";
     }
 
-    /**
-     * Delete individual user
-     */
-    @PostMapping("/delete-user")
-    public String deleteUser(@RequestParam Long userId,
-                             RedirectAttributes redirectAttributes) {
-
-        User user = securityHelper.getCurrentUser();
-
-        // Prevent admin from deleting themselves
-        if (user.getUserId().equals(userId)) {
-            redirectAttributes.addFlashAttribute("error", "You cannot delete your own account!");
-            return "redirect:/admin";
-        }
-
-        String result = userService.deleteUser(userId);
-
-        if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "User deleted successfully!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", result);
-        }
-
-        return "redirect:/admin";
-    }
-
-    /**
-     * Edit user information and role
-     */
-    @PostMapping("/edit-user")
-    public String editUser(@RequestParam Long userId,
-                           @RequestParam String firstName,
-                           @RequestParam String lastName,
-                           @RequestParam String roleName,
-                           RedirectAttributes redirectAttributes) {
-
-        User user = securityHelper.getCurrentUser();
-
-        // Prevent admin from editing themselves
-        if (user.getUserId().equals(userId)) {
-            redirectAttributes.addFlashAttribute("error", "You cannot edit your own account!");
-            return "redirect:/admin";
-        }
-
-        String result = userService.updateUserByAdmin(userId, firstName, lastName, roleName);
-
-        if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "User updated successfully!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", result);
-        }
-
-        return "redirect:/admin";
-    }
-
-    // ==========================================
-    // BULK OPERATIONS
-    // ==========================================
-
-    /**
-     * Delete all non-admin users (requires password confirmation)
-     */
-    @PostMapping("/delete-all-users")
-    public String deleteAllUsers(@RequestParam String adminPassword,
-                                 RedirectAttributes redirectAttributes) {
-
-        User user = securityHelper.getCurrentUser();
-
-        // Verify admin password
-        if (!userService.verifyAdminPassword(user.getUserId(), adminPassword)) {
-            redirectAttributes.addFlashAttribute("error", "Invalid password! Operation cancelled.");
-            return "redirect:/admin";
-        }
-
-        String result = userService.deleteAllNonAdminUsers();
-
-        if (result.startsWith("success:")) {
-            String countStr = result.substring(8); // Remove "success:" prefix
-            redirectAttributes.addFlashAttribute("success",
-                    "Successfully deleted " + countStr + " users from the database!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", result);
-        }
-
-        return "redirect:/admin";
-    }
-
-    // ==========================================
-    // AJAX ENDPOINTS
-    // ==========================================
-
-    /**
-     * Verify admin password (AJAX endpoint for UI validation)
-     */
-    @PostMapping("/verify-password")
+    @GetMapping("/metrics/user-roles")
     @ResponseBody
-    public String verifyPassword(@RequestParam String adminPassword) {
+    public Map<String, Object> getUserRoleMetrics() {
+        return getMetrics(() -> {
+            List<User> users = userService.getAllNonAdminUsers();
+            Map<String, Integer> counts = new HashMap<>();
+            counts.put("chief", 0);
+            counts.put("manager", 0);
+            counts.put("user", 0);
 
-        User user = securityHelper.getCurrentUser();
+            users.forEach(user -> {
+                String role = user.getRoleName().toLowerCase();
+                counts.computeIfPresent(role, (k, v) -> v + 1);
+            });
 
-        // Verify password using service (handles both BCrypt and legacy passwords)
-        if (userService.verifyAdminPassword(user.getUserId(), adminPassword)) {
-            return "valid";
-        } else {
-            return "invalid";
+            Map<String, Object> response = new HashMap<>();
+            response.put("roleCounts", counts);
+            response.put("totalUsers", users.size());
+            return response;
+        });
+    }
+
+    @GetMapping("/metrics/item-status")
+    @ResponseBody
+    public Map<String, Object> getItemStatusMetrics() {
+        return getMetrics(() -> {
+            Map<String, Integer> counts = itemService.getItemStatusDistribution();
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("statusCounts", counts);
+            response.put("totalItems", total);
+            return response;
+        });
+    }
+
+    @GetMapping("/metrics/event-status")
+    @ResponseBody
+    public Map<String, Object> getEventStatusMetrics() {
+        return getMetrics(() -> {
+            List<Event> events = eventService.getAllEvents();
+            Map<String, Integer> counts = new HashMap<>();
+            counts.put("notActive", 0);
+            counts.put("active", 0);
+            counts.put("equipmentReturn", 0);
+
+            events.forEach(event -> {
+                switch (event.getStatus()) {
+                    case Event.STATUS_NOT_ACTIVE -> counts.put("notActive", counts.get("notActive") + 1);
+                    case Event.STATUS_ACTIVE -> counts.put("active", counts.get("active") + 1);
+                    case Event.STATUS_EQUIPMENT_RETURN -> counts.put("equipmentReturn", counts.get("equipmentReturn") + 1);
+                }
+            });
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("statusCounts", counts);
+            response.put("totalEvents", events.size());
+            return response;
+        });
+    }
+
+    private Map<String, Object> getMetrics(MetricsSupplier supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            return Map.of("roleCounts", Map.of(), "statusCounts", Map.of(), "totalUsers", 0, "totalItems", 0, "totalEvents", 0);
         }
+    }
+
+    @FunctionalInterface
+    private interface MetricsSupplier {
+        Map<String, Object> get() throws Exception;
     }
 }

@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -254,5 +256,49 @@ public class ItemService {
         }
 
         return null; // No requests for this item
+    }
+
+    /**
+     * Get all items in the system (for admin metrics)
+     */
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
+
+    /**
+     * Get item status distribution for admin metrics
+     */
+    public Map<String, Integer> getItemStatusDistribution() {
+        List<Item> allItems = getAllItems();
+
+        Map<String, Integer> statusCounts = new HashMap<>();
+        statusCounts.put("available", 0);
+        statusCounts.put("inUse", 0);
+        statusCounts.put("unavailable", 0);
+
+        for (Item item : allItems) {
+            String itemStatus = determineItemStatus(item);
+            statusCounts.put(itemStatus, statusCounts.get(itemStatus) + 1);
+        }
+
+        return statusCounts;
+    }
+
+    /**
+     * Determine item status based on ownership and status field
+     */
+    private String determineItemStatus(Item item) {
+        // If item is assigned to a user, it's in use
+        if (item.getUser() != null) {
+            return "inUse";
+        }
+
+        // If not assigned to user, check the status field
+        String status = item.getStatus();
+        if (status != null && status.toLowerCase().equals("available")) {
+            return "available";
+        } else {
+            return "unavailable";
+        }
     }
 }
