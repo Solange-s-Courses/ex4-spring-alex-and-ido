@@ -243,6 +243,7 @@ function renderUserTable() {
         ? `<button class="btn-demote" onclick="demoteUser(${user.userId})">Remove Chief</button>`
         : `<button class="btn-promote" onclick="promoteUser(${user.userId})">Make Chief</button>`
     }
+                <button class="btn-delete" onclick="showDeleteUserModal(${user.userId}, '${user.fullName}', '${user.role}')">Delete</button>
             </td>
         </tr>
     `).join('');
@@ -284,16 +285,16 @@ async function promoteUser(userId) {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message, 'success');
+            Toast.success(result.message);
             await loadUserManagementData(); // Refresh table
             await loadAllMetricsData(); // Refresh metrics charts
         } else {
-            showToast(result.message, 'error');
+            Toast.error(result.message);
         }
 
     } catch (error) {
         console.error('Error promoting user:', error);
-        showToast('Failed to promote user', 'error');
+        Toast.error('Failed to promote user');
     }
 }
 
@@ -329,16 +330,16 @@ async function demoteUser(userId) {
             if (result.wasLastChief) {
                 message += ' (System now has no Chiefs)';
             }
-            showToast(message, 'success');
+            Toast.success(result.message);
             await loadUserManagementData(); // Refresh table
             await loadAllMetricsData(); // Refresh metrics charts
         } else {
-            showToast(result.message, 'error');
+            Toast.error(result.message);
         }
 
     } catch (error) {
         console.error('Error demoting chief:', error);
-        showToast('Failed to demote chief', 'error');
+        Toast.error('Failed to demote chief');
     }
 }
 
@@ -381,19 +382,6 @@ function filterUsers() {
     renderUserTable();
 }
 
-// Simple toast notification (fallback if toast.js not available)
-function showToast(message, type) {
-    if (typeof window.toast !== 'undefined') {
-        if (type === 'success') {
-            window.toast.success(message);
-        } else {
-            window.toast.error(message);
-        }
-    } else {
-        alert(message); // Fallback
-    }
-}
-
 // Update the existing switchTab function to handle user management
 const originalSwitchTab = switchTab;
 switchTab = function(tabId) {
@@ -407,3 +395,85 @@ switchTab = function(tabId) {
         }, 200); // Small delay to ensure chart loads first
     }
 };
+
+// Delete User Modal Management
+let userIdToDelete = null;
+
+// Show delete user modal
+function showDeleteUserModal(userId, userName, userRole) {
+    userIdToDelete = userId;
+
+    // Set user details in modal
+    document.getElementById('deleteUserName').textContent = userName;
+    const roleElement = document.getElementById('deleteUserRole');
+    roleElement.textContent = userRole;
+    roleElement.className = `role-badge role-${userRole.toLowerCase()}`;
+
+    // Show modal
+    document.getElementById('deleteUserModal').classList.add('show');
+}
+
+// Hide delete user modal
+function hideDeleteUserModal() {
+    document.getElementById('deleteUserModal').classList.remove('show');
+    userIdToDelete = null;
+}
+
+// Confirm delete user
+async function confirmDeleteUser() {
+    if (!userIdToDelete) {
+        Toast.error('No user selected for deletion');
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('userId', userIdToDelete);
+
+        const response = await fetch('/admin/delete-user', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        // Hide modal first
+        hideDeleteUserModal();
+
+        if (result.success) {
+            Toast.success(result.message);
+            await loadUserManagementData(); // Refresh user table
+            await loadAllMetricsData(); // Refresh metrics charts
+        } else {
+            Toast.error(result.message);
+        }
+
+    } catch (error) {
+        hideDeleteUserModal();
+        console.error('Error deleting user:', error);
+        Toast.error('Failed to delete user');
+    }
+}
+
+// Close modal when clicking outside or pressing ESC
+document.addEventListener('DOMContentLoaded', function() {
+    // Close modal when clicking outside
+    const deleteModal = document.getElementById('deleteUserModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteUserModal();
+            }
+        });
+    }
+
+    // Handle ESC key to close modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const deleteModal = document.getElementById('deleteUserModal');
+            if (deleteModal && deleteModal.classList.contains('show')) {
+                hideDeleteUserModal();
+            }
+        }
+    });
+});

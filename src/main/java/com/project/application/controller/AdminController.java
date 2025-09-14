@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -209,5 +210,43 @@ public class AdminController {
             return str;
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+
+    @PostMapping("/delete-user")
+    @ResponseBody
+    public Map<String, Object> deleteUser(@RequestParam Long userId) {
+        try {
+            // First check if user exists and get their details for validation
+            Optional<User> userOptional = userService.findById(userId);
+            if (userOptional.isEmpty()) {
+                return Map.of("success", false, "message", "User not found");
+            }
+
+            User userToDelete = userOptional.get();
+
+            // Prevent deleting admin users
+            if ("admin".equals(userToDelete.getRoleName())) {
+                return Map.of("success", false, "message", "Cannot delete admin users");
+            }
+
+            // Get username for success message
+            String userName = capitalizeNames(userToDelete.getFirstName(), userToDelete.getLastName());
+
+            // Call the delete service method
+            String result = userService.deleteUser(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            if ("success".equals(result)) {
+                response.put("success", true);
+                response.put("message", "User '" + userName + "' deleted successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", result);
+            }
+            return response;
+
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to delete user: " + e.getMessage());
+        }
     }
 }

@@ -220,6 +220,14 @@ public class ItemService {
     }
 
     /**
+     *
+     * @param item
+     */
+    public void saveItem(Item item) {
+        itemRepository.save(item);
+    }
+
+    /**
      * Get count of items owned by a specific user
      */
     public long countItemsByUserId(Long userId) {

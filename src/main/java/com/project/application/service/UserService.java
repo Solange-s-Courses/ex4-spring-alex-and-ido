@@ -1,13 +1,12 @@
 package com.project.application.service;
 
-import com.project.application.entity.Role;
-import com.project.application.entity.User;
+import com.project.application.entity.*;
+import com.project.application.repository.ItemRepository;
+import com.project.application.repository.RoleRepository;
 import com.project.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import com.project.application.entity.Responsibility;
-import com.project.application.entity.UserResponsibility;
 import com.project.application.repository.UserResponsibilityRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +32,7 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
 
     // Dependency Injections
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
     private final ItemService itemService;
     private final RoleService roleService;
     private final ResponsibilityService responsibilityService;
@@ -215,7 +215,6 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         return userRepository.findAllNonAdminUsers();
     }
 
-    //Delete user by ID (an admin functionality)
     @Transactional
     public String deleteUser(Long userId) {
         try {
@@ -229,7 +228,15 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
                     return "Cannot delete admin users";
                 }
 
-                // Step 1: Handle responsibility assignment if user is a manager
+                // Step 1: Handle items assigned to this user - set user to null and status to Unavailable
+                List<com.project.application.entity.Item> userItems = itemService.getItemsByUserId(userId);
+                for (com.project.application.entity.Item item : userItems) {
+                    item.setUser(null);
+                    item.setStatus("Unavailable");
+                    itemService.saveItem(item); // Assuming you have this method, or use itemRepository.save(item)
+                }
+
+                // Step 2: Handle responsibility assignment if user is a manager
                 Optional<UserResponsibility> userResponsibility =
                         userResponsibilityRepository.findByUserId(userId);
 
@@ -252,7 +259,11 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
                     }
                 }
 
-                // Step 2: Now safely delete the user
+                // Step 3: Delete all requests made by this user
+                // Assuming you have a method to delete requests by user ID
+                // requestService.deleteRequestsByUserId(userId);
+
+                // Step 4: Now safely delete the user
                 userRepository.deleteById(userId);
                 return "success";
 
