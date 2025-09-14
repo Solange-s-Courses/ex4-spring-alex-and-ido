@@ -42,6 +42,11 @@ public interface EventResponsibilityRepository extends JpaRepository<EventRespon
     List<Responsibility> findResponsibilitiesNotAssignedToEvent(@Param("eventId") Long eventId);
 
     /**
+     * Delete responsibility by the responsibility ID
+     */
+    void deleteByResponsibility_ResponsibilityId(Long responsibilityId);
+
+    /**
      * Find all event assignments for a specific responsibility
      */
     @Query("SELECT er FROM EventResponsibility er WHERE er.responsibility.responsibilityId = :responsibilityId")

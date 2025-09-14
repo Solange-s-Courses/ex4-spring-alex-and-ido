@@ -1,16 +1,14 @@
 package com.project.application.service;
 
 import com.project.application.entity.*;
-import com.project.application.repository.ItemRepository;
-import com.project.application.repository.RoleRepository;
 import com.project.application.repository.UserRepository;
+import com.project.application.repository.UserResponsibilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import com.project.application.repository.UserResponsibilityRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-// STEP 2: Add Spring Security imports
+// Spring Security imports
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,25 +21,65 @@ import java.util.Optional;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for comprehensive user management in the logistics system.
+
+ * Handles the complete user lifecycle including:
+ * - User registration and authentication (with Spring Security integration)
+ * - Role-based access control and role transitions
+ * - Responsibility assignment for managers
+ * - Admin user management (promote/demote chiefs, user deletion)
+ * - Profile updates and password management with BCrypt encryption
+ * - Complex cascade deletion with foreign key constraint handling
+
+ * Business Rules:
+ * - Users start with "user" role by default
+ * - Managers are assigned specific responsibilities
+ * - Chiefs can be promoted from any non-admin role
+ * - Admin users are protected from modification/deletion
+ * - Cascade deletion maintains database integrity
+
+ * Security Features:
+ * - BCrypt password encryption with migration support
+ * - Spring Security UserDetailsService implementation
+ * - Role-based authorization support
+ */
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService { // STEP 2: Implement UserDetailsService
+public class UserService implements UserDetailsService {
 
+    // Validation patterns
     private static final String NAME_PATTERN = "^[A-Za-z]{1,20}$";
     private static final String PHONE_PATTERN = "^[0-9]{10}$";
 
-    // Dependency Injections
+    // Role constants
+    private static final String ROLE_ADMIN = "admin";
+    private static final String ROLE_CHIEF = "chief";
+    private static final String ROLE_MANAGER = "manager";
+    private static final String ROLE_USER = "user";
+
+    // BCrypt identifier
+    private static final String BCRYPT_PREFIX = "$2a$";
+
+    // Repository Dependencies
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+    private final UserResponsibilityRepository userResponsibilityRepository;
+
+    // Service Dependencies
     private final ItemService itemService;
     private final RoleService roleService;
     private final ResponsibilityService responsibilityService;
-    private final UserResponsibilityRepository userResponsibilityRepository;
+    private final RequestService requestService;
 
-    // STEP 2: Add PasswordEncoder dependency
+    // Security Dependencies
     private final PasswordEncoder passwordEncoder;
 
-    // STEP 2: Implement UserDetailsService method
+    // ========== SPRING SECURITY INTEGRATION ==========
+
+    /**
+     * Loads user details for Spring Security authentication.
+     * Converts database user to Spring Security UserDetails format.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAddress(username)
@@ -50,47 +88,33 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmailAddress())
                 .password(user.getPassword())
-                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoleName().toUpperCase())))
+                .authorities(Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_" + user.getRoleName().toUpperCase())))
                 .build();
     }
 
-    // Register new user with default "user" role
+    // ========== USER REGISTRATION & AUTHENTICATION ==========
+
+    /**
+     * Registers a new user with default "user" role and encrypted password.
+     * Validates uniqueness of email and phone number.
+     *
+     * @param user User object with registration details
+     * @return "success" if registration successful, error message otherwise
+     */
     public String registerUser(User user) {
-
-        // Trim and convert names to lowercase for storage
-        if (user.getFirstName() != null) {
-            user.setFirstName(user.getFirstName().trim().toLowerCase());
-        }
-        if (user.getLastName() != null) {
-            user.setLastName(user.getLastName().trim().toLowerCase());
-        }
-        if (user.getEmailAddress() != null) {
-            user.setEmailAddress(user.getEmailAddress().trim().toLowerCase());
-        }
-        if (user.getPhoneNumber() != null) {
-            user.setPhoneNumber(user.getPhoneNumber().trim());
-        }
-
-        // Check for existing email
-        if (userRepository.findByEmailAddress(user.getEmailAddress()).isPresent()) {
-            return "Email address already exists!";
-        }
-
-        // Check for existing phone number
-        if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) {
-            return "Phone number already exists!";
-        }
-
         try {
-            // Get default "user" role
-            Role defaultRole = roleService.getDefaultUserRole();
+            // Normalize user input
+            normalizeUserInput(user);
 
-            // Set role and timestamp
-            user.setRole(defaultRole);
-            user.setDateOfIssue(LocalDateTime.now());
+            // Validate uniqueness
+            String uniquenessValidation = validateUserUniqueness(user);
+            if (!uniquenessValidation.equals("success")) {
+                return uniquenessValidation;
+            }
 
-            // STEP 2: Encode password for new users
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            // Set up new user
+            setupNewUser(user);
 
             userRepository.save(user);
             return "success";
@@ -102,7 +126,14 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    // STEP 2: Enhanced login method with password migration
+    /**
+     * Authenticates user login with BCrypt support and legacy password migration.
+     * Automatically migrates plain text passwords to BCrypt on successful login.
+     *
+     * @param email User's email address
+     * @param password User's plain text password
+     * @return User object if authentication successful, null otherwise
+     */
     public User loginUser(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmailAddress(email);
 
@@ -110,18 +141,15 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
             User user = userOptional.get();
             String storedPassword = user.getPassword();
 
-            // Check if password is already BCrypt encoded (starts with $2a$)
-            if (storedPassword.startsWith("$2a$")) {
-                // Use BCrypt verification
+            if (isBCryptEncoded(storedPassword)) {
+                // Use BCrypt verification for encrypted passwords
                 if (passwordEncoder.matches(password, storedPassword)) {
                     return user;
                 }
             } else {
-                // Legacy plain text password - verify and migrate
+                // Legacy plain text password - verify and migrate to BCrypt
                 if (password.equals(storedPassword)) {
-                    // Migrate to BCrypt
-                    user.setPassword(passwordEncoder.encode(password));
-                    userRepository.save(user);
+                    migratePasswordToBCrypt(user, password);
                     return user;
                 }
             }
@@ -129,35 +157,44 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         return null;
     }
 
-    // Find user by email
-    public Optional<User> findByEmailAddress(String emailAddress) {
-        return userRepository.findByEmailAddress(emailAddress);
+    /**
+     * Verifies admin password with BCrypt support and legacy compatibility.
+     */
+    public boolean verifyAdminPassword(Long adminId, String password) {
+        try {
+            Optional<User> adminOptional = userRepository.findById(adminId);
+            if (adminOptional.isPresent()) {
+                User admin = adminOptional.get();
+                String storedPassword = admin.getPassword();
+
+                if (isBCryptEncoded(storedPassword)) {
+                    return passwordEncoder.matches(password, storedPassword);
+                } else {
+                    return password.equals(storedPassword);
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    // Find user by phone
-    public Optional<User> findByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber);
-    }
+    // ========== USER PROFILE MANAGEMENT ==========
 
-    // Update username - matches your current logic
+    /**
+     * Updates user's first and last name with validation.
+     */
     public String updateUserName(User loggedInUser, String firstName, String lastName) {
         try {
-            // Trim and convert names to lowercase
-            firstName = firstName.trim().toLowerCase();
-            lastName = lastName.trim().toLowerCase();
-
-            // Validate names (only letters, max 20 characters)
-            if (!firstName.matches(NAME_PATTERN)) {
-                return "First name must contain only letters and be 1-20 characters long.";
+            // Validate and normalize names
+            String validationResult = validateAndNormalizeNames(firstName, lastName);
+            if (!validationResult.equals("success")) {
+                return validationResult;
             }
 
-            if (!lastName.matches(NAME_PATTERN)) {
-                return "Last name must contain only letters and be 1-20 characters long.";
-            }
-
-            // Update user in database
-            loggedInUser.setFirstName(firstName);
-            loggedInUser.setLastName(lastName);
+            // Update user
+            loggedInUser.setFirstName(firstName.trim().toLowerCase());
+            loggedInUser.setLastName(lastName.trim().toLowerCase());
             userRepository.save(loggedInUser);
             return "success";
 
@@ -166,24 +203,23 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    // Update user phone - matches your current logic
+    /**
+     * Updates user's phone number with validation and uniqueness check.
+     */
     public String updateUserPhone(User loggedInUser, String phoneNumber) {
         try {
-            // Trim phone number
             phoneNumber = phoneNumber.trim();
 
-            // Validate phone number (exactly 10 digits)
+            // Validate phone format
             if (!phoneNumber.matches(PHONE_PATTERN)) {
                 return "Phone number must be exactly 10 digits.";
             }
 
-            // Check if phone number already exists (excluding current user)
-            Optional<User> existingUser = userRepository.findByPhoneNumber(phoneNumber);
-            if (existingUser.isPresent() && !existingUser.get().getUserId().equals(loggedInUser.getUserId())) {
+            // Check uniqueness (excluding current user)
+            if (isPhoneNumberTaken(phoneNumber, loggedInUser.getUserId())) {
                 return "Phone number already exists!";
             }
 
-            // Update user in database
             loggedInUser.setPhoneNumber(phoneNumber);
             userRepository.save(loggedInUser);
             return "success";
@@ -193,7 +229,11 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    // NEW: Method to change user role (for future admin functionality)
+    // ========== ROLE MANAGEMENT ==========
+
+    /**
+     * Changes user role (generic method for admin functionality).
+     */
     public String changeUserRole(Long userId, String roleName) {
         try {
             Optional<User> userOptional = userRepository.findById(userId);
@@ -211,118 +251,212 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    public List<User> getAllNonAdminUsers() {
-        return userRepository.findAllNonAdminUsers();
+    /**
+     * Promotes any non-admin user to chief role.
+     * Automatically removes manager responsibilities if applicable.
+     */
+    @Transactional
+    public String promoteToChief(Long userId) {
+        try {
+            User user = getUserOrFail(userId);
+            if (user == null) return "User not found";
+
+            // Validation checks
+            if (ROLE_ADMIN.equals(user.getRoleName())) {
+                return "Cannot modify admin users";
+            }
+            if (ROLE_CHIEF.equals(user.getRoleName())) {
+                return "User is already a chief";
+            }
+
+            // Remove manager responsibilities before promotion
+            if (ROLE_MANAGER.equals(user.getRoleName())) {
+                String removeResult = removeUserFromResponsibility(userId);
+                if (!removeResult.equals("success")) {
+                    return "Failed to remove user from responsibility: " + removeResult;
+                }
+            }
+
+            // Promote to chief
+            return assignRoleToUser(user, ROLE_CHIEF);
+
+        } catch (Exception e) {
+            return "Failed to promote user to chief: " + e.getMessage();
+        }
     }
 
+    /**
+     * Demotes chief to regular user role.
+     */
+    @Transactional
+    public String demoteChief(Long userId) {
+        try {
+            User user = getUserOrFail(userId);
+            if (user == null) return "User not found";
+
+            // Validation checks
+            if (ROLE_ADMIN.equals(user.getRoleName())) {
+                return "Cannot modify admin users";
+            }
+            if (!ROLE_CHIEF.equals(user.getRoleName())) {
+                return "User is not a chief";
+            }
+
+            // Demote to regular user
+            return assignRoleToUser(user, ROLE_USER);
+
+        } catch (Exception e) {
+            return "Failed to demote chief: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Checks if the specified user is the last chief in the system.
+     */
+    public boolean isLastChief(Long userId) {
+        try {
+            long chiefCount = getAllNonAdminUsers().stream()
+                    .filter(u -> ROLE_CHIEF.equals(u.getRoleName()))
+                    .count();
+
+            if (chiefCount == 1) {
+                Optional<User> userOptional = userRepository.findById(userId);
+                return userOptional.isPresent() && ROLE_CHIEF.equals(userOptional.get().getRoleName());
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ========== RESPONSIBILITY MANAGEMENT ==========
+
+    /**
+     * Assigns a responsibility to a user and promotes them to manager role.
+     */
+    @Transactional
+    public String assignResponsibility(Long userId, String responsibilityName) {
+        try {
+            // Validate input
+            if (responsibilityName == null || responsibilityName.trim().isEmpty()) {
+                return "Responsibility name cannot be empty";
+            }
+
+            User user = getUserOrFail(userId);
+            if (user == null) return "User not found";
+
+            // Check if user already has responsibility
+            if (userResponsibilityRepository.existsByUser_UserId(userId)) {
+                return "User already has a responsibility assigned";
+            }
+
+            // Get or create responsibility
+            Responsibility responsibility = getOrCreateResponsibility(responsibilityName.trim());
+
+            // Create assignment and promote user
+            createResponsibilityAssignment(user, responsibility);
+            assignRoleToUser(user, ROLE_MANAGER);
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to assign responsibility: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Removes user from their responsibility and demotes to user role if needed.
+     */
+    @Transactional
+    public String removeUserFromResponsibility(Long userId) {
+        try {
+            Optional<UserResponsibility> userResponsibilityOptional =
+                    userResponsibilityRepository.findByUserId(userId);
+
+            if (userResponsibilityOptional.isEmpty()) {
+                return "User has no responsibility assigned";
+            }
+
+            Long responsibilityId = userResponsibilityOptional.get()
+                    .getResponsibility().getResponsibilityId();
+
+            // Remove user assignment
+            userResponsibilityRepository.deleteByUser_UserId(userId);
+
+            // Handle responsibility cleanup if no managers remain
+            handleResponsibilityCleanup(responsibilityId);
+
+            // Demote manager to user (if applicable)
+            demoteManagerToUser(userId);
+
+            return "success";
+
+        } catch (Exception e) {
+            return "Failed to remove responsibility: " + e.getMessage();
+        }
+    }
+
+    // ========== USER DELETION & ADMIN OPERATIONS ==========
+
+    /**
+     * Deletes a user with complete cascade cleanup of all related data.
+     * Handles foreign key constraints by deleting in proper order:
+     * 1. User's owned items → set to "Unavailable"
+     * 2. User's requests → deleted
+     * 3. Responsibility assignments → removed/cleaned up
+     * 4. User → deleted
+     */
     @Transactional
     public String deleteUser(Long userId) {
         try {
-            Optional<User> userOptional = userRepository.findById(userId);
+            User userToDelete = getUserOrFail(userId);
+            if (userToDelete == null) return "User not found";
 
-            if (userOptional.isPresent()) {
-                User userToDelete = userOptional.get();
-
-                // Safety check: prevent deleting admin users
-                if ("admin".equals(userToDelete.getRole().getName())) {
-                    return "Cannot delete admin users";
-                }
-
-                // Step 1: Handle items assigned to this user - set user to null and status to Unavailable
-                List<com.project.application.entity.Item> userItems = itemService.getItemsByUserId(userId);
-                for (com.project.application.entity.Item item : userItems) {
-                    item.setUser(null);
-                    item.setStatus("Unavailable");
-                    itemService.saveItem(item); // Assuming you have this method, or use itemRepository.save(item)
-                }
-
-                // Step 2: Handle responsibility assignment if user is a manager
-                Optional<UserResponsibility> userResponsibility =
-                        userResponsibilityRepository.findByUserId(userId);
-
-                if (userResponsibility.isPresent()) {
-                    Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
-
-                    // Remove user's responsibility assignment
-                    userResponsibilityRepository.deleteByUser_UserId(userId);
-
-                    // Check if responsibility has any remaining managers
-                    long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
-
-                    // If no managers left, delete the responsibility and its items
-                    if (remainingManagers == 0) {
-                        // Delete all items for this responsibility first
-                        itemService.deleteAllItemsByResponsibilityId(responsibilityId);
-
-                        // Then delete the responsibility
-                        responsibilityService.deleteResponsibility(responsibilityId);
-                    }
-                }
-
-                // Step 3: Delete all requests made by this user
-                // Assuming you have a method to delete requests by user ID
-                // requestService.deleteRequestsByUserId(userId);
-
-                // Step 4: Now safely delete the user
-                userRepository.deleteById(userId);
-                return "success";
-
-            } else {
-                return "User not found";
+            // Safety check: prevent deleting admin users
+            if (ROLE_ADMIN.equals(userToDelete.getRole().getName())) {
+                return "Cannot delete admin users";
             }
+
+            // Step 1: Handle user's owned items
+            handleUserItemsOnDeletion(userId);
+
+            // Step 2: Handle responsibility assignments
+            handleUserResponsibilityOnDeletion(userId);
+
+            // Step 3: Clean up user's requests
+            requestService.deleteRequestsByUserId(userId);
+
+            // Step 4: Delete the user
+            userRepository.deleteById(userId);
+            return "success";
+
         } catch (Exception e) {
             return "Failed to delete user: " + e.getMessage();
         }
     }
 
-    // Update user name and role (an admin functionality)
+    /**
+     * Updates user information by admin (names and role).
+     */
     public String updateUserByAdmin(Long userId, String firstName, String lastName, String roleName) {
         try {
-            // Find the user
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (!userOptional.isPresent()) {
-                return "User not found";
-            }
+            User user = getUserOrFail(userId);
+            if (user == null) return "User not found";
 
-            User user = userOptional.get();
-
-            // Validate and update names if provided
+            // Update names if provided
             if (firstName != null && lastName != null) {
-                // Trim and convert names to lowercase
-                firstName = firstName.trim().toLowerCase();
-                lastName = lastName.trim().toLowerCase();
-
-                // Validate names (only letters, max 20 characters)
-                if (!firstName.matches(NAME_PATTERN)) {
-                    return "First name must contain only letters and be 1-20 characters long.";
+                String nameValidation = validateAndUpdateUserNames(user, firstName, lastName);
+                if (!nameValidation.equals("success")) {
+                    return nameValidation;
                 }
-
-                if (!lastName.matches(NAME_PATTERN)) {
-                    return "Last name must contain only letters and be 1-20 characters long.";
-                }
-
-                user.setFirstName(firstName);
-                user.setLastName(lastName);
             }
 
             // Update role if provided
             if (roleName != null && !roleName.trim().isEmpty()) {
-                Optional<Role> roleOptional = roleService.findByName(roleName);
-                if (!roleOptional.isPresent()) {
-                    return "Role not found";
+                String roleValidation = validateAndUpdateUserRole(user, roleName);
+                if (!roleValidation.equals("success")) {
+                    return roleValidation;
                 }
-
-                // Prevent changing admin role
-                if ("admin".equals(user.getRole().getName())) {
-                    return "Cannot modify admin users";
-                }
-
-                // Prevent setting admin role
-                if ("admin".equals(roleName)) {
-                    return "Cannot assign admin role";
-                }
-
-                user.setRole(roleOptional.get());
             }
 
             userRepository.save(user);
@@ -333,7 +467,9 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    // Delete all non-admin users (critical admin functionality)
+    /**
+     * Deletes all non-admin users (critical admin functionality).
+     */
     @Transactional
     public String deleteAllNonAdminUsers() {
         try {
@@ -345,32 +481,11 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
 
             int deletedCount = nonAdminUsers.size();
 
-            // Step 1: Remove all responsibility assignments for users being deleted
-            for (User user : nonAdminUsers) {
-                // Check if user has any responsibility
-                Optional<UserResponsibility> userResponsibility =
-                        userResponsibilityRepository.findByUserId(user.getUserId());
+            // Clean up all responsibility assignments first
+            cleanupAllResponsibilityAssignments(nonAdminUsers);
 
-                if (userResponsibility.isPresent()) {
-                    Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
-
-                    // Remove user's assignment
-                    userResponsibilityRepository.deleteByUser_UserId(user.getUserId());
-
-                    // Check if responsibility has any remaining managers
-                    long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
-
-                    // If no managers left, delete the responsibility
-                    if (remainingManagers == 0) {
-                        responsibilityService.deleteResponsibility(responsibilityId);
-                    }
-                }
-            }
-
-            // Step 2: Now safely delete all non-admin users
-            for (User user : nonAdminUsers) {
-                userRepository.delete(user);
-            }
+            // Delete all users
+            nonAdminUsers.forEach(userRepository::delete);
 
             return "success:" + deletedCount;
 
@@ -379,317 +494,310 @@ public class UserService implements UserDetailsService { // STEP 2: Implement Us
         }
     }
 
-    // STEP 2: Enhanced admin password verification with BCrypt support
-    public boolean verifyAdminPassword(Long adminId, String password) {
-        try {
-            Optional<User> adminOptional = userRepository.findById(adminId);
-            if (adminOptional.isPresent()) {
-                User admin = adminOptional.get();
-                String storedPassword = admin.getPassword();
-
-                // Check if password is BCrypt encoded
-                if (storedPassword.startsWith("$2a$")) {
-                    return passwordEncoder.matches(password, storedPassword);
-                } else {
-                    // Legacy plain text comparison
-                    return password.equals(storedPassword);
-                }
-            }
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    // Get user by ID
-    public Optional<User> findById(Long userId) {
-        return userRepository.findById(userId);
-    }
+    // ========== QUERY METHODS ==========
 
     /**
-     * Assign responsibility to a user and automatically make them manager
+     * Gets all non-admin users for management purposes.
      */
-    @Transactional
-    public String assignResponsibility(Long userId, String responsibilityName) {
-        try {
-            // Validate responsibility name
-            if (responsibilityName == null || responsibilityName.trim().isEmpty()) {
-                return "Responsibility name cannot be empty";
-            }
-
-            responsibilityName = responsibilityName.trim();
-
-            // Find the user
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (!userOptional.isPresent()) {
-                return "User not found";
-            }
-
-            User user = userOptional.get();
-
-            // Check if user already has a responsibility
-            if (userResponsibilityRepository.existsByUser_UserId(userId)) {
-                return "User already has a responsibility assigned";
-            }
-
-            // Get or create responsibility
-            Responsibility responsibility;
-            Optional<Responsibility> existingResponsibility = responsibilityService.findByName(responsibilityName);
-
-            if (existingResponsibility.isPresent()) {
-                responsibility = existingResponsibility.get();
-            } else {
-                responsibility = responsibilityService.createResponsibility(responsibilityName);
-            }
-
-            // Create user-responsibility assignment
-            UserResponsibility userResponsibility = new UserResponsibility(user, responsibility);
-            userResponsibilityRepository.save(userResponsibility);
-
-            // Change user role to manager
-            Optional<Role> managerRole = roleService.findByName("manager");
-            if (managerRole.isPresent()) {
-                user.setRole(managerRole.get());
-                userRepository.save(user);
-            } else {
-                return "Manager role not found in system";
-            }
-
-            return "success";
-
-        } catch (Exception e) {
-            return "Failed to assign responsibility: " + e.getMessage();
-        }
+    public List<User> getAllNonAdminUsers() {
+        return userRepository.findAllNonAdminUsers();
     }
 
     /**
-     * Remove user from their responsibility and demote to user role if needed
-     */
-    @Transactional
-    public String removeUserFromResponsibility(Long userId) {
-        try {
-            // Find user's current responsibility assignment
-            Optional<UserResponsibility> userResponsibilityOptional =
-                    userResponsibilityRepository.findByUserId(userId);
-
-            if (!userResponsibilityOptional.isPresent()) {
-                return "User has no responsibility assigned";
-            }
-
-            UserResponsibility userResponsibility = userResponsibilityOptional.get();
-            Long responsibilityId = userResponsibility.getResponsibility().getResponsibilityId();
-
-            // Remove user assignment
-            userResponsibilityRepository.deleteByUser_UserId(userId);
-
-            // Check if responsibility has any remaining managers
-            long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
-
-            // If no managers left, delete the responsibility and its items
-            if (remainingManagers == 0) {
-                // Delete all items for this responsibility first
-                itemService.deleteAllItemsByResponsibilityId(responsibilityId);
-
-                // Then delete the responsibility
-                responsibilityService.deleteResponsibility(responsibilityId);
-            }
-
-            // Demote user to "user" role (unless they're chief or admin)
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                String currentRole = user.getRoleName();
-
-                // Only demote if they're currently a manager
-                if ("manager".equals(currentRole)) {
-                    Optional<Role> userRole = roleService.findByName("user");
-                    if (userRole.isPresent()) {
-                        user.setRole(userRole.get());
-                        userRepository.save(user);
-                    }
-                }
-            }
-
-            return "success";
-
-        } catch (Exception e) {
-            return "Failed to remove responsibility: " + e.getMessage();
-        }
-    }
-
-    /**
-     * Get user's current responsibility name (for display purposes)
-     */
-    public String getUserResponsibilityName(Long userId) {
-        Optional<UserResponsibility> userResponsibilityOptional =
-                userResponsibilityRepository.findByUserId(userId);
-
-        if (userResponsibilityOptional.isPresent()) {
-            return userResponsibilityOptional.get().getResponsibility().getResponsibilityName();
-        }
-
-        return null; // User has no responsibility
-    }
-
-    /**
-     * Get all managers for a specific responsibility
-     */
-    public List<User> getResponsibilityManagers(Long responsibilityId) {
-        List<UserResponsibility> assignments =
-                userResponsibilityRepository.findByResponsibilityId(responsibilityId);
-
-        return assignments.stream()
-                .map(UserResponsibility::getUser)
-                .collect(java.util.stream.Collectors.toList());
-    }
-
-    /**
-     * Get managers and users with their responsibility information populated
-     */
-    public List<User> getManagersAndUsersWithResponsibilities() {
-        // Get only managers and users (exclude admins and chiefs)
-        List<User> users = getAllNonAdminUsers().stream()
-                .filter(u -> "manager".equals(u.getRole().getName()) || "user".equals(u.getRole().getName()))
-                .collect(Collectors.toList());
-
-        // Populate responsibility names for each user
-        for (User user : users) {
-            String responsibilityName = getUserResponsibilityName(user.getUserId());
-            user.setResponsibilityName(responsibilityName);
-        }
-
-        return users;
-    }
-
-    /**
-     * Get user's current responsibility ID (for URL generation)
-     */
-    public Long getUserResponsibilityId(Long userId) {
-        Optional<UserResponsibility> userResponsibilityOptional =
-                userResponsibilityRepository.findByUserId(userId);
-
-        if (userResponsibilityOptional.isPresent()) {
-            return userResponsibilityOptional.get().getResponsibility().getResponsibilityId();
-        }
-
-        return null; // User has no responsibility
-    }
-
-    /**
-     * Get all non-admin users for user management (admin functionality)
+     * Gets all users for admin user management interface.
      */
     public List<User> getAllUsersForManagement() {
         return userRepository.findAllNonAdminUsers();
     }
 
     /**
-     * Promote user to chief role
+     * Gets managers and users with responsibility information populated.
      */
-    @Transactional
-    public String promoteToChief(Long userId) {
-        try {
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (!userOptional.isPresent()) {
-                return "User not found";
-            }
+    public List<User> getManagersAndUsersWithResponsibilities() {
+        List<User> users = getAllNonAdminUsers().stream()
+                .filter(u -> ROLE_MANAGER.equals(u.getRole().getName()) ||
+                        ROLE_USER.equals(u.getRole().getName()))
+                .collect(Collectors.toList());
 
+        // Populate responsibility names
+        users.forEach(user -> {
+            String responsibilityName = getUserResponsibilityName(user.getUserId());
+            user.setResponsibilityName(responsibilityName);
+        });
+
+        return users;
+    }
+
+    /**
+     * Gets all managers for a specific responsibility.
+     */
+    public List<User> getResponsibilityManagers(Long responsibilityId) {
+        return userResponsibilityRepository.findByResponsibilityId(responsibilityId)
+                .stream()
+                .map(UserResponsibility::getUser)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets user's current responsibility name.
+     */
+    public String getUserResponsibilityName(Long userId) {
+        return userResponsibilityRepository.findByUserId(userId)
+                .map(ur -> ur.getResponsibility().getResponsibilityName())
+                .orElse(null);
+    }
+
+    /**
+     * Gets user's current responsibility ID.
+     */
+    public Long getUserResponsibilityId(Long userId) {
+        return userResponsibilityRepository.findByUserId(userId)
+                .map(ur -> ur.getResponsibility().getResponsibilityId())
+                .orElse(null);
+    }
+
+    // ========== FINDER METHODS ==========
+
+    public Optional<User> findByEmailAddress(String emailAddress) {
+        return userRepository.findByEmailAddress(emailAddress);
+    }
+
+    public Optional<User> findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    // ========== PRIVATE HELPER METHODS ==========
+
+    /**
+     * Normalizes user input by trimming and converting to lowercase where appropriate.
+     */
+    private void normalizeUserInput(User user) {
+        if (user.getFirstName() != null) {
+            user.setFirstName(user.getFirstName().trim().toLowerCase());
+        }
+        if (user.getLastName() != null) {
+            user.setLastName(user.getLastName().trim().toLowerCase());
+        }
+        if (user.getEmailAddress() != null) {
+            user.setEmailAddress(user.getEmailAddress().trim().toLowerCase());
+        }
+        if (user.getPhoneNumber() != null) {
+            user.setPhoneNumber(user.getPhoneNumber().trim());
+        }
+    }
+
+    /**
+     * Validates that email and phone are unique in the system.
+     */
+    private String validateUserUniqueness(User user) {
+        if (userRepository.findByEmailAddress(user.getEmailAddress()).isPresent()) {
+            return "Email address already exists!";
+        }
+        if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) {
+            return "Phone number already exists!";
+        }
+        return "success";
+    }
+
+    /**
+     * Sets up a new user with default role, timestamp, and encrypted password.
+     */
+    private void setupNewUser(User user) {
+        Role defaultRole = roleService.getDefaultUserRole();
+        user.setRole(defaultRole);
+        user.setDateOfIssue(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
+
+    /**
+     * Validates and normalizes first and last names.
+     */
+    private String validateAndNormalizeNames(String firstName, String lastName) {
+        firstName = firstName.trim().toLowerCase();
+        lastName = lastName.trim().toLowerCase();
+
+        if (!firstName.matches(NAME_PATTERN)) {
+            return "First name must contain only letters and be 1-20 characters long.";
+        }
+        if (!lastName.matches(NAME_PATTERN)) {
+            return "Last name must contain only letters and be 1-20 characters long.";
+        }
+        return "success";
+    }
+
+    /**
+     * Checks if a phone number is already taken by another user.
+     */
+    private boolean isPhoneNumberTaken(String phoneNumber, Long excludeUserId) {
+        Optional<User> existingUser = userRepository.findByPhoneNumber(phoneNumber);
+        return existingUser.isPresent() && !existingUser.get().getUserId().equals(excludeUserId);
+    }
+
+    /**
+     * Checks if password is BCrypt encoded.
+     */
+    private boolean isBCryptEncoded(String password) {
+        return password.startsWith(BCRYPT_PREFIX);
+    }
+
+    /**
+     * Migrates legacy plain text password to BCrypt.
+     */
+    private void migratePasswordToBCrypt(User user, String plainTextPassword) {
+        user.setPassword(passwordEncoder.encode(plainTextPassword));
+        userRepository.save(user);
+    }
+
+    /**
+     * Helper to get user by ID with null handling.
+     */
+    private User getUserOrFail(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    /**
+     * Assigns a role to a user with error handling.
+     */
+    private String assignRoleToUser(User user, String roleName) {
+        Optional<Role> roleOptional = roleService.findByName(roleName);
+        if (roleOptional.isEmpty()) {
+            return roleName + " role not found in system";
+        }
+
+        user.setRole(roleOptional.get());
+        userRepository.save(user);
+        return "success";
+    }
+
+    /**
+     * Gets or creates a responsibility by name.
+     */
+    private Responsibility getOrCreateResponsibility(String responsibilityName) {
+        return responsibilityService.findByName(responsibilityName)
+                .orElseGet(() -> responsibilityService.createResponsibility(responsibilityName));
+    }
+
+    /**
+     * Creates user-responsibility assignment.
+     */
+    private void createResponsibilityAssignment(User user, Responsibility responsibility) {
+        UserResponsibility userResponsibility = new UserResponsibility(user, responsibility);
+        userResponsibilityRepository.save(userResponsibility);
+    }
+
+    /**
+     * Handles responsibility cleanup when no managers remain.
+     */
+    private void handleResponsibilityCleanup(Long responsibilityId) {
+        long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+        if (remainingManagers == 0) {
+            itemService.deleteAllItemsByResponsibilityId(responsibilityId);
+            responsibilityService.deleteResponsibility(responsibilityId);
+        }
+    }
+
+    /**
+     * Demotes manager to user role if appropriate.
+     */
+    private void demoteManagerToUser(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
-
-            // Prevent promoting admin users
-            if ("admin".equals(user.getRoleName())) {
-                return "Cannot modify admin users";
+            if (ROLE_MANAGER.equals(user.getRoleName())) {
+                assignRoleToUser(user, ROLE_USER);
             }
+        }
+    }
 
-            // Check if user is already chief
-            if ("chief".equals(user.getRoleName())) {
-                return "User is already a chief";
+    /**
+     * Handles user's owned items when user is deleted.
+     */
+    private void handleUserItemsOnDeletion(Long userId) {
+        List<Item> userItems = itemService.getItemsByUserId(userId);
+        userItems.forEach(item -> {
+            item.setUser(null);
+            item.setStatus("Unavailable");
+            itemService.saveItem(item);
+        });
+    }
+
+    /**
+     * Handles user's responsibility assignments when user is deleted.
+     */
+    private void handleUserResponsibilityOnDeletion(Long userId) {
+        Optional<UserResponsibility> userResponsibility =
+                userResponsibilityRepository.findByUserId(userId);
+
+        if (userResponsibility.isPresent()) {
+            Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
+
+            userResponsibilityRepository.deleteByUser_UserId(userId);
+
+            long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+            if (remainingManagers == 0) {
+                // Delete requests first to avoid foreign key constraints
+                requestService.deleteRequestsByResponsibilityId(responsibilityId);
+                itemService.deleteAllItemsByResponsibilityId(responsibilityId);
+                responsibilityService.deleteResponsibility(responsibilityId);
             }
+        }
+    }
 
-            // If user is currently a manager, remove them from responsibility
-            if ("manager".equals(user.getRoleName())) {
-                String removeResult = removeUserFromResponsibility(userId);
-                if (!removeResult.equals("success")) {
-                    return "Failed to remove user from responsibility: " + removeResult;
+    /**
+     * Validates and updates usernames for admin operations.
+     */
+    private String validateAndUpdateUserNames(User user, String firstName, String lastName) {
+        String validation = validateAndNormalizeNames(firstName, lastName);
+        if (!validation.equals("success")) {
+            return validation;
+        }
+
+        user.setFirstName(firstName.trim().toLowerCase());
+        user.setLastName(lastName.trim().toLowerCase());
+        return "success";
+    }
+
+    /**
+     * Validates and updates user role for admin operations.
+     */
+    private String validateAndUpdateUserRole(User user, String roleName) {
+        Optional<Role> roleOptional = roleService.findByName(roleName);
+        if (roleOptional.isEmpty()) {
+            return "Role not found";
+        }
+
+        if (ROLE_ADMIN.equals(user.getRole().getName())) {
+            return "Cannot modify admin users";
+        }
+        if (ROLE_ADMIN.equals(roleName)) {
+            return "Cannot assign admin role";
+        }
+
+        user.setRole(roleOptional.get());
+        return "success";
+    }
+
+    /**
+     * Cleans up all responsibility assignments for multiple users.
+     */
+    private void cleanupAllResponsibilityAssignments(List<User> users) {
+        for (User user : users) {
+            Optional<UserResponsibility> userResponsibility =
+                    userResponsibilityRepository.findByUserId(user.getUserId());
+
+            if (userResponsibility.isPresent()) {
+                Long responsibilityId = userResponsibility.get().getResponsibility().getResponsibilityId();
+                userResponsibilityRepository.deleteByUser_UserId(user.getUserId());
+
+                long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
+                if (remainingManagers == 0) {
+                    responsibilityService.deleteResponsibility(responsibilityId);
                 }
             }
-
-            // Get chief role
-            Optional<Role> chiefRole = roleService.findByName("chief");
-            if (!chiefRole.isPresent()) {
-                return "Chief role not found in system";
-            }
-
-            // Update user role to chief
-            user.setRole(chiefRole.get());
-            userRepository.save(user);
-
-            return "success";
-
-        } catch (Exception e) {
-            return "Failed to promote user to chief: " + e.getMessage();
-        }
-    }
-
-    /**
-     * Demote chief to regular user role
-     */
-    @Transactional
-    public String demoteChief(Long userId) {
-        try {
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (!userOptional.isPresent()) {
-                return "User not found";
-            }
-
-            User user = userOptional.get();
-
-            // Prevent modifying admin users
-            if ("admin".equals(user.getRoleName())) {
-                return "Cannot modify admin users";
-            }
-
-            // Check if user is actually a chief
-            if (!"chief".equals(user.getRoleName())) {
-                return "User is not a chief";
-            }
-
-            // Get user role
-            Optional<Role> userRole = roleService.findByName("user");
-            if (!userRole.isPresent()) {
-                return "User role not found in system";
-            }
-
-            // Update user role to regular user
-            user.setRole(userRole.get());
-            userRepository.save(user);
-
-            return "success";
-
-        } catch (Exception e) {
-            return "Failed to demote chief: " + e.getMessage();
-        }
-    }
-
-    /**
-     * Check if this is the last chief in the system
-     */
-    public boolean isLastChief(Long userId) {
-        try {
-            // Count total chiefs
-            List<User> allUsers = getAllNonAdminUsers();
-            long chiefCount = allUsers.stream()
-                    .filter(u -> "chief".equals(u.getRoleName()))
-                    .count();
-
-            // If there's only 1 chief and this user is that chief, then it's the last one
-            if (chiefCount == 1) {
-                Optional<User> userOptional = userRepository.findById(userId);
-                return userOptional.isPresent() && "chief".equals(userOptional.get().getRoleName());
-            }
-
-            return false;
-        } catch (Exception e) {
-            return false;
         }
     }
 }
