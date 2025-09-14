@@ -124,6 +124,7 @@ public class AdminController {
                         Map<String, Object> userMap = new HashMap<>();
                         userMap.put("userId", user.getUserId());
                         userMap.put("fullName", capitalizeNames(user.getFirstName(), user.getLastName()));
+                        userMap.put("email", user.getEmailAddress()); // Add email field
                         userMap.put("phone", user.getPhoneNumber());
                         userMap.put("role", capitalizeFirst(user.getRoleName()));
                         userMap.put("isChief", "chief".equals(user.getRoleName()));

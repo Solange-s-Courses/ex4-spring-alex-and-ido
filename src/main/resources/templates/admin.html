@@ -17,9 +17,6 @@
 </div>
 
 <div class="container">
-  <h1>Admin Dashboard</h1>
-  <p class="subtitle">System Administration & Management</p>
-
   <!-- Alert Messages -->
   <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
@@ -28,8 +25,8 @@
   <div class="admin-content">
     <div class="tabs-section">
       <div class="tabs-header">
-        <h2>Admin Controls</h2>
-        <p class="tabs-subtitle">Management and configuration options</p>
+        <h2>Admin Control Panel</h2>
+        <p class="tabs-subtitle">Management and Metrics</p>
       </div>
 
       <!-- Tab Navigation -->
@@ -77,7 +74,7 @@
             </div>
           </div>
 
-          <!-- User Management Section -->
+          <!-- User Management Section (excerpt showing the table structure) -->
           <div class="user-management-card">
             <div class="user-management-header">
               <h3>User Role Management</h3>
@@ -87,7 +84,7 @@
             <!-- Search and Filter Controls -->
             <div class="user-controls">
               <div class="search-container">
-                <input type="text" id="userSearch" placeholder="Search by name or phone..." class="search-input">
+                <input type="text" id="userSearch" placeholder="Search by name, email, or phone..." class="search-input">
               </div>
               <div class="filter-container">
                 <select id="roleFilter" class="filter-select">
@@ -110,6 +107,7 @@
                   <thead class="table-header-fixed">
                   <tr>
                     <th>Full Name</th>
+                    <th>Email</th>
                     <th>Phone</th>
                     <th>Current Role</th>
                     <th>Actions</th>

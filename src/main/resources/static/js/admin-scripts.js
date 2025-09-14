@@ -211,7 +211,7 @@ async function loadUserManagementData() {
     }
 }
 
-// Render user table - Updated for scrollable wrapper
+// Render user table - Updated for email column
 function renderUserTable() {
     const loadingElement = document.getElementById('userTableLoading');
     const emptyElement = document.getElementById('userTableEmpty');
@@ -234,6 +234,7 @@ function renderUserTable() {
     tbody.innerHTML = filteredUsers.map(user => `
         <tr data-user-id="${user.userId}">
             <td class="user-name">${user.fullName}</td>
+            <td class="user-email">${user.email}</td>
             <td class="user-phone">${user.phone}</td>
             <td class="user-role">
                 <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
@@ -357,15 +358,16 @@ function setupUserManagementControls() {
     }
 }
 
-// Filter users based on search and role filter
+// Updated filter function to include email in search
 function filterUsers() {
     const searchTerm = document.getElementById('userSearch').value.toLowerCase();
     const roleFilter = document.getElementById('roleFilter').value;
 
     filteredUsers = allUsers.filter(user => {
-        // Search filter
+        // Search filter - now includes email
         const matchesSearch = searchTerm === '' ||
             user.fullName.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm) ||
             user.phone.includes(searchTerm);
 
         // Role filter

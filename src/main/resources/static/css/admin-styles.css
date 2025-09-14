@@ -678,13 +678,20 @@ h1 {
     color: #333;
 }
 
+.user-email {
+    color: #495057;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.85rem;
+    word-break: break-word; /* Allow email to wrap if very long */
+}
+
 .user-phone {
     color: #6c757d;
     font-family: monospace;
 }
 
 .user-role {
-    text-align: center;
+    text-align: left;
 }
 
 /* Role Badges */
@@ -715,7 +722,7 @@ h1 {
 
 /* Action Buttons */
 .user-actions {
-    text-align: center;
+    text-align: left;
 }
 
 .btn-promote, .btn-demote {
@@ -820,9 +827,18 @@ h1 {
 
     /* Add data labels for mobile */
     .user-name::before { content: "Name: "; }
+    .user-email::before { content: "Email: "; }
     .user-phone::before { content: "Phone: "; }
     .user-role::before { content: "Role: "; }
     .user-actions::before { content: ""; }
+
+    /* Make email more readable on mobile */
+    .user-email {
+        font-size: 0.8rem;
+        word-break: break-all; /* Force break long emails on mobile */
+        text-align: left;
+        flex: 1;
+    }
 }
 
 /* Delete User Modal Styles */
