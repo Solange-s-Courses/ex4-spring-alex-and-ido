@@ -479,3 +479,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Add these placeholder functions to the end of admin-scripts.js
+
+// ========== ADMIN USER ACTIONS (BULK OPERATIONS) ==========
+
+/**
+ * Placeholder function for deleting all non-admin users
+ */
+function deleteAllUsers() {
+    console.log('Delete All Users clicked - Implementation pending');
+    Toast.info('Delete All Users functionality will be implemented next');
+}
+
+/**
+ * Placeholder function for making all managers have "User" role
+ */
+function makeAllManagersUser() {
+    console.log('Make All Managers "User" Role clicked - Implementation pending');
+    Toast.info('Manager demotion functionality will be implemented next');
+}
+
+/**
+ * Placeholder function for making all chiefs have "User" role
+ */
+function makeAllChiefsUser() {
+    console.log('Make All Chiefs "User" Role clicked - Implementation pending');
+    Toast.info('Chief demotion functionality will be implemented next');
+}

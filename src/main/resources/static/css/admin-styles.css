@@ -236,39 +236,6 @@ h1 {
     text-align: center;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .metrics-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .chart-container {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .chart-wrapper {
-        width: 220px;
-        height: 220px;
-    }
-
-    .chart-legend {
-        width: 100%;
-        max-width: 280px;
-    }
-
-    .metrics-grid {
-        gap: 1.5rem;
-        grid-template-columns: 1fr;
-    }
-
-    .metric-card {
-        padding: 1rem;
-    }
-}
-
 /* Admin Content Area */
 .admin-content {
     background: white;
@@ -406,47 +373,108 @@ h1 {
     margin: 1.5rem 0 0 0;
 }
 
-/* Responsive Design for Tabs */
-@media (max-width: 768px) {
-    .tab-navigation {
-        flex-direction: column;
-        align-items: center;
-        gap: 0;
-    }
-
-    .tab-button {
-        width: 200px;
-        border-bottom: none;
-        border-left: 3px solid transparent;
-        top: 0;
-    }
-
-    .tab-button.active {
-        border-bottom-color: transparent;
-        border-left-color: #007bff;
-    }
-
-    .test-number-display {
-        flex-direction: column;
-        gap: 0.5rem;
-        text-align: center;
-    }
-
-    .test-number {
-        font-size: 2rem;
-        min-width: 100px;
-    }
+/* Users Section Container - 70/30 Split Layout */
+.users-section-container {
+    display: flex;
+    margin-bottom: 2rem;
+    align-items: stretch;
 }
 
-/* User Management Styles */
+/* Users Metrics Card - 70% width */
+.users-metrics {
+    flex: 0 0 70%;
+    min-width: 0; /* Prevents flex item from overflowing */
+}
 
+/* Admin Actions Card - 30% width */
+.admin-actions {
+    flex: 0 0 30%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Admin Actions Content */
+.admin-actions-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    padding: 0 0.5rem;
+}
+
+.action-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    justify-content: center;
+}
+
+/* Admin Action Buttons */
+.admin-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 1.4;
+    position: relative;
+    min-height: 70px;
+    justify-content: center;
+}
+
+.admin-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.admin-action-btn:active {
+    transform: translateY(0);
+}
+
+/* Button Variants */
+.admin-action-btn.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.admin-action-btn.danger:hover {
+    background-color: #c82333;
+}
+
+.admin-action-btn.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.admin-action-btn.warning:hover {
+    background-color: #e0a800;
+}
+
+/* Button Subtitle */
+.btn-subtitle {
+    font-size: 0.75rem;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-top: 0.3rem;
+    line-height: 1.2;
+}
+
+/* User Management Card - Updated for full width */
 .user-management-card {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 8px;
     padding: 1.5rem;
-    max-width: 1000px;
-    margin: 2rem auto 0 auto;
+    width: 100%;
+    margin: 0;
 }
 
 .user-management-header {
@@ -691,7 +719,7 @@ h1 {
 }
 
 .user-role {
-    text-align: left;
+    text-align: center;
 }
 
 /* Role Badges */
@@ -722,7 +750,7 @@ h1 {
 
 /* Action Buttons */
 .user-actions {
-    text-align: left;
+    text-align: center;
 }
 
 .btn-promote, .btn-demote {
@@ -755,90 +783,23 @@ h1 {
     transform: translateY(-1px);
 }
 
-/* Responsive Design for User Management */
-@media (max-width: 768px) {
-    .user-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-container {
-        min-width: auto;
-        max-width: none;
-    }
-
-    .user-table {
-        font-size: 0.8rem;
-    }
-
-    .user-table th,
-    .user-table td {
-        padding: 0.5rem 0.4rem;
-    }
-
-    .user-phone {
-        font-size: 0.75rem;
-    }
-
-    .role-badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.4rem;
-    }
-
-    .btn-promote, .btn-demote {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-    }
+/* Delete Button in Table */
+.btn-delete {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #6c757d;
+    color: white;
+    margin-left: 0.5rem;
 }
 
-@media (max-width: 576px) {
-    .user-table thead {
-        display: none;
-    }
-
-    .user-table tbody tr {
-        display: block;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: white;
-    }
-
-    .user-table td {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0.4rem 0;
-        border-bottom: 1px solid #f8f9fa;
-    }
-
-    .user-table td:last-child {
-        border-bottom: none;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-
-    .user-table td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #495057;
-    }
-
-    /* Add data labels for mobile */
-    .user-name::before { content: "Name: "; }
-    .user-email::before { content: "Email: "; }
-    .user-phone::before { content: "Phone: "; }
-    .user-role::before { content: "Role: "; }
-    .user-actions::before { content: ""; }
-
-    /* Make email more readable on mobile */
-    .user-email {
-        font-size: 0.8rem;
-        word-break: break-all; /* Force break long emails on mobile */
-        text-align: left;
-        flex: 1;
-    }
+.btn-delete:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
 }
 
 /* Delete User Modal Styles */
@@ -1041,27 +1002,142 @@ h1 {
     transform: translateY(-1px);
 }
 
-/* Delete Button in Table */
-.btn-delete {
-    padding: 0.4rem 0.8rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background-color: #6c757d;
-    color: white;
-    margin-left: 0.5rem;
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Stack users section on tablets */
+    .users-section-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .users-metrics,
+    .admin-actions {
+        flex: none;
+        width: 100%;
+    }
+
+    /* Adjust admin actions layout for stacked view */
+    .action-button-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
 }
 
-.btn-delete:hover {
-    background-color: #5a6268;
-    transform: translateY(-1px);
-}
-
-/* Responsive Design for Modal */
 @media (max-width: 768px) {
+    .chart-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .chart-wrapper {
+        width: 220px;
+        height: 220px;
+    }
+
+    .chart-legend {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .metrics-grid {
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        padding: 1rem;
+    }
+
+    /* Tab Navigation for Mobile */
+    .tab-navigation {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .tab-button {
+        width: 200px;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        top: 0;
+    }
+
+    .tab-button.active {
+        border-bottom-color: transparent;
+        border-left-color: #007bff;
+    }
+
+    .test-number-display {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .test-number {
+        font-size: 2rem;
+        min-width: 100px;
+    }
+
+    /* Users Section Mobile */
+    .users-section-container {
+        gap: 1rem;
+    }
+
+    .action-button-group {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .admin-action-btn {
+        padding: 0.8rem 1rem;
+        min-height: 60px;
+        font-size: 0.85rem;
+    }
+
+    .btn-subtitle {
+        font-size: 0.7rem;
+    }
+
+    /* User Management Mobile */
+    .user-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-container {
+        min-width: auto;
+        max-width: none;
+    }
+
+    .user-table {
+        font-size: 0.8rem;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 0.5rem 0.4rem;
+    }
+
+    .user-phone {
+        font-size: 0.75rem;
+    }
+
+    .role-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .btn-promote, .btn-demote, .btn-delete {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    /* Modal responsive */
     .delete-modal-content {
         width: 95%;
         margin: 1rem;
@@ -1079,5 +1155,43 @@ h1 {
 
     .btn-cancel, .btn-delete-confirm {
         width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .user-table thead {
+        display: none;
+    }
+
+    .user-table tbody tr {
+        display: block;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: white;
+    }
+
+    .user-table td {
+        display: block;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+        text-align: center;
+    }
+
+    .user-table td:last-child {
+        border-bottom: none;
+        margin-top: 0.5rem;
+    }
+
+    .user-table td::before {
+        font-weight: 600;
+        color: #495057;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-actions::before {
+        display: none;
     }
 }

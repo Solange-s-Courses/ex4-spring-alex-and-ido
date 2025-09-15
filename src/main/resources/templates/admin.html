@@ -38,43 +38,69 @@
 
       <!-- Tab Contents -->
       <div class="tab-content-wrapper">
-        <!-- Tab 1 Content - Users Metrics + User Management -->
+        <!-- Tab 1 Content - Users Metrics + Admin Actions + User Management -->
         <div id="tab1" class="tab-content active">
-          <!-- User Distribution Metrics -->
-          <div class="metric-card">
-            <div class="metric-card-header">
-              <h3>User Distribution</h3>
-              <p>Users by role</p>
-            </div>
-            <div class="chart-container">
-              <div class="chart-wrapper">
-                <canvas id="userRoleChart"></canvas>
+          <!-- Users Section Container with side-by-side layout -->
+          <div class="users-section-container">
+            <!-- User Distribution Metrics (60% width) -->
+            <div class="metric-card users-metrics">
+              <div class="metric-card-header">
+                <h3>User Distribution</h3>
+                <p>Users by role</p>
               </div>
-              <div class="chart-legend">
-                <div class="legend-item">
-                  <span class="legend-color chief-color"></span>
-                  <span class="legend-label">Chief</span>
-                  <span class="legend-count" id="chiefCount">0</span>
+              <div class="chart-container">
+                <div class="chart-wrapper">
+                  <canvas id="userRoleChart"></canvas>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color manager-color"></span>
-                  <span class="legend-label">Manager</span>
-                  <span class="legend-count" id="managerCount">0</span>
+                <div class="chart-legend">
+                  <div class="legend-item">
+                    <span class="legend-color chief-color"></span>
+                    <span class="legend-label">Chief</span>
+                    <span class="legend-count" id="chiefCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color manager-color"></span>
+                    <span class="legend-label">Manager</span>
+                    <span class="legend-count" id="managerCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color user-color"></span>
+                    <span class="legend-label">User</span>
+                    <span class="legend-count" id="userCount">0</span>
+                  </div>
+                  <div class="legend-total">
+                    <span class="total-label">Total Users:</span>
+                    <span class="total-count" id="totalUserCount">0</span>
+                  </div>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color user-color"></span>
-                  <span class="legend-label">User</span>
-                  <span class="legend-count" id="userCount">0</span>
-                </div>
-                <div class="legend-total">
-                  <span class="total-label">Total Users:</span>
-                  <span class="total-count" id="totalUserCount">0</span>
+              </div>
+            </div>
+
+            <!-- Admin User Actions Section (40% width) -->
+            <div class="metric-card admin-actions">
+              <div class="metric-card-header">
+                <h3>Admin User Actions</h3>
+                <p>Bulk user management operations</p>
+              </div>
+              <div class="admin-actions-content">
+                <div class="action-button-group">
+                  <button class="admin-action-btn warning" onclick="makeAllManagersUser()">
+                    Demote managers to user
+                  </button>
+
+                  <button class="admin-action-btn warning" onclick="makeAllChiefsUser()">
+                    Demote chiefs to user
+                  </button>
+
+                  <button class="admin-action-btn danger" onclick="deleteAllUsers()">
+                    Delete All Users
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- User Management Section (excerpt showing the table structure) -->
+          <!-- User Management Section (full width below) -->
           <div class="user-management-card">
             <div class="user-management-header">
               <h3>User Role Management</h3>
