@@ -224,6 +224,8 @@
   </div>
 </div>
 
+<!-- Modals -->
+
 <!-- Delete User Confirmation Modal -->
 <div id="deleteUserModal" class="delete-modal">
   <div class="delete-modal-content">
@@ -256,6 +258,46 @@
     <div class="delete-modal-footer">
       <button class="btn-cancel" onclick="hideDeleteUserModal()">Cancel</button>
       <button class="btn-delete-confirm" onclick="confirmDeleteUser()">Delete User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Demote All Managers Confirmation Modal -->
+<div id="demoteManagersModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Demote All Managers</h3>
+      <button class="delete-modal-close" onclick="hideDemoteManagersModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to demote all managers to user role?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Managers to demote:</strong> <span id="managerCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Change all manager roles to regular user role</li>
+          <li>Remove all managers from their assigned responsibilities</li>
+          <li>Delete responsibilities that have no remaining managers</li>
+          <li>Cancel all requests for items in deleted responsibilities</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="demoteProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="demoteProgressFill"></div>
+        </div>
+        <p class="progress-text" id="demoteProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDemoteManagersModal()" id="demoteCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDemoteAllManagers()" id="demoteConfirmBtn">Demote All Managers</button>
     </div>
   </div>
 </div>

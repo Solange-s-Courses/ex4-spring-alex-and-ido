@@ -250,4 +250,40 @@ public class AdminController {
             return Map.of("success", false, "message", "Failed to delete user: " + e.getMessage());
         }
     }
+
+    @GetMapping("/managers-info")
+    @ResponseBody
+    public Map<String, Object> getManagersInfo() {
+        try {
+            List<User> managers = userService.getAllNonAdminUsers().stream()
+                    .filter(u -> "manager".equals(u.getRoleName()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("managerCount", managers.size());
+            response.put("managers", managers.stream().map(u ->
+                    capitalizeNames(u.getFirstName(), u.getLastName())).collect(java.util.stream.Collectors.toList()));
+
+            return response;
+        } catch (Exception e) {
+            return Map.of("managerCount", 0, "managers", List.of(), "error", "Failed to load manager info");
+        }
+    }
+
+    @PostMapping("/demote-all-managers")
+    @ResponseBody
+    public Map<String, Object> demoteAllManagers() {
+        try {
+            String result = userService.demoteAllManagers();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " managers demoted successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to demote managers: " + e.getMessage());
+        }
+    }
 }

@@ -800,4 +800,34 @@ public class UserService implements UserDetailsService {
             }
         }
     }
+
+    @Transactional
+    public String demoteAllManagers() {
+        try {
+            List<User> managers = getAllNonAdminUsers().stream()
+                    .filter(u -> ROLE_MANAGER.equals(u.getRoleName()))
+                    .collect(Collectors.toList());
+
+            if (managers.isEmpty()) {
+                return "No managers to demote";
+            }
+
+            int demotedCount = 0;
+
+            for (User manager : managers) {
+                // Remove from responsibility (this handles cascade deletion)
+                String removeResult = removeUserFromResponsibility(manager.getUserId());
+                if (removeResult.equals("success") || removeResult.equals("User has no responsibility assigned")) {
+                    // Demote to user role
+                    assignRoleToUser(manager, ROLE_USER);
+                    demotedCount++;
+                }
+            }
+
+            return "success:" + demotedCount;
+
+        } catch (Exception e) {
+            return "Failed to demote managers: " + e.getMessage();
+        }
+    }
 }

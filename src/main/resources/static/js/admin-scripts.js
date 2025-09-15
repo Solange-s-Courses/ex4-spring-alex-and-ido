@@ -480,8 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add these placeholder functions to the end of admin-scripts.js
-
 // ========== ADMIN USER ACTIONS (BULK OPERATIONS) ==========
 
 /**
@@ -492,13 +490,141 @@ function deleteAllUsers() {
     Toast.info('Delete All Users functionality will be implemented next');
 }
 
+// ========== DEMOTE ALL MANAGERS FUNCTIONALITY ==========
 /**
- * Placeholder function for making all managers have "User" role
+ * Shows modal to confirm demoting all managers to user role
  */
-function makeAllManagersUser() {
-    console.log('Make All Managers "User" Role clicked - Implementation pending');
-    Toast.info('Manager demotion functionality will be implemented next');
+async function makeAllManagersUser() {
+    try {
+        // First get info about managers
+        const response = await fetch('/admin/managers-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load manager information');
+            return;
+        }
+
+        if (data.managerCount === 0) {
+            Toast.info('No managers found to demote');
+            return;
+        }
+
+        // Update modal with manager count
+        document.getElementById('managerCountDisplay').textContent = data.managerCount;
+
+        // Show modal
+        document.getElementById('demoteManagersModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading manager info:', error);
+        Toast.error('Failed to load manager information');
+    }
 }
+
+/**
+ * Hides the demote managers modal
+ */
+function hideDemoteManagersModal() {
+    document.getElementById('demoteManagersModal').classList.remove('show');
+
+    // Reset progress section
+    const progressSection = document.getElementById('demoteProgress');
+    const progressFill = document.getElementById('demoteProgressFill');
+    const progressText = document.getElementById('demoteProgressText');
+
+    progressSection.style.display = 'none';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Processing...';
+
+    // Reset button states
+    document.getElementById('demoteCancelBtn').disabled = false;
+    document.getElementById('demoteConfirmBtn').disabled = false;
+    document.getElementById('demoteConfirmBtn').textContent = 'Demote All Managers';
+}
+
+/**
+ * Confirms and executes the demote all managers operation
+ */
+async function confirmDemoteAllManagers() {
+    try {
+        // Disable buttons and show progress
+        document.getElementById('demoteCancelBtn').disabled = true;
+        document.getElementById('demoteConfirmBtn').disabled = true;
+        document.getElementById('demoteConfirmBtn').textContent = 'Processing...';
+
+        const progressSection = document.getElementById('demoteProgress');
+        const progressFill = document.getElementById('demoteProgressFill');
+        const progressText = document.getElementById('demoteProgressText');
+
+        progressSection.style.display = 'block';
+        progressText.textContent = 'Demoting managers...';
+
+        // Simulate progress animation
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 10;
+            progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 100);
+
+        // Execute the demotion
+        const response = await fetch('/admin/demote-all-managers', {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        // Complete progress
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Wait a moment before hiding modal
+        setTimeout(() => {
+            hideDemoteManagersModal();
+
+            if (result.success) {
+                Toast.success(result.message);
+                // Refresh data
+                loadUserManagementData();
+                loadAllMetricsData();
+            } else {
+                Toast.error(result.message);
+            }
+        }, 1000);
+
+    } catch (error) {
+        hideDemoteManagersModal();
+        console.error('Error demoting managers:', error);
+        Toast.error('Failed to demote managers');
+    }
+}
+
+// Close modal when clicking outside or pressing ESC (extend existing event listener)
+document.addEventListener('DOMContentLoaded', function() {
+    // Extend existing modal close functionality
+    const demoteModal = document.getElementById('demoteManagersModal');
+    if (demoteModal) {
+        demoteModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDemoteManagersModal();
+            }
+        });
+    }
+
+    // Extend existing ESC key handler
+    const originalKeyHandler = document.onkeydown;
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const demoteModal = document.getElementById('demoteManagersModal');
+            if (demoteModal && demoteModal.classList.contains('show')) {
+                hideDemoteManagersModal();
+            }
+            // Also call original handler for delete modal
+            if (originalKeyHandler) originalKeyHandler(e);
+        }
+    });
+});
 
 /**
  * Placeholder function for making all chiefs have "User" role
