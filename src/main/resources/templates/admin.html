@@ -302,6 +302,87 @@
   </div>
 </div>
 
+<!-- Demote All Chiefs Confirmation Modal -->
+<div id="demoteChiefsModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Demote All Chiefs</h3>
+      <button class="delete-modal-close" onclick="hideDemoteChiefsModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to demote all chiefs to user role?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Chiefs to demote:</strong> <span id="chiefCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Change all chief roles to regular user role</li>
+          <li>Remove all elevated privileges from chiefs</li>
+          <li>System will have no chiefs after this operation</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="demoteChiefsProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="demoteChiefsProgressFill"></div>
+        </div>
+        <p class="progress-text" id="demoteChiefsProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDemoteChiefsModal()" id="demoteChiefsCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDemoteAllChiefs()" id="demoteChiefsConfirmBtn">Demote All Chiefs</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete All Users Confirmation Modal -->
+<div id="deleteAllUsersModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Delete All Users</h3>
+      <button class="delete-modal-close" onclick="hideDeleteAllUsersModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to delete ALL users from the system?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Users to delete:</strong> <span id="allUsersCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This DESTRUCTIVE action will:</strong></p>
+        <ul>
+          <li>Permanently delete ALL non-admin users</li>
+          <li>Remove all user assignments from responsibilities</li>
+          <li>Delete all responsibilities with no remaining managers</li>
+          <li>Set all user-owned items to "Unavailable" status</li>
+          <li>Cancel ALL user requests in the system</li>
+          <li>Clear all user data permanently</li>
+        </ul>
+        <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL RESET THE ENTIRE SYSTEM!</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="deleteAllProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="deleteAllProgressFill"></div>
+        </div>
+        <p class="progress-text" id="deleteAllProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDeleteAllUsersModal()" id="deleteAllCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDeleteAllUsers()" id="deleteAllConfirmBtn">Delete All Users</button>
+    </div>
+  </div>
+</div>
+
 <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
 <!-- Chart.js Library -->

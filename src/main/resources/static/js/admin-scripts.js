@@ -1,6 +1,3 @@
-/* Clean admin-scripts.js - Truly Minimal */
-
-// Chart instances and data
 let charts = { tab1: null, tab2: null, tab3: null };
 let metricsData = {};
 
@@ -459,7 +456,7 @@ async function confirmDeleteUser() {
 
 // Close modal when clicking outside or pressing ESC
 document.addEventListener('DOMContentLoaded', function() {
-    // Close modal when clicking outside
+    // Close modal when clicking outside - Delete User Modal
     const deleteModal = document.getElementById('deleteUserModal');
     if (deleteModal) {
         deleteModal.addEventListener('click', function(e) {
@@ -469,12 +466,64 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle ESC key to close modal
+    // Close modal when clicking outside - Demote Managers Modal
+    const demoteManagersModal = document.getElementById('demoteManagersModal');
+    if (demoteManagersModal) {
+        demoteManagersModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDemoteManagersModal();
+            }
+        });
+    }
+
+    // Close modal when clicking outside - Demote Chiefs Modal
+    const demoteChiefsModal = document.getElementById('demoteChiefsModal');
+    if (demoteChiefsModal) {
+        demoteChiefsModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDemoteChiefsModal();
+            }
+        });
+    }
+
+    // Close modal when clicking outside - Delete All Users Modal
+    const deleteAllUsersModal = document.getElementById('deleteAllUsersModal');
+    if (deleteAllUsersModal) {
+        deleteAllUsersModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteAllUsersModal();
+            }
+        });
+    }
+
+    // Handle ESC key to close all modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            // Check delete user modal
             const deleteModal = document.getElementById('deleteUserModal');
             if (deleteModal && deleteModal.classList.contains('show')) {
                 hideDeleteUserModal();
+                return;
+            }
+
+            // Check demote managers modal
+            const demoteManagersModal = document.getElementById('demoteManagersModal');
+            if (demoteManagersModal && demoteManagersModal.classList.contains('show')) {
+                hideDemoteManagersModal();
+                return;
+            }
+
+            // Check demote chiefs modal
+            const demoteChiefsModal = document.getElementById('demoteChiefsModal');
+            if (demoteChiefsModal && demoteChiefsModal.classList.contains('show')) {
+                hideDemoteChiefsModal();
+                return;
+            }
+
+            const deleteAllUsersModal = document.getElementById('deleteAllUsersModal');
+            if (deleteAllUsersModal && deleteAllUsersModal.classList.contains('show')) {
+                hideDeleteAllUsersModal();
+                return;
             }
         }
     });
@@ -482,12 +531,128 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== ADMIN USER ACTIONS (BULK OPERATIONS) ==========
 
+// ========== DELETE ALL USERS FUNCTIONALITY ==========
+
 /**
- * Placeholder function for deleting all non-admin users
+ * Shows modal to confirm deleting all non-admin users
  */
-function deleteAllUsers() {
-    console.log('Delete All Users clicked - Implementation pending');
-    Toast.info('Delete All Users functionality will be implemented next');
+async function deleteAllUsers() {
+    try {
+        // First get info about all users
+        const response = await fetch('/admin/all-users-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load user information');
+            return;
+        }
+
+        if (data.userCount === 0) {
+            Toast.info('No users found to delete');
+            return;
+        }
+
+        // Update modal with user count
+        document.getElementById('allUsersCountDisplay').textContent = data.userCount;
+
+        // Show modal
+        document.getElementById('deleteAllUsersModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading user info:', error);
+        Toast.error('Failed to load user information');
+    }
+}
+
+/**
+ * Hides the delete all users modal
+ */
+function hideDeleteAllUsersModal() {
+    document.getElementById('deleteAllUsersModal').classList.remove('show');
+
+    // Reset progress section
+    const progressSection = document.getElementById('deleteAllProgress');
+    const progressFill = document.getElementById('deleteAllProgressFill');
+    const progressText = document.getElementById('deleteAllProgressText');
+
+    progressSection.style.display = 'none';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Processing...';
+
+    // Reset button states
+    document.getElementById('deleteAllCancelBtn').disabled = false;
+    document.getElementById('deleteAllConfirmBtn').disabled = false;
+    document.getElementById('deleteAllConfirmBtn').textContent = 'Delete All Users';
+}
+
+/**
+ * Confirms and executes the delete all users operation
+ */
+async function confirmDeleteAllUsers() {
+    // Extra confirmation for this destructive operation
+    const doubleConfirm = confirm('FINAL WARNING: This will permanently delete ALL users and cannot be undone. Type "DELETE ALL" in the next prompt to confirm.');
+
+    if (!doubleConfirm) {
+        return;
+    }
+
+    const confirmText = prompt('Type "DELETE ALL" to confirm this destructive action:');
+    if (confirmText !== 'DELETE ALL') {
+        Toast.warning('Operation cancelled - confirmation text did not match');
+        return;
+    }
+
+    try {
+        // Disable buttons and show progress
+        document.getElementById('deleteAllCancelBtn').disabled = true;
+        document.getElementById('deleteAllConfirmBtn').disabled = true;
+        document.getElementById('deleteAllConfirmBtn').textContent = 'Deleting...';
+
+        const progressSection = document.getElementById('deleteAllProgress');
+        const progressFill = document.getElementById('deleteAllProgressFill');
+        const progressText = document.getElementById('deleteAllProgressText');
+
+        progressSection.style.display = 'block';
+        progressText.textContent = 'Deleting all users...';
+
+        // Simulate progress animation (slower for more dramatic effect)
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 5;
+            progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 150);
+
+        // Execute the deletion
+        const response = await fetch('/admin/delete-all-users', {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        // Complete progress
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Wait a moment before hiding modal
+        setTimeout(() => {
+            hideDeleteAllUsersModal();
+
+            if (result.success) {
+                Toast.success(result.message);
+                // Refresh data
+                loadUserManagementData();
+                loadAllMetricsData();
+            } else {
+                Toast.error(result.message);
+            }
+        }, 1500);
+
+    } catch (error) {
+        hideDeleteAllUsersModal();
+        console.error('Error deleting users:', error);
+        Toast.error('Failed to delete users');
+    }
 }
 
 // ========== DEMOTE ALL MANAGERS FUNCTIONALITY ==========
@@ -626,10 +791,113 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ========== DEMOTE ALL CHIEFS FUNCTIONALITY ==========
+
 /**
- * Placeholder function for making all chiefs have "User" role
+ * Shows modal to confirm demoting all chiefs to user role
  */
-function makeAllChiefsUser() {
-    console.log('Make All Chiefs "User" Role clicked - Implementation pending');
-    Toast.info('Chief demotion functionality will be implemented next');
+async function makeAllChiefsUser() {
+    try {
+        // First get info about chiefs
+        const response = await fetch('/admin/chiefs-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load chief information');
+            return;
+        }
+
+        if (data.chiefCount === 0) {
+            Toast.info('No chiefs found to demote');
+            return;
+        }
+
+        // Update modal with chief count
+        document.getElementById('chiefCountDisplay').textContent = data.chiefCount;
+
+        // Show modal
+        document.getElementById('demoteChiefsModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading chief info:', error);
+        Toast.error('Failed to load chief information');
+    }
+}
+
+/**
+ * Hides the demote chiefs modal
+ */
+function hideDemoteChiefsModal() {
+    document.getElementById('demoteChiefsModal').classList.remove('show');
+
+    // Reset progress section
+    const progressSection = document.getElementById('demoteChiefsProgress');
+    const progressFill = document.getElementById('demoteChiefsProgressFill');
+    const progressText = document.getElementById('demoteChiefsProgressText');
+
+    progressSection.style.display = 'none';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Processing...';
+
+    // Reset button states
+    document.getElementById('demoteChiefsCancelBtn').disabled = false;
+    document.getElementById('demoteChiefsConfirmBtn').disabled = false;
+    document.getElementById('demoteChiefsConfirmBtn').textContent = 'Demote All Chiefs';
+}
+
+/**
+ * Confirms and executes the demote all chiefs operation
+ */
+async function confirmDemoteAllChiefs() {
+    try {
+        // Disable buttons and show progress
+        document.getElementById('demoteChiefsCancelBtn').disabled = true;
+        document.getElementById('demoteChiefsConfirmBtn').disabled = true;
+        document.getElementById('demoteChiefsConfirmBtn').textContent = 'Processing...';
+
+        const progressSection = document.getElementById('demoteChiefsProgress');
+        const progressFill = document.getElementById('demoteChiefsProgressFill');
+        const progressText = document.getElementById('demoteChiefsProgressText');
+
+        progressSection.style.display = 'block';
+        progressText.textContent = 'Demoting chiefs...';
+
+        // Simulate progress animation
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 10;
+            progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 100);
+
+        // Execute the demotion
+        const response = await fetch('/admin/demote-all-chiefs', {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        // Complete progress
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Wait a moment before hiding modal
+        setTimeout(() => {
+            hideDemoteChiefsModal();
+
+            if (result.success) {
+                Toast.success(result.message);
+                // Refresh data
+                loadUserManagementData();
+                loadAllMetricsData();
+            } else {
+                Toast.error(result.message);
+            }
+        }, 1000);
+
+    } catch (error) {
+        hideDemoteChiefsModal();
+        console.error('Error demoting chiefs:', error);
+        Toast.error('Failed to demote chiefs');
+    }
 }

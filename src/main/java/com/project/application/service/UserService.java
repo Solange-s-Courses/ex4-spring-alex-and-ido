@@ -795,6 +795,9 @@ public class UserService implements UserDetailsService {
 
                 long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
                 if (remainingManagers == 0) {
+                    // CRITICAL: Delete requests and items first to avoid foreign key constraint
+                    requestService.deleteRequestsByResponsibilityId(responsibilityId);
+                    itemService.deleteAllItemsByResponsibilityId(responsibilityId);
                     responsibilityService.deleteResponsibility(responsibilityId);
                 }
             }
@@ -828,6 +831,34 @@ public class UserService implements UserDetailsService {
 
         } catch (Exception e) {
             return "Failed to demote managers: " + e.getMessage();
+        }
+    }
+
+    @Transactional
+    public String demoteAllChiefs() {
+        try {
+            List<User> chiefs = getAllNonAdminUsers().stream()
+                    .filter(u -> ROLE_CHIEF.equals(u.getRoleName()))
+                    .collect(Collectors.toList());
+
+            if (chiefs.isEmpty()) {
+                return "No chiefs to demote";
+            }
+
+            int demotedCount = 0;
+
+            for (User chief : chiefs) {
+                // Demote to user role (chiefs don't have responsibilities to remove)
+                String demoteResult = assignRoleToUser(chief, ROLE_USER);
+                if ("success".equals(demoteResult)) {
+                    demotedCount++;
+                }
+            }
+
+            return "success:" + demotedCount;
+
+        } catch (Exception e) {
+            return "Failed to demote chiefs: " + e.getMessage();
         }
     }
 }

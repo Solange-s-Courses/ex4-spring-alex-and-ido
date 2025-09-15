@@ -286,4 +286,74 @@ public class AdminController {
             return Map.of("success", false, "message", "Failed to demote managers: " + e.getMessage());
         }
     }
+
+    @GetMapping("/chiefs-info")
+    @ResponseBody
+    public Map<String, Object> getChiefsInfo() {
+        try {
+            List<User> chiefs = userService.getAllNonAdminUsers().stream()
+                    .filter(u -> "chief".equals(u.getRoleName()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("chiefCount", chiefs.size());
+            response.put("chiefs", chiefs.stream().map(u ->
+                    capitalizeNames(u.getFirstName(), u.getLastName())).collect(java.util.stream.Collectors.toList()));
+
+            return response;
+        } catch (Exception e) {
+            return Map.of("chiefCount", 0, "chiefs", List.of(), "error", "Failed to load chief info");
+        }
+    }
+
+    @PostMapping("/demote-all-chiefs")
+    @ResponseBody
+    public Map<String, Object> demoteAllChiefs() {
+        try {
+            String result = userService.demoteAllChiefs();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " chiefs demoted successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to demote chiefs: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/all-users-info")
+    @ResponseBody
+    public Map<String, Object> getAllUsersInfo() {
+        try {
+            List<User> allUsers = userService.getAllNonAdminUsers();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("userCount", allUsers.size());
+            response.put("users", allUsers.stream().map(u ->
+                    capitalizeNames(u.getFirstName(), u.getLastName())).collect(java.util.stream.Collectors.toList()));
+
+            return response;
+        } catch (Exception e) {
+            return Map.of("userCount", 0, "users", List.of(), "error", "Failed to load user info");
+        }
+    }
+
+    @PostMapping("/delete-all-users")
+    @ResponseBody
+    public Map<String, Object> deleteAllUsers() {
+        try {
+            String result = userService.deleteAllNonAdminUsers();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " users deleted successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to delete users: " + e.getMessage());
+        }
+    }
 }
