@@ -901,3 +901,238 @@ async function confirmDemoteAllChiefs() {
         Toast.error('Failed to demote chiefs');
     }
 }
+
+// ========== ITEM BULK OPERATIONS ==========
+
+/**
+ * Shows modal to confirm returning all in-use items to unavailable status
+ */
+async function returnAllInUseItems() {
+    try {
+        // First get info about in-use items
+        const response = await fetch('/admin/items-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load item information');
+            return;
+        }
+
+        if (data.inUseCount === 0) {
+            Toast.info('No items are currently in use');
+            return;
+        }
+
+        // Update modal with item count
+        document.getElementById('inUseItemCountDisplay').textContent = data.inUseCount;
+
+        // Show modal
+        document.getElementById('returnInUseItemsModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading item info:', error);
+        Toast.error('Failed to load item information');
+    }
+}
+
+/**
+ * Shows modal to confirm making all items unavailable
+ */
+async function makeAllItemsUnavailable() {
+    try {
+        // First get info about all items
+        const response = await fetch('/admin/items-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load item information');
+            return;
+        }
+
+        if (data.totalItemCount === 0) {
+            Toast.info('No items found in system');
+            return;
+        }
+
+        // Update modal with item count
+        document.getElementById('allItemsUnavailableCountDisplay').textContent = data.totalItemCount;
+
+        // Show modal
+        document.getElementById('makeItemsUnavailableModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading item info:', error);
+        Toast.error('Failed to load item information');
+    }
+}
+
+/**
+ * Shows modal to confirm deleting all items
+ */
+async function deleteAllItems() {
+    try {
+        // First get info about all items
+        const response = await fetch('/admin/items-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load item information');
+            return;
+        }
+
+        if (data.totalItemCount === 0) {
+            Toast.info('No items found to delete');
+            return;
+        }
+
+        // Update modal with item count
+        document.getElementById('deleteAllItemsCountDisplay').textContent = data.totalItemCount;
+
+        // Show modal
+        document.getElementById('deleteAllItemsModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading item info:', error);
+        Toast.error('Failed to load item information');
+    }
+}
+
+// Modal hide functions
+function hideReturnInUseItemsModal() {
+    document.getElementById('returnInUseItemsModal').classList.remove('show');
+    resetModalProgress('returnInUseProgress', 'returnInUseProgressFill', 'returnInUseProgressText', 'returnInUseCancelBtn', 'returnInUseConfirmBtn', 'Return In-Use Items');
+}
+
+function hideMakeItemsUnavailableModal() {
+    document.getElementById('makeItemsUnavailableModal').classList.remove('show');
+    resetModalProgress('makeUnavailableProgress', 'makeUnavailableProgressFill', 'makeUnavailableProgressText', 'makeUnavailableCancelBtn', 'makeUnavailableConfirmBtn', 'Make Items Unavailable');
+}
+
+function hideDeleteAllItemsModal() {
+    document.getElementById('deleteAllItemsModal').classList.remove('show');
+    resetModalProgress('deleteItemsProgress', 'deleteItemsProgressFill', 'deleteItemsProgressText', 'deleteItemsCancelBtn', 'deleteItemsConfirmBtn', 'Delete All Items');
+}
+
+// Confirmation functions
+async function confirmReturnInUseItems() {
+    await executeItemBulkOperation(
+        '/admin/return-all-inuse-items',
+        'returnInUseProgress',
+        'returnInUseProgressFill',
+        'returnInUseProgressText',
+        'returnInUseCancelBtn',
+        'returnInUseConfirmBtn',
+        'Returning items...',
+        hideReturnInUseItemsModal
+    );
+}
+
+async function confirmMakeItemsUnavailable() {
+    await executeItemBulkOperation(
+        '/admin/make-all-items-unavailable',
+        'makeUnavailableProgress',
+        'makeUnavailableProgressFill',
+        'makeUnavailableProgressText',
+        'makeUnavailableCancelBtn',
+        'makeUnavailableConfirmBtn',
+        'Updating items...',
+        hideMakeItemsUnavailableModal
+    );
+}
+
+async function confirmDeleteAllItems() {
+    // Extra confirmation for destructive operation
+    const doubleConfirm = confirm('FINAL WARNING: This will permanently delete ALL items and cannot be undone. Type "DELETE ALL ITEMS" in the next prompt to confirm.');
+
+    if (!doubleConfirm) {
+        return;
+    }
+
+    const confirmText = prompt('Type "DELETE ALL ITEMS" to confirm this destructive action:');
+    if (confirmText !== 'DELETE ALL ITEMS') {
+        Toast.warning('Operation cancelled - confirmation text did not match');
+        return;
+    }
+
+    await executeItemBulkOperation(
+        '/admin/delete-all-items',
+        'deleteItemsProgress',
+        'deleteItemsProgressFill',
+        'deleteItemsProgressText',
+        'deleteItemsCancelBtn',
+        'deleteItemsConfirmBtn',
+        'Deleting items...',
+        hideDeleteAllItemsModal
+    );
+}
+
+// Helper function to execute bulk operations with progress tracking
+async function executeItemBulkOperation(url, progressSectionId, progressFillId, progressTextId, cancelBtnId, confirmBtnId, progressMessage, hideModalFn) {
+    try {
+        // Disable buttons and show progress
+        document.getElementById(cancelBtnId).disabled = true;
+        document.getElementById(confirmBtnId).disabled = true;
+        document.getElementById(confirmBtnId).textContent = 'Processing...';
+
+        const progressSection = document.getElementById(progressSectionId);
+        const progressFill = document.getElementById(progressFillId);
+        const progressText = document.getElementById(progressTextId);
+
+        progressSection.style.display = 'block';
+        progressText.textContent = progressMessage;
+
+        // Simulate progress animation
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 10;
+            progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 100);
+
+        // Execute the operation
+        const response = await fetch(url, { method: 'POST' });
+        const result = await response.json();
+
+        // Complete progress
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Wait before hiding modal
+        setTimeout(() => {
+            hideModalFn();
+
+            if (result.success) {
+                Toast.success(result.message);
+                // Refresh data
+                loadAllMetricsData();
+            } else {
+                Toast.error(result.message);
+            }
+        }, 1000);
+
+    } catch (error) {
+        hideModalFn();
+        console.error('Error executing item operation:', error);
+        Toast.error('Failed to execute operation');
+    }
+}
+
+// Helper function to reset modal progress state
+function resetModalProgress(progressSectionId, progressFillId, progressTextId, cancelBtnId, confirmBtnId, confirmBtnText) {
+    const progressSection = document.getElementById(progressSectionId);
+    const progressFill = document.getElementById(progressFillId);
+    const progressText = document.getElementById(progressTextId);
+
+    if (progressSection) progressSection.style.display = 'none';
+    if (progressFill) progressFill.style.width = '0%';
+    if (progressText) progressText.textContent = 'Processing...';
+
+    const cancelBtn = document.getElementById(cancelBtnId);
+    const confirmBtn = document.getElementById(confirmBtnId);
+
+    if (cancelBtn) cancelBtn.disabled = false;
+    if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = confirmBtnText;
+    }
+}

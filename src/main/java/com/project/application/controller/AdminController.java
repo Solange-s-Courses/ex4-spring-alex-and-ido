@@ -1,6 +1,7 @@
 package com.project.application.controller;
 
 import com.project.application.controller.helper.SecurityHelper;
+import com.project.application.entity.Item;
 import com.project.application.entity.User;
 import com.project.application.entity.Event;
 import com.project.application.service.UserService;
@@ -354,6 +355,80 @@ public class AdminController {
             }
         } catch (Exception e) {
             return Map.of("success", false, "message", "Failed to delete users: " + e.getMessage());
+        }
+    }
+
+    // ========== ITEM BULK OPERATIONS ==========
+
+    @GetMapping("/items-info")
+    @ResponseBody
+    public Map<String, Object> getItemsInfo() {
+        try {
+            List<Item> allItems = itemService.getAllItems();
+
+            // Count items by status
+            long inUseCount = allItems.stream()
+                    .filter(item -> "In Use".equals(item.getStatus()) && item.getUser() != null)
+                    .count();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalItemCount", allItems.size());
+            response.put("inUseCount", inUseCount);
+
+            return response;
+        } catch (Exception e) {
+            return Map.of("totalItemCount", 0, "inUseCount", 0, "error", "Failed to load item info");
+        }
+    }
+
+    @PostMapping("/return-all-inuse-items")
+    @ResponseBody
+    public Map<String, Object> returnAllInUseItems() {
+        try {
+            String result = itemService.returnAllInUseItems();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " in-use items returned successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to return items: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/make-all-items-unavailable")
+    @ResponseBody
+    public Map<String, Object> makeAllItemsUnavailable() {
+        try {
+            String result = itemService.makeAllItemsUnavailable();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " items marked as unavailable", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to update items: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/delete-all-items")
+    @ResponseBody
+    public Map<String, Object> deleteAllItems() {
+        try {
+            String result = itemService.deleteAllItems();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " items deleted successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to delete items: " + e.getMessage());
         }
     }
 }

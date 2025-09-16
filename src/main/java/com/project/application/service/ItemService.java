@@ -3,6 +3,7 @@ package com.project.application.service;
 import com.project.application.entity.Item;
 import com.project.application.entity.Responsibility;
 import com.project.application.repository.ItemRepository;
+import com.project.application.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final ResponsibilityService responsibilityService;
+    private final RequestRepository requestRepository;
 
     /**
      * Get all items for a specific responsibility
@@ -307,6 +309,120 @@ public class ItemService {
             return "available";
         } else {
             return "unavailable";
+        }
+    }
+
+    // ========== BULK OPERATIONS FOR ADMIN ==========
+
+    /**
+     * Return all in-use items to unavailable status and remove user ownership
+     */
+    @Transactional
+    public String returnAllInUseItems() {
+        try {
+            // Get all items that are currently in use (have users assigned)
+            List<Item> inUseItems = itemRepository.findAll().stream()
+                    .filter(item -> "In Use".equals(item.getStatus()) && item.getUser() != null)
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (inUseItems.isEmpty()) {
+                return "No items are currently in use";
+            }
+
+            int processedCount = 0;
+
+            for (Item item : inUseItems) {
+                // Remove user ownership and set to unavailable
+                item.setUser(null);
+                item.setStatus("Unavailable");
+                itemRepository.save(item);
+
+                // Delete all requests for this item
+                deleteRequestsForItem(item.getItemId());
+
+                processedCount++;
+            }
+
+            return "success:" + processedCount;
+
+        } catch (Exception e) {
+            return "Failed to return in-use items: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Make all items unavailable (change status only, keep user ownership if exists)
+     */
+    @Transactional
+    public String makeAllItemsUnavailable() {
+        try {
+            List<Item> allItems = itemRepository.findAll();
+
+            if (allItems.isEmpty()) {
+                return "No items found in system";
+            }
+
+            int processedCount = 0;
+
+            for (Item item : allItems) {
+                // Only update if not already unavailable
+                if (!"Unavailable".equals(item.getStatus())) {
+                    // Remove user ownership for consistency
+                    item.setUser(null);
+                    item.setStatus("Unavailable");
+                    itemRepository.save(item);
+
+                    // Delete all requests for this item
+                    deleteRequestsForItem(item.getItemId());
+
+                    processedCount++;
+                }
+            }
+
+            return "success:" + processedCount;
+
+        } catch (Exception e) {
+            return "Failed to make items unavailable: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Delete all items from the system (complete cleanup)
+     */
+    @Transactional
+    public String deleteAllItems() {
+        try {
+            List<Item> allItems = itemRepository.findAll();
+
+            if (allItems.isEmpty()) {
+                return "No items found to delete";
+            }
+
+            int itemCount = allItems.size();
+
+            // Delete all requests for all items first
+            for (Item item : allItems) {
+                deleteRequestsForItem(item.getItemId());
+            }
+
+            // Delete all items
+            itemRepository.deleteAll();
+
+            return "success:" + itemCount;
+
+        } catch (Exception e) {
+            return "Failed to delete all items: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Helper method to delete all requests for a specific item
+     */
+    private void deleteRequestsForItem(Long itemId) {
+        try {
+            requestRepository.deleteByItem_ItemId(itemId);
+        } catch (Exception e) {
+            System.err.println("Warning: Could not delete requests for item " + itemId + ": " + e.getMessage());
         }
     }
 }

@@ -504,6 +504,33 @@ h1 {
     justify-content: center;
 }
 
+/* Items Section Container - 70/30 Split Layout (same as users) */
+.items-section-container {
+    display: flex;
+    margin-bottom: 2rem;
+    align-items: stretch;
+}
+
+/* Items Metrics Card - 70% width */
+.items-metrics {
+    flex: 0 0 70%;
+    min-width: 0; /* Prevents flex item from overflowing */
+}
+
+/* Responsive adjustments for items section */
+@media (max-width: 1024px) {
+    /* Stack items section on tablets */
+    .items-section-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .items-metrics {
+        flex: none;
+        width: 100%;
+    }
+}
+
 .search-container {
     flex: 1;
     min-width: 250px;

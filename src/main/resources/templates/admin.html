@@ -150,34 +150,61 @@
 
         <!-- Tab 2 Content -->
         <div id="tab2" class="tab-content">
-          <div class="metric-card">
-            <div class="metric-card-header">
-              <h3>Item Status</h3>
-              <p>Items by availability status</p>
-            </div>
-            <div class="chart-container">
-              <div class="chart-wrapper">
-                <canvas id="itemStatusChart"></canvas>
+          <!-- Items Section Container with side-by-side layout -->
+          <div class="items-section-container">
+            <!-- Item Status Metrics (70% width) -->
+            <div class="metric-card items-metrics">
+              <div class="metric-card-header">
+                <h3>Item Status</h3>
+                <p>Items by availability status</p>
               </div>
-              <div class="chart-legend">
-                <div class="legend-item">
-                  <span class="legend-color available-color"></span>
-                  <span class="legend-label">Available</span>
-                  <span class="legend-count" id="availableCount">0</span>
+              <div class="chart-container">
+                <div class="chart-wrapper">
+                  <canvas id="itemStatusChart"></canvas>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color inuse-color"></span>
-                  <span class="legend-label">In Use</span>
-                  <span class="legend-count" id="inUseCount">0</span>
+                <div class="chart-legend">
+                  <div class="legend-item">
+                    <span class="legend-color available-color"></span>
+                    <span class="legend-label">Available</span>
+                    <span class="legend-count" id="availableCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color inuse-color"></span>
+                    <span class="legend-label">In Use</span>
+                    <span class="legend-count" id="inUseCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color unavailable-color"></span>
+                    <span class="legend-label">Unavailable</span>
+                    <span class="legend-count" id="unavailableCount">0</span>
+                  </div>
+                  <div class="legend-total">
+                    <span class="total-label">Total Items:</span>
+                    <span class="total-count" id="totalItemCount">0</span>
+                  </div>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color unavailable-color"></span>
-                  <span class="legend-label">Unavailable</span>
-                  <span class="legend-count" id="unavailableCount">0</span>
-                </div>
-                <div class="legend-total">
-                  <span class="total-label">Total Items:</span>
-                  <span class="total-count" id="totalItemCount">0</span>
+              </div>
+            </div>
+
+            <!-- Admin Item Actions Section (30% width) -->
+            <div class="metric-card admin-actions">
+              <div class="metric-card-header">
+                <h3>Admin Item Actions</h3>
+                <p>Bulk item management operations</p>
+              </div>
+              <div class="admin-actions-content">
+                <div class="action-button-group">
+                  <button class="admin-action-btn warning" onclick="returnAllInUseItems()">
+                    Return all in-use items
+                  </button>
+
+                  <button class="admin-action-btn warning" onclick="makeAllItemsUnavailable()">
+                    Make all items unavailable
+                  </button>
+
+                  <button class="admin-action-btn danger" onclick="deleteAllItems()">
+                    Delete All Items
+                  </button>
                 </div>
               </div>
             </div>
@@ -379,6 +406,127 @@
     <div class="delete-modal-footer">
       <button class="btn-cancel" onclick="hideDeleteAllUsersModal()" id="deleteAllCancelBtn">Cancel</button>
       <button class="btn-delete-confirm" onclick="confirmDeleteAllUsers()" id="deleteAllConfirmBtn">Delete All Users</button>
+    </div>
+  </div>
+</div>
+
+<!-- Return In-Use Items Confirmation Modal -->
+<div id="returnInUseItemsModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Return In-Use Items</h3>
+      <button class="delete-modal-close" onclick="hideReturnInUseItemsModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to return all in-use items?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Items to return:</strong> <span id="inUseItemCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Remove user ownership from all in-use items</li>
+          <li>Change item status from "In Use" to "Unavailable"</li>
+          <li>Cancel all pending requests for these items</li>
+          <li>Remove items from users' item lists</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="returnInUseProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="returnInUseProgressFill"></div>
+        </div>
+        <p class="progress-text" id="returnInUseProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideReturnInUseItemsModal()" id="returnInUseCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmReturnInUseItems()" id="returnInUseConfirmBtn">Return In-Use Items</button>
+    </div>
+  </div>
+</div>
+
+<!-- Make All Items Unavailable Confirmation Modal -->
+<div id="makeItemsUnavailableModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Make Items Unavailable</h3>
+      <button class="delete-modal-close" onclick="hideMakeItemsUnavailableModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to make all items unavailable?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Items to update:</strong> <span id="allItemsUnavailableCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Change all item statuses to "Unavailable"</li>
+          <li>Remove user ownership from all items</li>
+          <li>Cancel all pending requests for items</li>
+          <li>Clear all items from users' item lists</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="makeUnavailableProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="makeUnavailableProgressFill"></div>
+        </div>
+        <p class="progress-text" id="makeUnavailableProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideMakeItemsUnavailableModal()" id="makeUnavailableCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmMakeItemsUnavailable()" id="makeUnavailableConfirmBtn">Make Items Unavailable</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete All Items Confirmation Modal -->
+<div id="deleteAllItemsModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Delete All Items</h3>
+      <button class="delete-modal-close" onclick="hideDeleteAllItemsModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to delete ALL items from the system?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Items to delete:</strong> <span id="deleteAllItemsCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This DESTRUCTIVE action will:</strong></p>
+        <ul>
+          <li>Permanently delete ALL items from the system</li>
+          <li>Remove all items from users' item lists</li>
+          <li>Cancel ALL pending requests in the system</li>
+          <li>Clear all item data permanently</li>
+          <li>Responsibilities will have no items</li>
+        </ul>
+        <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL CLEAR ALL ITEM DATA!</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="deleteItemsProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="deleteItemsProgressFill"></div>
+        </div>
+        <p class="progress-text" id="deleteItemsProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDeleteAllItemsModal()" id="deleteItemsCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDeleteAllItems()" id="deleteItemsConfirmBtn">Delete All Items</button>
     </div>
   </div>
 </div>
