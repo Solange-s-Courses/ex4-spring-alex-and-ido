@@ -417,17 +417,18 @@ public class UserService implements UserDetailsService {
                 return "Cannot delete admin users";
             }
 
-            // Step 1: Handle user's owned items
+            // Handle user's item list
             handleUserItemsOnDeletion(userId);
 
-            // Step 2: Handle responsibility assignments
+            // Handle responsibility assignments
             handleUserResponsibilityOnDeletion(userId);
 
-            // Step 3: Clean up user's requests
+            // Clean up user's requests
             requestService.deleteRequestsByUserId(userId);
 
-            // Step 4: Delete the user
+            // Delete the user
             userRepository.deleteById(userId);
+
             return "success";
 
         } catch (Exception e) {
@@ -695,6 +696,7 @@ public class UserService implements UserDetailsService {
     private void handleResponsibilityCleanup(Long responsibilityId) {
         long remainingManagers = userResponsibilityRepository.countByResponsibilityId(responsibilityId);
         if (remainingManagers == 0) {
+            requestService.deleteRequestsByResponsibilityId(responsibilityId);
             itemService.deleteAllItemsByResponsibilityId(responsibilityId);
             responsibilityService.deleteResponsibility(responsibilityId);
         }
