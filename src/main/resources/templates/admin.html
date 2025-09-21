@@ -213,34 +213,61 @@
 
         <!-- Tab 3 Content -->
         <div id="tab3" class="tab-content">
-          <div class="metric-card">
-            <div class="metric-card-header">
-              <h3>Event Status</h3>
-              <p>Events by current status</p>
-            </div>
-            <div class="chart-container">
-              <div class="chart-wrapper">
-                <canvas id="eventStatusChart"></canvas>
+          <!-- Events Section Container with side-by-side layout -->
+          <div class="events-section-container">
+            <!-- Event Status Metrics (70% width) -->
+            <div class="metric-card events-metrics">
+              <div class="metric-card-header">
+                <h3>Event Status</h3>
+                <p>Events by current status</p>
               </div>
-              <div class="chart-legend">
-                <div class="legend-item">
-                  <span class="legend-color not-active-color"></span>
-                  <span class="legend-label">Not Active</span>
-                  <span class="legend-count" id="notActiveCount">0</span>
+              <div class="chart-container">
+                <div class="chart-wrapper">
+                  <canvas id="eventStatusChart"></canvas>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color active-color"></span>
-                  <span class="legend-label">Active</span>
-                  <span class="legend-count" id="activeCount">0</span>
+                <div class="chart-legend">
+                  <div class="legend-item">
+                    <span class="legend-color not-active-color"></span>
+                    <span class="legend-label">Not Active</span>
+                    <span class="legend-count" id="notActiveCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color active-color"></span>
+                    <span class="legend-label">Active</span>
+                    <span class="legend-count" id="activeCount">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color equipment-return-color"></span>
+                    <span class="legend-label">Equipment Return</span>
+                    <span class="legend-count" id="equipmentReturnCount">0</span>
+                  </div>
+                  <div class="legend-total">
+                    <span class="total-label">Total Events:</span>
+                    <span class="total-count" id="totalEventCount">0</span>
+                  </div>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-color equipment-return-color"></span>
-                  <span class="legend-label">Equipment Return</span>
-                  <span class="legend-count" id="equipmentReturnCount">0</span>
-                </div>
-                <div class="legend-total">
-                  <span class="total-label">Total Events:</span>
-                  <span class="total-count" id="totalEventCount">0</span>
+              </div>
+            </div>
+
+            <!-- Admin Event Actions Section (30% width) -->
+            <div class="metric-card admin-actions">
+              <div class="metric-card-header">
+                <h3>Admin Event Actions</h3>
+                <p>Bulk event management operations</p>
+              </div>
+              <div class="admin-actions-content">
+                <div class="action-button-group">
+                  <button class="admin-action-btn warning" onclick="deactivateAllEvents()">
+                    Deactivate all events
+                  </button>
+
+                  <button class="admin-action-btn warning" onclick="setActiveEventsToReturn()">
+                    Set active events to return
+                  </button>
+
+                  <button class="admin-action-btn danger" onclick="deleteAllEvents()">
+                    Delete All Events
+                  </button>
                 </div>
               </div>
             </div>
@@ -527,6 +554,125 @@
     <div class="delete-modal-footer">
       <button class="btn-cancel" onclick="hideDeleteAllItemsModal()" id="deleteItemsCancelBtn">Cancel</button>
       <button class="btn-delete-confirm" onclick="confirmDeleteAllItems()" id="deleteItemsConfirmBtn">Delete All Items</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deactivate All Events Confirmation Modal -->
+<div id="deactivateEventsModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Deactivate All Events</h3>
+      <button class="delete-modal-close" onclick="hideDeactivateEventsModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to deactivate all events?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Events to deactivate:</strong> <span id="deactivateEventsCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Change all event statuses to "Not Active"</li>
+          <li>Stop all item requests and returns for these events</li>
+          <li>Events can be reactivated later if needed</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="deactivateEventsProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="deactivateEventsProgressFill"></div>
+        </div>
+        <p class="progress-text" id="deactivateEventsProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDeactivateEventsModal()" id="deactivateEventsCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDeactivateEvents()" id="deactivateEventsConfirmBtn">Deactivate All Events</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Active Events to Return Mode Confirmation Modal -->
+<div id="setEventsReturnModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Set Events to Return Mode</h3>
+      <button class="delete-modal-close" onclick="hideSetEventsReturnModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to set active events to return mode?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Active events to update:</strong> <span id="activeEventsCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This action will:</strong></p>
+        <ul>
+          <li>Change only "Active" events to "Equipment Return" status</li>
+          <li>Allow users to return items but not request new ones</li>
+          <li>Cancel all pending item requests</li>
+          <li>Events can be switched back to active if needed</li>
+        </ul>
+        <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="setReturnProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="setReturnProgressFill"></div>
+        </div>
+        <p class="progress-text" id="setReturnProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideSetEventsReturnModal()" id="setReturnCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmSetEventsToReturn()" id="setReturnConfirmBtn">Set to Return Mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete All Events Confirmation Modal -->
+<div id="deleteAllEventsModal" class="delete-modal">
+  <div class="delete-modal-content">
+    <div class="delete-modal-header">
+      <h3>Delete All Events</h3>
+      <button class="delete-modal-close" onclick="hideDeleteAllEventsModal()">&times;</button>
+    </div>
+    <div class="delete-modal-body">
+      <div class="delete-warning-icon">⚠️</div>
+      <p class="delete-warning-text">Are you sure you want to delete ALL events from the system?</p>
+      <div class="user-details">
+        <div class="user-detail-item">
+          <strong>Events to delete:</strong> <span id="deleteAllEventsCountDisplay">0</span>
+        </div>
+      </div>
+      <div class="delete-consequences">
+        <p><strong>This DESTRUCTIVE action will:</strong></p>
+        <ul>
+          <li>Permanently delete ALL events from the system</li>
+          <li>Remove all event-responsibility assignments</li>
+          <li>Clear all event data permanently</li>
+          <li>Responsibilities will remain but be unassigned</li>
+        </ul>
+        <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL CLEAR ALL EVENT DATA!</strong></p>
+      </div>
+      <!-- Progress Section (hidden initially) -->
+      <div id="deleteEventsProgress" class="progress-section" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="deleteEventsProgressFill"></div>
+        </div>
+        <p class="progress-text" id="deleteEventsProgressText">Processing...</p>
+      </div>
+    </div>
+    <div class="delete-modal-footer">
+      <button class="btn-cancel" onclick="hideDeleteAllEventsModal()" id="deleteEventsCancelBtn">Cancel</button>
+      <button class="btn-delete-confirm" onclick="confirmDeleteAllEvents()" id="deleteEventsConfirmBtn">Delete All Events</button>
     </div>
   </div>
 </div>

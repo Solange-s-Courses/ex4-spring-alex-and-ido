@@ -1117,6 +1117,221 @@ async function executeItemBulkOperation(url, progressSectionId, progressFillId, 
     }
 }
 
+// ========== EVENT BULK OPERATIONS ==========
+
+/**
+ * Shows modal to confirm deactivating all events
+ */
+async function deactivateAllEvents() {
+    try {
+        // First get info about all events
+        const response = await fetch('/admin/events-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load event information');
+            return;
+        }
+
+        if (data.totalEventCount === 0) {
+            Toast.info('No events found in system');
+            return;
+        }
+
+        // Update modal with event count
+        document.getElementById('deactivateEventsCountDisplay').textContent = data.totalEventCount;
+
+        // Show modal
+        document.getElementById('deactivateEventsModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading event info:', error);
+        Toast.error('Failed to load event information');
+    }
+}
+
+/**
+ * Shows modal to confirm setting active events to return mode
+ */
+async function setActiveEventsToReturn() {
+    try {
+        // First get info about active events
+        const response = await fetch('/admin/events-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load event information');
+            return;
+        }
+
+        if (data.activeCount === 0) {
+            Toast.info('No active events found');
+            return;
+        }
+
+        // Update modal with active event count
+        document.getElementById('activeEventsCountDisplay').textContent = data.activeCount;
+
+        // Show modal
+        document.getElementById('setEventsReturnModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading event info:', error);
+        Toast.error('Failed to load event information');
+    }
+}
+
+/**
+ * Shows modal to confirm deleting all events
+ */
+async function deleteAllEvents() {
+    try {
+        // First get info about all events
+        const response = await fetch('/admin/events-info');
+        const data = await response.json();
+
+        if (data.error) {
+            Toast.error('Failed to load event information');
+            return;
+        }
+
+        if (data.totalEventCount === 0) {
+            Toast.info('No events found to delete');
+            return;
+        }
+
+        // Update modal with event count
+        document.getElementById('deleteAllEventsCountDisplay').textContent = data.totalEventCount;
+
+        // Show modal
+        document.getElementById('deleteAllEventsModal').classList.add('show');
+
+    } catch (error) {
+        console.error('Error loading event info:', error);
+        Toast.error('Failed to load event information');
+    }
+}
+
+// Modal hide functions
+function hideDeactivateEventsModal() {
+    document.getElementById('deactivateEventsModal').classList.remove('show');
+    resetModalProgress('deactivateEventsProgress', 'deactivateEventsProgressFill', 'deactivateEventsProgressText', 'deactivateEventsCancelBtn', 'deactivateEventsConfirmBtn', 'Deactivate All Events');
+}
+
+function hideSetEventsReturnModal() {
+    document.getElementById('setEventsReturnModal').classList.remove('show');
+    resetModalProgress('setReturnProgress', 'setReturnProgressFill', 'setReturnProgressText', 'setReturnCancelBtn', 'setReturnConfirmBtn', 'Set to Return Mode');
+}
+
+function hideDeleteAllEventsModal() {
+    document.getElementById('deleteAllEventsModal').classList.remove('show');
+    resetModalProgress('deleteEventsProgress', 'deleteEventsProgressFill', 'deleteEventsProgressText', 'deleteEventsCancelBtn', 'deleteEventsConfirmBtn', 'Delete All Events');
+}
+
+// Confirmation functions
+async function confirmDeactivateEvents() {
+    await executeEventBulkOperation(
+        '/admin/deactivate-all-events',
+        'deactivateEventsProgress',
+        'deactivateEventsProgressFill',
+        'deactivateEventsProgressText',
+        'deactivateEventsCancelBtn',
+        'deactivateEventsConfirmBtn',
+        'Deactivating events...',
+        hideDeactivateEventsModal
+    );
+}
+
+async function confirmSetEventsToReturn() {
+    await executeEventBulkOperation(
+        '/admin/set-active-events-to-return',
+        'setReturnProgress',
+        'setReturnProgressFill',
+        'setReturnProgressText',
+        'setReturnCancelBtn',
+        'setReturnConfirmBtn',
+        'Setting events to return mode...',
+        hideSetEventsReturnModal
+    );
+}
+
+async function confirmDeleteAllEvents() {
+    // Extra confirmation for destructive operation
+    const doubleConfirm = confirm('FINAL WARNING: This will permanently delete ALL events and cannot be undone. Type "DELETE ALL EVENTS" in the next prompt to confirm.');
+
+    if (!doubleConfirm) {
+        return;
+    }
+
+    const confirmText = prompt('Type "DELETE ALL EVENTS" to confirm this destructive action:');
+    if (confirmText !== 'DELETE ALL EVENTS') {
+        Toast.warning('Operation cancelled - confirmation text did not match');
+        return;
+    }
+
+    await executeEventBulkOperation(
+        '/admin/delete-all-events',
+        'deleteEventsProgress',
+        'deleteEventsProgressFill',
+        'deleteEventsProgressText',
+        'deleteEventsCancelBtn',
+        'deleteEventsConfirmBtn',
+        'Deleting events...',
+        hideDeleteAllEventsModal
+    );
+}
+
+// Helper function to execute event bulk operations with progress tracking
+async function executeEventBulkOperation(url, progressSectionId, progressFillId, progressTextId, cancelBtnId, confirmBtnId, progressMessage, hideModalFn) {
+    try {
+        // Disable buttons and show progress
+        document.getElementById(cancelBtnId).disabled = true;
+        document.getElementById(confirmBtnId).disabled = true;
+        document.getElementById(confirmBtnId).textContent = 'Processing...';
+
+        const progressSection = document.getElementById(progressSectionId);
+        const progressFill = document.getElementById(progressFillId);
+        const progressText = document.getElementById(progressTextId);
+
+        progressSection.style.display = 'block';
+        progressText.textContent = progressMessage;
+
+        // Simulate progress animation
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 10;
+            progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 100);
+
+        // Execute the operation
+        const response = await fetch(url, { method: 'POST' });
+        const result = await response.json();
+
+        // Complete progress
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Wait before hiding modal
+        setTimeout(() => {
+            hideModalFn();
+
+            if (result.success) {
+                Toast.success(result.message);
+                // Refresh data
+                loadAllMetricsData();
+            } else {
+                Toast.error(result.message);
+            }
+        }, 1000);
+
+    } catch (error) {
+        hideModalFn();
+        console.error('Error executing event operation:', error);
+        Toast.error('Failed to execute operation');
+    }
+}
+
 // Helper function to reset modal progress state
 function resetModalProgress(progressSectionId, progressFillId, progressTextId, cancelBtnId, confirmBtnId, confirmBtnText) {
     const progressSection = document.getElementById(progressSectionId);

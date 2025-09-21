@@ -431,4 +431,78 @@ public class AdminController {
             return Map.of("success", false, "message", "Failed to delete items: " + e.getMessage());
         }
     }
+
+    // ========== EVENT BULK OPERATIONS ==========
+
+    @GetMapping("/events-info")
+    @ResponseBody
+    public Map<String, Object> getEventsInfo() {
+        try {
+            List<Event> allEvents = eventService.getAllEvents();
+
+            // Count events by status
+            long activeCount = allEvents.stream()
+                    .filter(event -> Event.STATUS_ACTIVE.equals(event.getStatus()))
+                    .count();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalEventCount", allEvents.size());
+            response.put("activeCount", activeCount);
+
+            return response;
+        } catch (Exception e) {
+            return Map.of("totalEventCount", 0, "activeCount", 0, "error", "Failed to load event info");
+        }
+    }
+
+    @PostMapping("/deactivate-all-events")
+    @ResponseBody
+    public Map<String, Object> deactivateAllEvents() {
+        try {
+            String result = eventService.deactivateAllEvents();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " events deactivated successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to deactivate events: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/set-active-events-to-return")
+    @ResponseBody
+    public Map<String, Object> setActiveEventsToReturn() {
+        try {
+            String result = eventService.setActiveEventsToReturn();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " active events set to return mode", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to set events to return mode: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/delete-all-events")
+    @ResponseBody
+    public Map<String, Object> deleteAllEvents() {
+        try {
+            String result = eventService.deleteAllEvents();
+
+            if (result.startsWith("success:")) {
+                int count = Integer.parseInt(result.substring(8));
+                return Map.of("success", true, "message", count + " events deleted successfully", "count", count);
+            } else {
+                return Map.of("success", false, "message", result);
+            }
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Failed to delete events: " + e.getMessage());
+        }
+    }
 }

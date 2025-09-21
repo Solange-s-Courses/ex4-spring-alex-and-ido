@@ -550,4 +550,134 @@ public class EventService {
 
         return false;
     }
+
+    // ========== BULK OPERATIONS FOR ADMIN ==========
+
+    /**
+     * Deactivate all events (change status to "Not Active")
+     * ENHANCED: Also cleans up requests and in-use items for all responsibilities
+     */
+    @Transactional
+    public String deactivateAllEvents() {
+        try {
+            List<Event> allEvents = eventRepository.findAll();
+
+            if (allEvents.isEmpty()) {
+                return "No events found in system";
+            }
+
+            int processedCount = 0;
+
+            for (Event event : allEvents) {
+                // Only update if not already "Not Active"
+                if (!Event.STATUS_NOT_ACTIVE.equals(event.getStatus())) {
+
+                    // CLEANUP: Before deactivating, clean up all responsibilities in this event
+                    cleanupEventResponsibilities(event.getEventId());
+
+                    // Deactivate the event
+                    event.setStatus(Event.STATUS_NOT_ACTIVE);
+                    eventRepository.save(event);
+                    processedCount++;
+                }
+            }
+
+            return "success:" + processedCount;
+
+        } catch (Exception e) {
+            return "Failed to deactivate events: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Helper method to clean up all responsibilities in an event
+     * - Deletes all requests for items in event responsibilities
+     * - Sets all "In Use" items to "Unavailable" and removes user ownership
+     */
+    private void cleanupEventResponsibilities(Long eventId) {
+        try {
+            // Get all responsibilities assigned to this event
+            List<Responsibility> eventResponsibilities = getEventResponsibilities(eventId);
+
+            for (Responsibility responsibility : eventResponsibilities) {
+                Long responsibilityId = responsibility.getResponsibilityId();
+
+                // Delete all requests for this responsibility
+                requestRepository.deleteByResponsibilityId(responsibilityId);
+
+                // Get all items in this responsibility that are "In Use"
+                List<com.project.application.entity.Item> inUseItems =
+                        itemService.getItemsByResponsibilityIdAndStatus(responsibilityId, "In Use");
+
+                // Set "In Use" items to "Unavailable" and remove user ownership
+                for (com.project.application.entity.Item item : inUseItems) {
+                    item.setStatus("Unavailable");
+                    item.setUser(null);
+                    itemService.saveItem(item);
+                }
+            }
+
+        } catch (Exception e) {
+            // Log error but don't fail the main operation
+            System.err.println("Warning: Could not fully cleanup event responsibilities for event " + eventId + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Set only active events to equipment return mode
+     */
+    @Transactional
+    public String setActiveEventsToReturn() {
+        try {
+            List<Event> activeEvents = eventRepository.findAll().stream()
+                    .filter(event -> Event.STATUS_ACTIVE.equals(event.getStatus()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (activeEvents.isEmpty()) {
+                return "No active events found";
+            }
+
+            int processedCount = 0;
+
+            for (Event event : activeEvents) {
+                event.setStatus(Event.STATUS_EQUIPMENT_RETURN);
+                eventRepository.save(event);
+                processedCount++;
+            }
+
+            return "success:" + processedCount;
+
+        } catch (Exception e) {
+            return "Failed to set events to return mode: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Delete all events from the system (complete cleanup)
+     */
+    @Transactional
+    public String deleteAllEvents() {
+        try {
+            List<Event> allEvents = eventRepository.findAll();
+
+            if (allEvents.isEmpty()) {
+                return "No events found to delete";
+            }
+
+            int eventCount = allEvents.size();
+
+            // CRITICAL: Delete event-responsibility relationships first to avoid foreign key constraints
+            for (Event event : allEvents) {
+                eventResponsibilityRepository.deleteByEventEventId(event.getEventId());
+            }
+
+            // Now delete all events safely
+            eventRepository.deleteAll();
+
+            return "success:" + eventCount;
+
+        } catch (Exception e) {
+            return "Failed to delete all events: " + e.getMessage();
+        }
+    }
 }
