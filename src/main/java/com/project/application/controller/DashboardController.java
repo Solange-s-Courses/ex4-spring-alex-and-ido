@@ -6,7 +6,6 @@ import com.project.application.service.EventService;
 import com.project.application.entity.Event;
 import com.project.application.service.ResponsibilityService;
 import com.project.application.entity.Responsibility;
-import com.project.application.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,6 @@ import java.util.*;
 
 /**
  * Controller handling dashboard display functionality
- * STEP 4: Updated to use Spring Security instead of manual session management
  */
 @Controller
 @RequiredArgsConstructor
@@ -26,16 +24,9 @@ public class DashboardController {
     private final ResponsibilityService responsibilityService;
     private final EventService eventService;
     private final SecurityHelper securityHelper;
-    private final UserService userService; // STEP 5: Added UserService dependency
-
-    // ==========================================
-    // DASHBOARD DISPLAY
-    // ==========================================
 
     /**
      * Display main dashboard with events and responsibilities
-     * STEP 4: Updated to use Spring Security authentication
-     * STEP 5: User data now provided globally by ControllerAdvice
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -50,8 +41,8 @@ public class DashboardController {
 
         // Get events based on user role
         List<Event> events;
-        if ("chief".equals(loggedInUser.getRoleName())) {
-            // Chiefs see all events they created
+        if ("chief".equals(loggedInUser.getRoleName()) || "admin".equals(loggedInUser.getRoleName())) {
+            // Chiefs and Admins see all events (chiefs can manage, admins view-only)
             events = eventService.getAllEvents();
         } else {
             // Other users see only ongoing events

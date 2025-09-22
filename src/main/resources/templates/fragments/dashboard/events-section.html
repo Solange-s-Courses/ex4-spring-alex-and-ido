@@ -8,8 +8,12 @@
      class="events-panel active">
 
     <div class="panel-header">
-        <h2 class="panel-title" th:text="${userRole == 'chief'} ? 'My Events' : 'Ongoing Events'">Events</h2>
+        <!-- Updated panel title to reflect admin view-only access -->
+        <h2 class="panel-title"
+            th:text="${userRole == 'chief'} ? 'My Events' :
+                     (${userRole == 'admin'} ? 'All Events' : 'Ongoing Events')">Events</h2>
 
+        <!-- Create Event Button - Chief only (admins excluded) -->
         <button th:if="${userRole == 'chief'}"
                 class="create-event-btn-trigger"
                 onclick="showEventModal()">
@@ -26,7 +30,8 @@
 
         <div th:if="${events == null or events.isEmpty()}" class="no-events">
             <span th:if="${userRole == 'chief'}">No events created yet. Create your first event!</span>
-            <span th:if="${userRole != 'chief'}">No ongoing events at the moment.</span>
+            <span th:if="${userRole == 'admin'}">No events in system.</span>
+            <span th:if="${userRole != 'chief' and userRole != 'admin'}">No ongoing events at the moment.</span>
         </div>
     </div>
 </div>

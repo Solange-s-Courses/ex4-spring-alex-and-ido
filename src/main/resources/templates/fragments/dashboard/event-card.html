@@ -35,8 +35,11 @@
             <span class="event-card-date"
                   th:text="${#temporals.format(event.dateOfCreation, 'MMM dd')}">Date</span>
 
-            <!-- View Button with conditional visibility -->
-            <button th:if="${(userRole == 'chief' or userRole == 'admin') or
+            <!-- View Button with updated conditional visibility -->
+            <!-- Chiefs: can view all events -->
+            <!-- Admins: can view all events (view-only) -->
+            <!-- Users: can view only active/equipment return events -->
+            <button th:if="${userRole == 'chief' or userRole == 'admin' or
                             (event.status == 'active' or event.status == 'equipment return')}"
                     class="event-card-action"
                     th:onclick="'window.location.href=\'/event/view/' + ${event.eventId} + '\''">
