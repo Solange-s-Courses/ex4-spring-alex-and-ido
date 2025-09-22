@@ -1,0 +1,401 @@
+<!-- Admin Modals Fragment -->
+<div th:fragment="modals">
+
+    <!-- Delete User Confirmation Modal -->
+    <div id="deleteUserModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Delete User</h3>
+                <button class="delete-modal-close" onclick="hideDeleteUserModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to delete this user?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Name:</strong> <span id="deleteUserName">-</span>
+                    </div>
+                    <div class="user-detail-item">
+                        <strong>Role:</strong> <span id="deleteUserRole" class="role-badge">-</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Permanently remove the user from the system</li>
+                        <li>Remove user from any assigned responsibilities</li>
+                        <li>Cancel all user requests and return items to available status</li>
+                        <li>Delete the responsibility if user was the last manager</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDeleteUserModal()">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDeleteUser()">Delete User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demote All Managers Confirmation Modal -->
+    <div id="demoteManagersModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Demote All Managers</h3>
+                <button class="delete-modal-close" onclick="hideDemoteManagersModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to demote all managers to user role?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Managers to demote:</strong> <span id="managerCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Change all manager roles to regular user role</li>
+                        <li>Remove all managers from their assigned responsibilities</li>
+                        <li>Delete responsibilities that have no remaining managers</li>
+                        <li>Cancel all requests for items in deleted responsibilities</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="demoteProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="demoteProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="demoteProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDemoteManagersModal()" id="demoteCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDemoteAllManagers()" id="demoteConfirmBtn">Demote All Managers</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demote All Chiefs Confirmation Modal -->
+    <div id="demoteChiefsModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Demote All Chiefs</h3>
+                <button class="delete-modal-close" onclick="hideDemoteChiefsModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to demote all chiefs to user role?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Chiefs to demote:</strong> <span id="chiefCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Change all chief roles to regular user role</li>
+                        <li>Remove all elevated privileges from chiefs</li>
+                        <li>System will have no chiefs after this operation</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="demoteChiefsProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="demoteChiefsProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="demoteChiefsProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDemoteChiefsModal()" id="demoteChiefsCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDemoteAllChiefs()" id="demoteChiefsConfirmBtn">Demote All Chiefs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Users Confirmation Modal -->
+    <div id="deleteAllUsersModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Delete All Users</h3>
+                <button class="delete-modal-close" onclick="hideDeleteAllUsersModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to delete ALL users from the system?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Users to delete:</strong> <span id="allUsersCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This DESTRUCTIVE action will:</strong></p>
+                    <ul>
+                        <li>Permanently delete ALL non-admin users</li>
+                        <li>Remove all user assignments from responsibilities</li>
+                        <li>Delete all responsibilities with no remaining managers</li>
+                        <li>Set all user-owned items to "Unavailable" status</li>
+                        <li>Cancel ALL user requests in the system</li>
+                        <li>Clear all user data permanently</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL RESET THE ENTIRE SYSTEM!</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="deleteAllProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="deleteAllProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="deleteAllProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDeleteAllUsersModal()" id="deleteAllCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDeleteAllUsers()" id="deleteAllConfirmBtn">Delete All Users</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return In-Use Items Confirmation Modal -->
+    <div id="returnInUseItemsModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Return In-Use Items</h3>
+                <button class="delete-modal-close" onclick="hideReturnInUseItemsModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to return all in-use items?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Items to return:</strong> <span id="inUseItemCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Remove user ownership from all in-use items</li>
+                        <li>Change item status from "In Use" to "Unavailable"</li>
+                        <li>Cancel all pending requests for these items</li>
+                        <li>Remove items from users' item lists</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="returnInUseProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="returnInUseProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="returnInUseProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideReturnInUseItemsModal()" id="returnInUseCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmReturnInUseItems()" id="returnInUseConfirmBtn">Return In-Use Items</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Make All Items Unavailable Confirmation Modal -->
+    <div id="makeItemsUnavailableModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Make Items Unavailable</h3>
+                <button class="delete-modal-close" onclick="hideMakeItemsUnavailableModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to make all items unavailable?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Items to update:</strong> <span id="allItemsUnavailableCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Change all item statuses to "Unavailable"</li>
+                        <li>Remove user ownership from all items</li>
+                        <li>Cancel all pending requests for items</li>
+                        <li>Clear all items from users' item lists</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="makeUnavailableProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="makeUnavailableProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="makeUnavailableProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideMakeItemsUnavailableModal()" id="makeUnavailableCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmMakeItemsUnavailable()" id="makeUnavailableConfirmBtn">Make Items Unavailable</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Items Confirmation Modal -->
+    <div id="deleteAllItemsModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Delete All Items</h3>
+                <button class="delete-modal-close" onclick="hideDeleteAllItemsModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to delete ALL items from the system?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Items to delete:</strong> <span id="deleteAllItemsCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This DESTRUCTIVE action will:</strong></p>
+                    <ul>
+                        <li>Permanently delete ALL items from the system</li>
+                        <li>Remove all items from users' item lists</li>
+                        <li>Cancel ALL pending requests in the system</li>
+                        <li>Clear all item data permanently</li>
+                        <li>Responsibilities will have no items</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL CLEAR ALL ITEM DATA!</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="deleteItemsProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="deleteItemsProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="deleteItemsProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDeleteAllItemsModal()" id="deleteItemsCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDeleteAllItems()" id="deleteItemsConfirmBtn">Delete All Items</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deactivate All Events Confirmation Modal -->
+    <div id="deactivateEventsModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Deactivate All Events</h3>
+                <button class="delete-modal-close" onclick="hideDeactivateEventsModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to deactivate all events?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Events to deactivate:</strong> <span id="deactivateEventsCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Change all event statuses to "Not Active"</li>
+                        <li>Stop all item requests and returns for these events</li>
+                        <li>Events can be reactivated later if needed</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="deactivateEventsProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="deactivateEventsProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="deactivateEventsProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDeactivateEventsModal()" id="deactivateEventsCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDeactivateEvents()" id="deactivateEventsConfirmBtn">Deactivate All Events</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Active Events to Return Mode Confirmation Modal -->
+    <div id="setEventsReturnModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Set Events to Return Mode</h3>
+                <button class="delete-modal-close" onclick="hideSetEventsReturnModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to set active events to return mode?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Active events to update:</strong> <span id="activeEventsCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This action will:</strong></p>
+                    <ul>
+                        <li>Change only "Active" events to "Equipment Return" status</li>
+                        <li>Allow users to return items but not request new ones</li>
+                        <li>Cancel all pending item requests</li>
+                        <li>Events can be switched back to active if needed</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="setReturnProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="setReturnProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="setReturnProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideSetEventsReturnModal()" id="setReturnCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmSetEventsToReturn()" id="setReturnConfirmBtn">Set to Return Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Events Confirmation Modal -->
+    <div id="deleteAllEventsModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Delete All Events</h3>
+                <button class="delete-modal-close" onclick="hideDeleteAllEventsModal()">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-warning-icon">⚠️</div>
+                <p class="delete-warning-text">Are you sure you want to delete ALL events from the system?</p>
+                <div class="user-details">
+                    <div class="user-detail-item">
+                        <strong>Events to delete:</strong> <span id="deleteAllEventsCountDisplay">0</span>
+                    </div>
+                </div>
+                <div class="delete-consequences">
+                    <p><strong>This DESTRUCTIVE action will:</strong></p>
+                    <ul>
+                        <li>Permanently delete ALL events from the system</li>
+                        <li>Remove all event-responsibility assignments</li>
+                        <li>Clear all event data permanently</li>
+                        <li>Responsibilities will remain but be unassigned</li>
+                    </ul>
+                    <p class="delete-warning-final"><strong>THIS ACTION CANNOT BE UNDONE AND WILL CLEAR ALL EVENT DATA!</strong></p>
+                </div>
+                <!-- Progress Section (hidden initially) -->
+                <div id="deleteEventsProgress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="deleteEventsProgressFill"></div>
+                    </div>
+                    <p class="progress-text" id="deleteEventsProgressText">Processing...</p>
+                </div>
+            </div>
+            <div class="delete-modal-footer">
+                <button class="btn-cancel" onclick="hideDeleteAllEventsModal()" id="deleteEventsCancelBtn">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDeleteAllEvents()" id="deleteEventsConfirmBtn">Delete All Events</button>
+            </div>
+        </div>
+    </div>
+
+</div>

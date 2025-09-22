@@ -1,0 +1,62 @@
+<!-- Items Tab Fragment -->
+<div id="tab2" class="tab-content" th:fragment="items-tab">
+    <!-- Items Section Container with side-by-side layout -->
+    <div class="items-section-container">
+        <!-- Item Status Metrics (70% width) -->
+        <div class="metric-card items-metrics">
+            <div class="metric-card-header">
+                <h3>Item Status</h3>
+                <p>Items by availability status</p>
+            </div>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="itemStatusChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-color available-color"></span>
+                        <span class="legend-label">Available</span>
+                        <span class="legend-count" id="availableCount">0</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color inuse-color"></span>
+                        <span class="legend-label">In Use</span>
+                        <span class="legend-count" id="inUseCount">0</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color unavailable-color"></span>
+                        <span class="legend-label">Unavailable</span>
+                        <span class="legend-count" id="unavailableCount">0</span>
+                    </div>
+                    <div class="legend-total">
+                        <span class="total-label">Total Items:</span>
+                        <span class="total-count" id="totalItemCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Item Actions Section (30% width) -->
+        <div class="metric-card admin-actions">
+            <div class="metric-card-header">
+                <h3>Admin Item Actions</h3>
+                <p>Bulk item management operations</p>
+            </div>
+            <div class="admin-actions-content">
+                <div class="action-button-group">
+                    <button class="admin-action-btn warning" onclick="returnAllInUseItems()">
+                        Return all in-use items
+                    </button>
+
+                    <button class="admin-action-btn warning" onclick="makeAllItemsUnavailable()">
+                        Make all items unavailable
+                    </button>
+
+                    <button class="admin-action-btn danger" onclick="deleteAllItems()">
+                        Delete All Items
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

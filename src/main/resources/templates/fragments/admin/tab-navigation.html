@@ -1,0 +1,14 @@
+<!-- Tab Navigation Fragment -->
+<div th:fragment="tab-navigation">
+    <div class="tabs-header">
+        <h2>Admin Control Panel</h2>
+        <p class="tabs-subtitle">Management and Metrics</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-button active" data-tab="tab1" onclick="switchTab('tab1')">Users</button>
+        <button class="tab-button" data-tab="tab2" onclick="switchTab('tab2')">Items</button>
+        <button class="tab-button" data-tab="tab3" onclick="switchTab('tab3')">Events</button>
+    </div>
+</div>
