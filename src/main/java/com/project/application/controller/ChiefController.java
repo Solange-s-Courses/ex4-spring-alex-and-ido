@@ -17,21 +17,16 @@ import java.util.stream.Collectors;
 
 /**
  * Controller handling chief-specific operations
- * STEP 4: Updated to use Spring Security with @PreAuthorize annotations
  */
 @Controller
 @RequestMapping("/chief")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CHIEF')") // STEP 4: Secure entire controller for chief role
+@PreAuthorize("hasRole('CHIEF')")
 public class ChiefController {
 
     private final UserService userService;
     private final RoleService roleService;
     private final SecurityHelper securityHelper;
-
-    // ==========================================
-    // CHIEF USER MANAGEMENT
-    // ==========================================
 
     /**
      * Display chief user management page
@@ -55,10 +50,6 @@ public class ChiefController {
 
         return "chief-user-list";
     }
-
-    // ==========================================
-    // USER-RESPONSIBILITY MANAGEMENT
-    // ==========================================
 
     /**
      * Assign responsibility to user (promotes user to manager)
