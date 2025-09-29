@@ -10,8 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,37 +57,35 @@ public class ChiefController {
      */
     @PostMapping("/assign-responsibility")
     public String assignResponsibility(@RequestParam Long userId,
-                                       @RequestParam String responsibilityName,
-                                       RedirectAttributes redirectAttributes) {
+                                       @RequestParam String responsibilityName) {
 
         // Assign responsibility using service
         String result = userService.assignResponsibility(userId, responsibilityName);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Responsibility assigned successfully!");
+            return "redirect:/chief/user-list?success=" +
+                    URLEncoder.encode("Responsibility assigned successfully!", StandardCharsets.UTF_8);
         } else {
-            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/chief/user-list?error=" +
+                    URLEncoder.encode(result, StandardCharsets.UTF_8);
         }
-
-        return "redirect:/chief/user-list";
     }
 
     /**
      * Remove responsibility from user
      */
     @PostMapping("/remove-responsibility")
-    public String removeResponsibility(@RequestParam Long userId,
-                                       RedirectAttributes redirectAttributes) {
+    public String removeResponsibility(@RequestParam Long userId) {
 
         // Remove responsibility using service
         String result = userService.removeUserFromResponsibility(userId);
 
         if ("success".equals(result)) {
-            redirectAttributes.addFlashAttribute("success", "Responsibility removed successfully!");
+            return "redirect:/chief/user-list?success=" +
+                    URLEncoder.encode("Responsibility removed successfully!", StandardCharsets.UTF_8);
         } else {
-            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/chief/user-list?error=" +
+                    URLEncoder.encode(result, StandardCharsets.UTF_8);
         }
-
-        return "redirect:/chief/user-list";
     }
 }

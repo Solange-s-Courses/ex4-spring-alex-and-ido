@@ -17,17 +17,16 @@
             <h1>Chief User List</h1>
             <p class="text-muted">View managers and users in the system</p>
 
-            <!-- Alert Messages -->
-            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
             <!-- User List Section -->
             <div th:replace="~{fragments/chief/user-list :: chiefUserList}"></div>
         </div>
     </div>
 
+    <!-- Include Toast System-->
+    <div th:replace="~{fragments/common/toast :: toast-system}"></div>
+
     <!-- Scripts -->
     <script th:src="@{/js/navbar-scripts.js}"></script>
-
+    <script th:src="@{/js/chief-user-scripts.js}"></script>
 </body>
 </html>
