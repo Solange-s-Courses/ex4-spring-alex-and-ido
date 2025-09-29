@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+    <nav th:fragment="navbar" class="navbar">
+        <div th:replace="~{fragments/navbar/navbar-brand :: brand}"></div>
 
-<!-- Refactored Navbar Fragment - Now uses external CSS/JS and modular fragments -->
-<nav th:fragment="navbar" class="navbar">
-    <div th:replace="~{fragments/navbar/navbar-brand :: brand}"></div>
+        <!-- Hamburger Button (shows on mobile only) -->
+        <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-    <!-- Hamburger Button (mobile only) -->
-    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-    <div th:replace="~{fragments/navbar/navbar-navigation :: desktop-nav}"></div>
-    <div th:replace="~{fragments/navbar/navbar-mobile :: mobile-menu}"></div>
-</nav>
-
+        <div th:replace="~{fragments/navbar/navbar-navigation :: desktop-nav}"></div>
+        <div th:replace="~{fragments/navbar/navbar-mobile :: mobile-menu}"></div>
+    </nav>
 </html>

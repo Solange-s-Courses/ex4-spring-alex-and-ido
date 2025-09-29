@@ -1,13 +1,3 @@
-/* Dashboard Page - Matching Responsibility View Style */
-
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-}
-
-/* Main Content */
 .main-content {
     max-width: 1400px;
     margin: 2rem auto;

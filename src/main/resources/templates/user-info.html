@@ -8,26 +8,23 @@
   <link rel="stylesheet" th:href="@{/css/user-info-styles.css}">
 </head>
 <body>
-
-<!-- Navigation Bar -->
-<div th:with="hideUserInfoBtn=true, showDashboardBtn=true">
+  <!-- Navigation Bar -->
   <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
 
-<!-- Main Content -->
-<div class="main-content">
-  <div th:replace="~{fragments/user-info/user-info-card :: userInfoCard(${user}, ${userRole})}"></div>
-</div>
+  <!-- Main Content -->
+  <div class="main-content">
+    <div th:replace="~{fragments/user-info/user-info-card :: userInfoCard(${user}, ${userRole})}"></div>
+  </div>
 
-<!-- Modal Fragments -->
-<div th:replace="~{fragments/user-info/change-name-modal :: changeNameModal(${user})}"></div>
-<div th:replace="~{fragments/user-info/change-phone-modal :: changePhoneModal(${user})}"></div>
+  <!-- Modals -->
+  <div th:replace="~{fragments/user-info/change-name-modal :: changeNameModal(${user})}"></div>
+  <div th:replace="~{fragments/user-info/change-phone-modal :: changePhoneModal(${user})}"></div>
 
-<!-- Include Complete Toast System (CSS + HTML + JS) -->
-<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+  <!-- Include Toast System-->
+  <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
-<script th:src="@{/js/navbar-scripts.js}"></script>
-<script th:src="@{/js/user-info-scripts.js}"></script>
-
+  <!-- Scripts -->
+  <script th:src="@{/js/navbar-scripts.js}"></script>
+  <script th:src="@{/js/user-info-scripts.js}"></script>
 </body>
 </html>

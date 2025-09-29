@@ -4,67 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Items - Event Management System</title>
-
-    <!-- Load user items specific styles -->
-    <link th:href="@{/css/user-items-styles.css}" rel="stylesheet">
-
-    <!-- Include Navbar Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
+    <link rel="stylesheet" th:href="@{/css/user-items-styles.css}">
 </head>
 <body>
-
-<!-- Navigation Bar with Dashboard button, hide My Items button on this page -->
-<div th:with="showDashboardBtn=true, hideMyItemsBtn=true">
+    <!-- Navigation Bar -->
     <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
 
-<!-- Main Content -->
-<div class="main-content">
-    <div class="content-card">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1 class="page-title">
-                <i class="icon">📦</i> My Items
-            </h1>
-            <p class="page-description">Items currently assigned to you</p>
-        </div>
-
-        <!-- Alert Messages -->
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-        <!-- Items Section -->
-        <div class="items-section">
-            <!-- Items Header with Count -->
-            <div class="items-header">
-                <div class="header-content">
-                    <!-- Dynamic Item Count -->
-                    <div class="item-count" th:if="${itemCount != null}">
-                        <span id="filteredItemCount" th:text="${itemCount}">0</span> of
-                        <span id="totalItemCount" th:text="${itemCount}">0</span> items shown
-                    </div>
-                </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="icon">📦</i> My Items
+                </h1>
+                <p class="page-description">Items currently assigned to you</p>
             </div>
 
-            <!-- Controls Fragment (Filter, Sort, Search) -->
-            <div th:replace="~{fragments/user-items/items-controls :: controls}"></div>
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-            <!-- Items Table Fragment -->
-            <div th:replace="~{fragments/user-items/items-table :: table(${userItems}, ${canReturnItems}, ${userPendingReturnItemIds})}"></div>        </div>
+            <!-- Items Section -->
+            <div class="items-section">
+                <!-- Items Header with Count -->
+                <div class="items-header">
+                    <div class="header-content">
+                        <!-- Dynamic Item Count -->
+                        <div class="item-count" th:if="${itemCount != null}">
+                            <span id="filteredItemCount" th:text="${itemCount}">0</span> of
+                            <span id="totalItemCount" th:text="${itemCount}">0</span> items shown
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls Fragment (Filter, Sort, Search) -->
+                <div th:replace="~{fragments/user-items/items-controls :: controls}"></div>
+
+                <!-- Items Table Fragment -->
+                <div th:replace="~{fragments/user-items/items-table :: table(${userItems}, ${canReturnItems}, ${userPendingReturnItemIds})}"></div>        </div>
+        </div>
     </div>
-</div>
 
-<!-- Return Modal Fragment -->
-<div th:replace="~{fragments/user-items/return-modal :: modal}"></div>
+    <!-- Return Modal Fragment -->
+    <div th:replace="~{fragments/user-items/return-modal :: modal}"></div>
 
-<!-- Include Complete Toast System (CSS + HTML + JS) -->
-<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+    <!-- Include Complete Toast System (CSS + HTML + JS) -->
+    <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
-<!-- Include Navbar Scripts -->
-<script th:src="@{/js/navbar-scripts.js}"></script>
+    <!-- Include Navbar Scripts -->
+    <script th:src="@{/js/navbar-scripts.js}"></script>
 
-<!-- Include User Items Scripts -->
-<script th:src="@{/js/user-items-scripts.js}"></script>
+    <!-- Include User Items Scripts -->
+    <script th:src="@{/js/user-items-scripts.js}"></script>
 
 </body>
 </html>

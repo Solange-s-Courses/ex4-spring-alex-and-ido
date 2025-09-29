@@ -4,79 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsibility Management - Event Management System</title>
-
-    <!-- Load responsibility management specific styles -->
-    <link th:href="@{/css/responsibility-manage-styles.css}" rel="stylesheet">
-
-    <!-- Include Navbar Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
+    <link rel="stylesheet" th:href="@{/css/responsibility-manage-styles.css}">
 </head>
 <body>
-<!-- Navigation Bar - Updated to use new navbar system -->
-<div th:replace="~{fragments/navbar/navbar-main :: navbar}"></div>
+    <!-- Navigation Bar -->
+    <div th:replace="~{fragments/navbar/navbar-main :: navbar}"></div>
 
-<!-- Main Content -->
-<div class="main-content">
-    <!-- Two Column Layout -->
-    <div class="management-layout">
-        <!-- Left Sidebar Fragment -->
-        <div th:replace="~{fragments/responsibility-manage/responsibility-sidebar :: sidebar(${responsibility}, ${responsibilityManagers}, ${itemCount})}"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Two Column Layout -->
+        <div class="management-layout">
+            <!-- Left Sidebar Fragment -->
+            <div th:replace="~{fragments/responsibility-manage/responsibility-sidebar :: sidebar(${responsibility}, ${responsibilityManagers}, ${itemCount})}"></div>
 
-        <!-- Right Main Area Fragment -->
-        <div th:replace="~{fragments/responsibility-manage/items-table :: table(${items}, ${itemCount}, ${requests}, ${requestCount})}"></div>
+            <!-- Right Main Area Fragment -->
+            <div th:replace="~{fragments/responsibility-manage/items-table :: table(${items}, ${itemCount}, ${requests}, ${requestCount})}"></div>
+        </div>
     </div>
-</div>
 
-<!-- Modal Fragments -->
-<div th:replace="~{fragments/responsibility-manage/edit-description-modal :: modal(${responsibility})}"></div>
-<div th:replace="~{fragments/responsibility-manage/add-item-modal :: modal(${responsibility})}"></div>
-<div th:replace="~{fragments/responsibility-manage/edit-item-modal :: modal(${responsibility})}"></div>
-<div th:replace="~{fragments/responsibility-manage/confirmation-modal :: modal}"></div>
+    <!-- Modals -->
+    <div th:replace="~{fragments/responsibility-manage/edit-description-modal :: modal(${responsibility})}"></div>
+    <div th:replace="~{fragments/responsibility-manage/add-item-modal :: modal(${responsibility})}"></div>
+    <div th:replace="~{fragments/responsibility-manage/edit-item-modal :: modal(${responsibility})}"></div>
+    <div th:replace="~{fragments/responsibility-manage/confirmation-modal :: modal}"></div>
 
-<!-- Hidden Delete Form (since we removed delete modal but still need the form) -->
-<form id="deleteItemForm" th:action="@{/responsibility-manage/{responsibilityId}/delete-item(responsibilityId=${responsibility.responsibilityId})}" method="post" style="display: none;">
-    <input type="hidden" id="deleteItemId" name="itemId">
-</form>
+    <!-- Hidden Delete Form (since we removed delete modal but still need the form) -->
+    <form id="deleteItemForm" th:action="@{/responsibility-manage/{responsibilityId}/delete-item(responsibilityId=${responsibility.responsibilityId})}" method="post" style="display: none;">
+        <input type="hidden" id="deleteItemId" name="itemId">
+    </form>
 
-<!-- Hidden Action Form for Approve/Deny Requests -->
-<form id="hiddenActionForm" method="post" style="display: none;">
-    <input type="hidden" id="hiddenActionInput" name="actionParam">
-</form>
+    <!-- Hidden Action Form for Approve/Deny Requests -->
+    <form id="hiddenActionForm" method="post" style="display: none;">
+        <input type="hidden" id="hiddenActionInput" name="actionParam">
+    </form>
 
-<!-- Include Complete Toast System (CSS + HTML + JS) -->
-<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+    <!-- Include Complete Toast System -->
+    <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
-<!-- Scripts -->
-<script th:src="@{/js/responsibility-manage-scripts.js}"></script>
-
-<!-- Toast Trigger Script for Flash Messages -->
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add a small delay to ensure everything is loaded
-        setTimeout(function() {
-            // Use th:inline="javascript" for proper variable injection
-            let successMessage = /*[[${success}]]*/ '';
-            let errorMessage = /*[[${error}]]*/ '';
-
-            // Show success toast
-            if (successMessage && successMessage.length > 0) {
-                if (typeof showToast === 'function') {
-                    showToast(successMessage, 'success');
-                }
-            }
-
-            // Show error toast
-            if (errorMessage && errorMessage.length > 0) {
-                if (typeof showToast === 'function') {
-                    showToast(errorMessage, 'error');
-                }
-            }
-        }, 300);
-    });
-</script>
-
-<!-- Include Navbar Scripts -->
-<script th:src="@{/js/navbar-scripts.js}"></script>
-
+    <!-- Scripts -->
+    <script th:src="@{/js/responsibility-manage-scripts.js}"></script>
+    <script th:src="@{/js/navbar-scripts.js}"></script>
 </body>
 </html>

@@ -1,29 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="toast-system">
+        <link rel="stylesheet" th:href="@{/css/toast-styles.css}">
 
-<!-- Toast CSS Include Fragment -->
-<div th:fragment="toast-css">
-    <link rel="stylesheet" th:href="@{/css/toast-styles.css}">
-</div>
+        <div id="toast" class="toast">
+            <span id="toastMessage" class="toast-message">Message</span>
+            <button id="toastClose" class="toast-close" type="button">&times;</button>
+        </div>
 
-<!-- Toast JavaScript Include Fragment -->
-<div th:fragment="toast-js">
-    <script th:src="@{/js/toast.js}"></script>
-</div>
-
-<!-- Complete Toast System Fragment (HTML + CSS + JS) -->
-<div th:fragment="toast-system">
-    <!-- Include CSS -->
-    <link rel="stylesheet" th:href="@{/css/toast-styles.css}">
-
-    <!-- Toast HTML -->
-    <div id="toast" class="toast">
-        <span id="toastMessage" class="toast-message">Message</span>
-        <button id="toastClose" class="toast-close" type="button">&times;</button>
+        <script th:src="@{/js/toast.js}"></script>
     </div>
-
-    <!-- Include JavaScript -->
-    <script th:src="@{/js/toast.js}"></script>
-</div>
-
 </html>

@@ -4,56 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administrator Dashboard</title>
+  <!-- Styles -->
+  <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
+  <link rel="stylesheet" th:href="@{/css/admin-styles.css}">
 </head>
 
 <body>
-<!-- Include Navbar Styles -->
-<link rel="stylesheet" th:href="@{/css/admin-styles.css}">
-<link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
-
-<!-- Navigation -->
-<div th:with="showDashboardBtn=true, hideAdminPageBtn=true">
+  <!-- Navigation -->
   <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
 
-<div class="container">
-  <!-- Alert Messages -->
-  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+  <div class="container">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-  <!-- Admin Content Area - Tabbed Section -->
-  <div class="admin-content">
-    <div class="tabs-section">
-      <!-- Tab Navigation -->
-      <div th:replace="~{fragments/admin/tab-navigation :: tab-navigation}"></div>
+    <!-- Admin Content Area - Tabbed Section -->
+    <div class="admin-content">
+      <div class="tabs-section">
+        <!-- Tab Navigation -->
+        <div th:replace="~{fragments/admin/tab-navigation :: tab-navigation}"></div>
 
-      <!-- Tab Contents -->
-      <div class="tab-content-wrapper">
-        <!-- Users Tab -->
-        <div th:replace="~{fragments/admin/users-tab :: users-tab}"></div>
+        <!-- Tab Contents -->
+        <div class="tab-content-wrapper">
+          <!-- Users Tab -->
+          <div th:replace="~{fragments/admin/users-tab :: users-tab}"></div>
 
-        <!-- Items Tab -->
-        <div th:replace="~{fragments/admin/items-tab :: items-tab}"></div>
+          <!-- Items Tab -->
+          <div th:replace="~{fragments/admin/items-tab :: items-tab}"></div>
 
-        <!-- Events Tab -->
-        <div th:replace="~{fragments/admin/events-tab :: events-tab}"></div>
+          <!-- Events Tab -->
+          <div th:replace="~{fragments/admin/events-tab :: events-tab}"></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- All Modals -->
-<div th:replace="~{fragments/admin/modals :: modals}"></div>
+  <!-- All Modals -->
+  <div th:replace="~{fragments/admin/modals :: modals}"></div>
 
-<!-- Toast Notifications -->
-<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+  <!-- Toast Notifications -->
+  <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
-<!-- Chart.js Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- Chart.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-<!-- Include Scripts -->
-<script th:src="@{/js/navbar-scripts.js}"></script>
-<script th:src="@{/js/admin-scripts.js}"></script>
+  <!-- Include Scripts -->
+  <script th:src="@{/js/navbar-scripts.js}"></script>
+  <script th:src="@{/js/admin-scripts.js}"></script>
 
 </body>
 </html>

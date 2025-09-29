@@ -4,50 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${event.eventName + ' - Event Management System'}">Event - Event Management System</title>
-
-    <!-- Include Navbar Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
-
     <link rel="stylesheet" th:href="@{/css/event-styles.css}">
 </head>
-<body>
-<!-- Navigation -->
-<div th:with="showDashboardBtn=true">
+    <body>
+    <!-- Navigation -->
     <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
 
-<!-- Main Content -->
-<div class="main-content">
-    <div class="content-card">
-        <div class="event-layout">
-            <!-- Event Info Fragment -->
-            <div th:replace="~{fragments/event/event-info :: event-info(${event}, ${userRole})}"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card">
+            <div class="event-layout">
+                <!-- Event Info Fragment -->
+                <div th:replace="~{fragments/event/event-info :: event-info(${event}, ${userRole})}"></div>
 
-            <!-- Responsibilities Fragment -->
-            <div th:replace="~{fragments/event/responsibilities-list :: responsibilities-list(${eventResponsibilities}, ${userRole}, ${event})}"></div>
+                <!-- Responsibilities Fragment -->
+                <div th:replace="~{fragments/event/responsibilities-list :: responsibilities-list(${eventResponsibilities}, ${userRole}, ${event})}"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Fragments -->
-<div th:replace="~{fragments/event/add-responsibility-modal :: modal}"></div>
-<div th:replace="~{fragments/event/remove-responsibility-modal :: modal}"></div>
-<div th:replace="~{fragments/event/edit-event-modal :: modal}"></div>
-<div th:replace="~{fragments/event/activate-event-modal :: activate-event-modal}"></div>
-<div th:replace="~{fragments/event/return-mode-modal :: return-mode-modal}"></div>
-<div th:replace="~{fragments/event/active-mode-modal :: active-mode-modal}"></div>
-<div th:replace="~{fragments/event/complete-event-modal :: complete-event-modal}"></div>
+    <!-- Modals -->
+    <div th:replace="~{fragments/event/add-responsibility-modal :: modal}"></div>
+    <div th:replace="~{fragments/event/remove-responsibility-modal :: modal}"></div>
+    <div th:replace="~{fragments/event/edit-event-modal :: modal}"></div>
+    <div th:replace="~{fragments/event/activate-event-modal :: activate-event-modal}"></div>
+    <div th:replace="~{fragments/event/return-mode-modal :: return-mode-modal}"></div>
+    <div th:replace="~{fragments/event/active-mode-modal :: active-mode-modal}"></div>
+    <div th:replace="~{fragments/event/complete-event-modal :: complete-event-modal}"></div>
 
-<!-- Include Complete Toast System (CSS + HTML + JS) -->
-<div th:replace="~{fragments/common/toast :: toast-system}"></div>
+    <!-- Include Complete Toast System -->
+    <div th:replace="~{fragments/common/toast :: toast-system}"></div>
 
-<!-- Include Navbar Scripts -->
-<script th:src="@{/js/navbar-scripts.js}"></script>
-
-<!-- Include Event Scripts -->
-<script src="/js/event-scripts.js"
-        th:attr="data-event-id=${event.eventId}, data-user-role=${userRole}">
-</script>
+    <!-- Scripts -->
+    <script th:src="@{/js/navbar-scripts.js}"></script>
+    <script src="/js/event-scripts.js"
+            th:attr="data-event-id=${event.eventId}, data-user-role=${userRole}">
+    </script>
 
 </body>
 </html>

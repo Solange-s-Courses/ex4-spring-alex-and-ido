@@ -4,96 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chief User List - Event Management System</title>
-    <!-- Load admin styles for user list components -->
-    <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
-
-    <!-- Include Navbar Styles -->
     <link rel="stylesheet" th:href="@{/css/navbar-styles.css}">
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-
-        /* Main Content */
-        .main-content {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .content-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .text-muted {
-            color: #6c757d;
-            margin-bottom: 2rem;
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Override admin tooltip cursor for chief user list */
-        .user-name {
-            cursor: default !important;
-        }
-
-        .user-name:hover {
-            color: #333 !important;
-        }
-    </style>
 </head>
 <body>
-<!-- Set variable for Dashboard button, then include navbar -->
-<div th:with="showDashboardBtn=true, hideUserListBtn=true">
-    <div th:replace="~{fragments/layout :: navbar}"></div>
-</div>
+    <!-- Navigation Bar -->
+    <div th:replace="~{fragments/navbar/navbar-main :: navbar}"></div>
 
-<!-- Main Content -->
-<div class="main-content">
-    <div class="content-card">
-        <h1>Chief User List</h1>
-        <p class="text-muted">View managers and users in the system</p>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card">
+            <h1>Chief User List</h1>
+            <p class="text-muted">View managers and users in the system</p>
 
-        <!-- Alert Messages -->
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-        <!-- User List Section -->
-        <div th:replace="~{fragments/chief/user-list :: chiefUserList}"></div>
+            <!-- User List Section -->
+            <div th:replace="~{fragments/chief/user-list :: chiefUserList}"></div>
+        </div>
     </div>
-</div>
 
-<!-- Include Navbar Scripts -->
-<script th:src="@{/js/navbar-scripts.js}"></script>
+    <!-- Scripts -->
+    <script th:src="@{/js/navbar-scripts.js}"></script>
 
 </body>
 </html>
