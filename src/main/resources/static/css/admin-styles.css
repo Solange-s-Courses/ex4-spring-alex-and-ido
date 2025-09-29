@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 /* Main Content Container */
 .container {
     max-width: 1200px;
