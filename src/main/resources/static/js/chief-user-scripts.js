@@ -1,5 +1,3 @@
-// Chief User List JavaScript
-
 // Initialize and check for flash messages on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Check for success/error messages from server
