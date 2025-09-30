@@ -46,5 +46,31 @@
     <!-- Scripts -->
     <script th:src="@{/js/responsibility-manage-scripts.js}"></script>
     <script th:src="@{/js/navbar-scripts.js}"></script>
+
+    <!-- Toast Trigger Script for Flash Messages -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a small delay to ensure everything is loaded
+            setTimeout(function() {
+                // Use th:inline="javascript" for proper variable injection
+                let successMessage = /*[[${success}]]*/ '';
+                let errorMessage = /*[[${error}]]*/ '';
+
+                // Show success toast
+                if (successMessage && successMessage.length > 0) {
+                    if (typeof showToast === 'function') {
+                        showToast(successMessage, 'success');
+                    }
+                }
+
+                // Show error toast
+                if (errorMessage && errorMessage.length > 0) {
+                    if (typeof showToast === 'function') {
+                        showToast(errorMessage, 'error');
+                    }
+                }
+            }, 300);
+        });
+    </script>
 </body>
 </html>
